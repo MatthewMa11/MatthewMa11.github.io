@@ -1,0 +1,85 @@
+{
+  "stages": [
+    "Original fixed joystick posts removed; top opening and nut ledges created",
+    "Removable flush control panel and four captured joystick nuts created",
+    "Three printable parts and native archive exported"
+  ],
+  "assembly_interferences": [],
+  "design_dimensions_mm": {
+    "panel": [
+      67.4,
+      37.8,
+      3
+    ],
+    "panel_edge_clearance": 0.3,
+    "joystick_hole_pitch": [
+      22,
+      26
+    ],
+    "joystick_clearance_hole_diameter": 2.8,
+    "joystick_nut_slot_width_height": [
+      5.2,
+      2.4
+    ],
+    "panel_screw_positions": [
+      [
+        -28,
+        23
+      ],
+      [
+        28,
+        23
+      ]
+    ],
+    "panel_nut_slot_width_height": [
+      5.8,
+      2.7
+    ],
+    "joystick_pcb_top_z": 25,
+    "control_deck_top_z": 42,
+    "panel_drop_in_inner_width": 44,
+    "joystick_pcb_width": 26
+  },
+  "hardware": [
+    "4 x M2.5 x 8 machine screws and standard M2.5 nuts",
+    "2 x M3 x 8 machine screws and standard M3 nuts"
+  ],
+  "parts": [
+    {
+      "name": "Cabinet shell",
+      "solid": true,
+      "lumps": 1,
+      "volume_mm3": 169702.27546320952,
+      "size_mm": [
+        100.0,
+        110.0,
+        145.0
+      ]
+    },
+    {
+      "name": "Removable joystick panel",
+      "solid": true,
+      "lumps": 1,
+      "volume_mm3": 8353.272521370887,
+      "size_mm": [
+        67.4,
+        37.8,
+        17.0
+      ]
+    },
+    {
+      "name": "Display retainer",
+      "solid": true,
+      "lumps": 1,
+      "volume_mm3": 4541.524783386728,
+      "size_mm": [
+        58.0,
+        12.065,
+        43.665
+      ]
+    }
+  ],
+  "timeline_issues": [],
+  "archive_exported": true,
+  "rear_cover_present": false
+}

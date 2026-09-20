@@ -1,0 +1,19 @@
+{
+  "file": "Mini_Arcade_Easy_Install_Bambu.3mf",
+  "size_bytes": 71584,
+  "build_items": 3,
+  "settings": {
+    "printer_model": "Bambu Lab P1S",
+    "layer_height": "0.2",
+    "wall_loops": "3",
+    "enable_support": "1",
+    "support_type": "tree(auto)",
+    "support_on_build_plate_only": "0",
+    "sparse_infill_density": "15%"
+  },
+  "slicer_estimate": {
+    "total_time": "7h25m",
+    "filament_g": 243.95
+  },
+  "print_sent": false
+}

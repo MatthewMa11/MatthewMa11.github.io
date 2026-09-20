@@ -1,0 +1,41 @@
+[
+  {
+    "file": "arcade_easy_install_shell.stl",
+    "triangles": 1364,
+    "size_mm": [
+      100.0,
+      110.0,
+      145.0
+    ],
+    "watertight": true,
+    "nonmanifold_edges": 0,
+    "degenerate_triangles": 0,
+    "volume_mm3": 169703.045
+  },
+  {
+    "file": "arcade_joystick_panel_flat.stl",
+    "triangles": 2604,
+    "size_mm": [
+      67.4,
+      37.8,
+      17.0
+    ],
+    "watertight": true,
+    "nonmanifold_edges": 0,
+    "degenerate_triangles": 0,
+    "volume_mm3": 8344.627
+  },
+  {
+    "file": "arcade_easy_install_retainer_flat.stl",
+    "triangles": 328,
+    "size_mm": [
+      58.0,
+      44.0,
+      3.0
+    ],
+    "watertight": true,
+    "nonmanifold_edges": 0,
+    "degenerate_triangles": 0,
+    "volume_mm3": 4541.802
+  }
+]

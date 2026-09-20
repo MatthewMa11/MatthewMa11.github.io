@@ -1,0 +1,55 @@
+{
+  "printable_solids": [
+    {
+      "name": "Cabinet shell",
+      "is_solid": true,
+      "lumps": 1,
+      "volume_mm3": 173397.31680213765,
+      "material": "ABS Plastic"
+    },
+    {
+      "name": "Rear cover",
+      "is_solid": true,
+      "lumps": 1,
+      "volume_mm3": 26054.80797231125,
+      "material": "ABS Plastic"
+    },
+    {
+      "name": "Display retainer",
+      "is_solid": true,
+      "lumps": 1,
+      "volume_mm3": 4541.524783386728,
+      "material": "ABS Plastic"
+    }
+  ],
+  "interferences": [],
+  "distances_mm": {
+    "REF joystick PCB / REF Arduino Uno PCB envelope": 14.8,
+    "REF joystick PCB / REF Uno headers -25": 9.883825170448938,
+    "REF joystick PCB / REF Uno headers 20": 9.883825170448938,
+    "Rear cover / REF Uno USB B envelope": 4.360045871318325
+  },
+  "timeline_issues": [],
+  "exports": [
+    {
+      "file": "cabinet_shell.stl",
+      "success": true
+    },
+    {
+      "file": "rear_cover.stl",
+      "success": true
+    },
+    {
+      "file": "display_retainer.stl",
+      "success": true
+    },
+    {
+      "file": "Mini_Arcade_Assembly.step",
+      "success": true
+    },
+    {
+      "file": "Mini_Arcade_1588BS_Uno.f3d",
+      "success": true
+    }
+  ]
+}
