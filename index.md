@@ -38,4 +38,9 @@ Some of my goals are:
 
 I hope to continue learning new things and exploring technology in the future.
 
+## Project Journals
+
+[Arduino Arcade — Development Journal](https://MatthewMa11.github.io/arduino-arcade-journal/) — Follow the cabinet design, assembly improvements, print preparation, and next steps for my Arduino mini arcade.
+
 Thanks for visiting my page!
+
