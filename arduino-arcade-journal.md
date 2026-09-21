@@ -9,13 +9,13 @@ permalink: /arduino-arcade-journal/
 # Arduino Snake Arcade — Innovator Journal
 
 **Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
-**Journal started:** September 20, 2026
+**Date:** September 20, 2026
 
-## My project and the skill I extended
+## The skills I developed throughout this project
 
-I built an Arduino Snake game controlled by a joystick, then made an arcade enclosure for it. My goal was to connect physical controls to a game on an LED matrix. This extends the **analog input** work from class: instead of using one potentiometer, I use the two axes of a joystick to choose a direction. It also extends digital output from controlling one LED to displaying a moving game on an 8 × 8 matrix.
+I built an Arduino Snake game controlled by a joystick, then made a 3D-printed arcade model for it. My goal was to connect physical controls to a game on an LED matrix. This extends the **analog input** work from class: instead of using one potentiometer, I use the two axes of a joystick to choose a direction. It also extends digital output from controlling one LED to displaying a moving game on an 8 × 8 matrix.
 
-I completed the wiring and programming first. After that, I designed the arcade in CAD and put the screen and Arduino inside. The two breadboards did not fit, so I left them outside the arcade. This journal records that sequence and explains the final sketch. It is a retrospective account; separate dates for the build sessions have not been recorded here.
+I completed the wiring and programming first. After that, I designed the arcade in CAD and put the screen and Arduino inside. The two breadboards did not fit, so I left them outside the arcade. This journal records that sequence and explains the final sketch. 
 
 ## Components and wiring
 
@@ -32,9 +32,7 @@ I completed the wiring and programming first. After that, I designed the arcade 
 
 ![Arduino Uno and 1588BS matrix wiring reference, showing four 220-ohm resistors on D2–D5 and four 200-ohm resistors on A0–A3](https://MatthewMa11.github.io/assets/arduino-arcade/matrix-wiring-reference.png)
 
-*Supplied matrix wiring reference. It shows a 9 V battery and switch, but those are not confirmed parts of my build. It also leaves out the joystick and the physical breadboard layout. The Arduino symbol carries a TheEngineeringProjects.com watermark; the original page for the complete diagram has not been identified.*
-
-The diagram shows **eight resistors**: four 220 Ω resistors on D2–D5 and four 200 Ω resistors on A0–A3. The sketch uses these eight Arduino pins as matrix row outputs. It uses D6–D13 as the column outputs, so a separate matrix-driver library is not needed by this sketch.
+The diagram shows eight resistors: four 220 Ω resistors on D2–D5 and four 200 Ω resistors on A0–A3. The sketch uses these eight Arduino pins as matrix row outputs. It uses D6–D13 as the column outputs.
 
 The row and column order in the code is:
 
@@ -42,8 +40,6 @@ The row and column order in the code is:
 const byte ROWS[8] = {2, 3, 4, 5, A3, A2, A1, A0};
 const byte COLS[8] = {6, 7, 8, 9, 10, 11, 12, 13};
 ```
-
-These arrays map the program's row and column coordinates to Arduino pins. Their positions are logical screen coordinates, not the numbered physical leads of the matrix package. A0–A3 are configured as digital outputs here, even though they can also be used as analog inputs.
 
 ### Joystick connections from my sketch
 
@@ -55,7 +51,7 @@ These arrays map the program's row and column coordinates to Arduino pins. Their
 | GND | GND |
 | SW — pushbutton | Not connected |
 
-The joystick provides two changing voltages. The Arduino measures them relative to ground and interprets them as directional input. Unlike a digital input, which is read as `HIGH` or `LOW`, an analog input provides a range of values. The Uno's normal `analogRead()` range is 0–1023. [Arduino analogRead reference](https://github.com/arduino/reference-en/blob/master/Language/Functions/Analog%20IO/analogRead.adoc)
+The joystick reads Analog inputs from two pins, VRx and VRy, which are responsible for the joystick's X and Y directions. Unlike a digital input, which is read as HIGH or LOW, an analog input delivers a range of values. The Uno's normal analog read's range is 0–1023. [Arduino analogRead reference](https://github.com/arduino/reference-en/blob/master/Language/Functions/Analog%20IO/analogRead.adoc)
 
 On the breadboards, holes within the same connected strip share an electrical connection. The center gap separates the terminal strips, and the long power rails are separate connections that may contain breaks. The wires connect those groups to the Arduino and components. The shared ground provides a reference for the joystick readings; the row resistors limit current through the selected LED path.
 
@@ -69,7 +65,7 @@ On the breadboards, holes within the same connected strip share an electrical co
 | Assembly | Put the screen and Arduino inside | Found that the breadboards did not fit |
 | Adaptation | Left the breadboards outside the arcade | Kept the circuit connected, while accepting an incomplete enclosure |
 
-### What did not work, and what I changed
+### The process of building the Arcade
 
 The enclosure did not fit the complete circuit. There was room for the screen and Arduino, but there was no space for the breadboards. I changed the assembly by leaving the breadboards outside instead of trying to force them into the arcade.
 
