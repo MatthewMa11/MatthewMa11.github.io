@@ -13,7 +13,7 @@ permalink: /arduino-arcade-journal/
 
 ## The skills I developed throughout this project
 
-I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axis.
+I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on analog input, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axis.
 
 A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, or in numbers, but the code turns them into up, down, left, or right. This also includes decisions such as ignoring small movements near the center and choosing a single direction when the joystick moves diagonally.
 
@@ -53,7 +53,7 @@ const byte COLS[8] = {6, 7, 8, 9, 10, 11, 12, 13};
 | GND | GND |
 | SW | Not connected |
 
-The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as `HIGH` or `LOW`. The joystick's GND connects to Arduino GND to give the power a way back. A0–A3 are used as outputs for the screen in this sketch. A4 and A5 remain available for the joystick's two analog signals.
+The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as HIGH or LOW. The joystick's GND connects to Arduino GND to give the power a way back. A0–A3 are used as outputs for the screen in this sketch. A4 and A5 remain available for the joystick's two analog signals.
 
 ## Development process
 
@@ -103,7 +103,7 @@ The CAD model is about 100 × 110 × 145 mm. It has an open back, a removable jo
 
 ### 1. Choose the pins and game settings
 
-`#include <Arduino.h>` lets the program use Arduino commands such as `digitalWrite()` and `analogRead()`. `ROWS` and `COLS` list the pins connected to the eight rows and eight columns of the screen. To turn on one LED, the code sets its row to HIGH and its column to LOW. The OFF settings turn that connection off.
+#include <Arduino.h> lets the program use Arduino commands such as digitalWrite() and analogRead(). ROWS and COLS list the pins connected to the eight rows and eight columns of the screen. To turn on one LED, the code sets its row to HIGH and its column to LOW. The OFF settings turn that connection off.
 
 ```cpp
 #include <Arduino.h>
@@ -132,7 +132,7 @@ const bool REVERSE_X = false;
 const bool REVERSE_Y = true;
 ```
 
-These settings control how the game works. A millisecond, written as **ms**, is one thousandth of a second.
+These settings control how the game works. A millisecond, written as ms, is one thousandth of a second.
 
 | Setting | What it controls |
 | --- | --- |
