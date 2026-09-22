@@ -8,6 +8,8 @@ permalink: /arduino-arcade-journal/
 
 # Arduino Snake Arcade — Innovator Journal
 
+[Watch the game demo](#working-demo)
+
 **Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
 **Date:** September 21, 2026  
 
@@ -71,7 +73,23 @@ The joystick sends two analog signals to the Arduino. Each reading ranges from 0
 
 The 3D print failed, although most of the arcade printed well enough to use. The joystick mount did not print properly, so I could not install the joystick with screws as planned. With limited time, I attached it with hot glue.
 
+<div style="display:flex;flex-wrap:wrap;gap:20px;margin:20px 0;">
+  <figure style="flex:1 1 210px;margin:0;">
+    <a href="/assets/arduino-arcade/printed-joystick-mount.jpg"><img src="/assets/arduino-arcade/printed-joystick-mount.jpg" alt="Underside of the red printed joystick panel, showing four mounting posts and screw holes" loading="lazy" style="width:100%;height:auto;"></a>
+    <figcaption>The underside of my printed joystick panel. The posts and holes were meant to hold the joystick with screws.</figcaption>
+  </figure>
+  <figure style="flex:1 1 210px;margin:0;">
+    <a href="/assets/arduino-arcade/arcade-hot-glued-joystick.jpg"><img src="/assets/arduino-arcade/arcade-hot-glued-joystick.jpg" alt="Front of the red arcade with the LED matrix fitted and hot glue visible around the joystick base" loading="lazy" style="width:100%;height:auto;"></a>
+    <figcaption>I fitted the screen into the arcade and used hot glue to hold the joystick because the printed mount did not work as planned.</figcaption>
+  </figure>
+</div>
+
 I also forgot to account for the space the wires take up. Once the circuit was connected, I could not fit the Arduino inside the arcade. The screen fits perfectly into the 3D printed arcade, while the Arduino and both breadboards stayed outside.
+
+<figure style="max-width:440px;margin:20px auto;">
+  <a href="/assets/arduino-arcade/external-arduino-breadboards.jpg"><img src="/assets/arduino-arcade/external-arduino-breadboards.jpg" alt="Rear view of the red arcade with wires leading to the Arduino and two breadboards outside the case" loading="lazy" style="width:100%;height:auto;"></a>
+  <figcaption>The connected circuit behind the arcade. This shows both breadboards, the Arduino, and the extra space taken up by the wires.</figcaption>
+</figure>
 
 There are two problems with the CAD arcade that I still need to fix: I will need to 3D print again, and its holes will need some slight adjustment. I also need to plan for space for the wire and the two breadboards.
 
@@ -693,7 +711,14 @@ void loop() {
 
 ## Working demo
 
-A photo or video of the actual game still needs to be added. The images above show the wiring reference and CAD model.
+This short video shows me using the joystick to control Snake on the LED matrix. It also shows the X that appears when the game ends.
+
+<video controls playsinline preload="metadata" poster="/assets/arduino-arcade/arcade-hot-glued-joystick.jpg" aria-label="Snake game demonstration using the arcade joystick" style="display:block;width:100%;max-width:360px;height:auto;margin:20px auto;">
+  <source src="/assets/arduino-arcade/snake-game-demo.mp4" type="video/mp4">
+  Your browser does not support this video. <a href="/assets/arduino-arcade/snake-game-demo.mp4">Watch or download the Snake game demo.</a>
+</video>
+
+[Watch or download the video (25 seconds)](/assets/arduino-arcade/snake-game-demo.mp4)
 
 ## Peer support
 
