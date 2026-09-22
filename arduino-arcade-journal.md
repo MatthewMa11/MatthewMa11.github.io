@@ -9,8 +9,7 @@ permalink: /arduino-arcade-journal/
 # Arduino Snake Arcade — Innovator Journal
 
 **Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
-**Date:** September 20, 2026  
-**Updated:** September 21, 2026
+**Date:** September 21, 2026  
 
 ## The skills I developed throughout this project
 
@@ -163,7 +162,7 @@ const unsigned long GAME_OVER_MS = 3000;
 
 `snakeX[64]` and `snakeY[64]` are two lists of numbers. Together, they record the position of each part of the snake. They have space for 64 parts because the screen has 64 squares. The first position in each list is numbered 0, and that is the head. `snakeLength` records how many parts the snake currently has.
 
-`dirX` and `dirY` record where the snake is moving. For example, (1, 0) moves it one square right, and (0, −1) moves it one square up. `nextDirX` and `nextDirY` save the player’s new direction until it is time to move again.
+`dirX` and `dirY` record where the snake is moving. For example, (1, 0) moves it one square right, and (0, −1) moves it one square up. `nextDirX` and `nextDirY` save the snake’s new direction until the code tells it to move again.
 
 `foodX` and `foodY` record where the food is. Setting them to −1 means there is no food on the screen. `pixels[8][8]` is an eight-by-eight list that tells the Arduino which LEDs should be on.
 
@@ -373,7 +372,7 @@ When enough time has passed for the next move, `moveSnake()` does these steps:
 5. Checks whether the head is about to hit the snake’s body.
 6. Adds one part if food was eaten, moves the body parts into the positions ahead of them, and puts the head in its new position.
 
-The body positions are copied starting at the tail and working toward the head. This keeps the old positions available until the next part has copied them.
+The body positions are copied starting at the tail and working toward the head. This code keeps the old positions available until the next part has copied them.
 
 ```cpp
 void moveSnake() {
@@ -520,7 +519,7 @@ The calculation divides the time between moves by **1.15**, which makes the snak
 
 A smaller wait makes the snake faster. The code stops the wait from going below **80 ms**, so it cannot keep speeding up forever. The level number can still increase after that.
 
-The new level starts with a three-part snake, new food, and another one-second ready pause. The total score stays. For example, level 2 begins with a score of 7, even though the snake is three parts long again. There is no final win screen in this version.
+The new level starts with a three-part snake, new food, and another one-second ready pause. For example, level 2 begins with a score of 7, even though the snake is three parts long again. There is no final win screen in this version.
 
 ### 9. Show the game on the LED screen
 
@@ -572,7 +571,7 @@ Before drawing food, the code checks that its position is not −1. This stops i
 
 `scanDisplay()` turns the saved picture into lights on the real screen. It goes through the 64 LED positions one by one. Its `static` values remember which position it reached and when it last changed LEDs, so it can continue where it left off.
 
-At least **100 microseconds**—one ten-thousandth of a second—must pass before it checks the next LED. `blankDisplay()` turns off the old LED first. The code then works out the next LED’s row and column and lights it if the saved picture says it should be on.
+At least 100 microseconds must pass before it checks the next LED. `blankDisplay()` turns off the old LED first. The code then works out the next LED’s row and column and lights it if the saved picture says it should be on.
 
 `index / 8` finds the row. `index % 8` gives the remainder after dividing by 8, which tells it the column. After the last LED, `% 64` brings the position back to 0. Repeating this quickly makes the picture appear on the screen.
 
@@ -698,17 +697,17 @@ A photo or video of the actual game still needs to be added. The images above sh
 
 ## Peer support
 
-I helped **Blair Wen** with wiring his circuit. I also helped **Sean Wei** CAD his fan holder.
+I helped Blair Wen with wiring her circuit and introduced her to Circuito.io, a tool I had been using to plan and organize circuit wiring. I also helped Sean Wei CAD a fan holder, which was designed to keep his fan securely in place, and assisted him with 3D printing the finished model. In addition, I helped Steven Shi with his Arduino wiring and supported him in setting up his development journal. I also assisted Leo Fan with wiring an ultrasonic sensor and helped him code his project. All of them told me that my help was useful, and I am glad that I was able to support my peers and contribute to their projects.
 
 ## Reflection
 
-The final assembly differed from the CAD plan. A usable-looking enclosure still had a failed joystick mount, and I had left out the space needed by the wires. Hot glue let me attach the joystick within the time available, but it did not solve the Arduino fit problem. The build therefore kept the Arduino and breadboards outside.
+The final assembly was different from what I originally planned. My 3D CAD model for the arcade was not large enough to fully enclose the Arduino and all of its wires. In addition, the 3D print failed partway through, so I was unable to use screws to mount the joysticks as planned. Because of the limited time, I had to hot-glue the joysticks in place instead.
 
-This project connects three skills: wiring an input, interpreting its readings, and using digital outputs to show a response. The code needs rules for those readings: the dead zone ignores small center changes, the stronger-axis check handles diagonal input, and the reverse-turn rule stops an invalid move. Reading a value is only the first step; deciding what it should do is what makes the control usable.
+This project helped me develop my skills in wiring and programming an LED matrix and an analog joystick, as well as designing a CAD model that could hold the joystick and Arduino. I used an LED matrix that I had never worked with before, which taught me how the display functions, how to wire it correctly, and how to program it. I also learned how to interpret joystick values and match them to the directions I wanted the system to recognize. Most importantly, I learned that CAD design requires careful consideration of how much space the physical hardware, connectors, and wires actually take up.
 
-One possible use is a simple menu controller for someone who finds several small buttons difficult to operate. The joystick could move a highlight between choices. That version would need a clear display, a way to confirm a choice, and adjustable sensitivity. The current 8 × 8 game display would need to be replaced or adapted to show recognizable choices. I would also check whether that person could comfortably grip and move the joystick.
+One possible real-world use for this project would be a simple menu controller for someone who finds several small buttons difficult to operate. The joystick could be used to move a highlighted selection between different options. To make this practical, the design would need a clearer display, a button or other method to confirm a selection, and adjustable joystick sensitivity. The current 8 × 8 LED matrix would also need to be replaced or redesigned so that the menu choices could be displayed clearly. I would also need to consider whether the user could comfortably grip and move the joystick.
 
-The skill I would rely on most is **debugging analog input**. I would print the raw X and Y readings, check their center and range, and compare each movement with the response on screen. That would help me choose a suitable dead zone and direction settings. The current fixed center of 512 and threshold of 170 are a starting point; a different joystick or user could need different settings.
+The skill I would rely on most when improving this project is debugging analog input. I would print the raw X and Y joystick readings, check the center position and movement range, and compare each joystick movement with the response shown on the display. This would help me choose an appropriate dead zone and make sure each direction is detected accurately. The current center value of 512 and threshold of 170 work as starting points, but different joysticks or users may require different settings.
 
 ## References
 
