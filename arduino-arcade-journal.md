@@ -8,8 +8,8 @@ permalink: /arduino-arcade-journal/
 
 # Arduino Snake Arcade — Innovator Journal
 
-**Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
-**Date:** September 21, 2026  
+Unit 1 Summative: Extend Your Circuit — Tech & Innovation  
+Date: September 21, 2026  
 
 ## The skills I developed throughout this project
 
@@ -103,7 +103,7 @@ The CAD model is about 100 × 110 × 145 mm. It has an open back, a removable jo
 
 ### 1. Choose the pins and game settings
 
-#include <Arduino.h> lets the program use Arduino commands such as digitalWrite() and analogRead(). ROWS and COLS list the pins connected to the eight rows and eight columns of the screen. To turn on one LED, the code sets its row to HIGH and its column to LOW. The OFF settings turn that connection off.
+#include &lt;Arduino.h&gt; lets the program use Arduino commands such as digitalWrite() and analogRead(). ROWS and COLS list the pins connected to the eight rows and eight columns of the screen. To turn on one LED, the code sets its row to HIGH and its column to LOW. The OFF settings turn that connection off.
 
 ```cpp
 #include <Arduino.h>
@@ -136,16 +136,16 @@ These settings control how the game works. A millisecond, written as ms, is one 
 
 | Setting | What it controls |
 | --- | --- |
-| `START_MOVE_MS = 800` | The snake starts by moving once every 800 ms, or 0.8 seconds |
-| `SPEED_INCREASE_PERCENT = 15` | Each new level makes the snake move about 15% faster |
-| `MIN_MOVE_MS = 80` | The time between moves cannot go below 80 ms |
-| `FOODS_PER_LEVEL = 7` | Eating seven foods starts the next level |
-| `FLASH_COUNT = 3` | The screen flashes three times between levels |
-| `FLASH_PHASE_MS = 120` | Each flash stays on for 120 ms and off for 120 ms |
-| `READY_MS = 1000` | Each level has a one-second pause before play |
-| `GAME_OVER_MS = 3000` | The game-over screen stays for three seconds |
+| START_MOVE_MS = 800 | The snake starts by moving once every 800 ms, or 0.8 seconds |
+| SPEED_INCREASE_PERCENT = 15 | Each new level makes the snake move about 15% faster |
+| MIN_MOVE_MS = 80 | The time between moves cannot go below 80 ms |
+| FOODS_PER_LEVEL = 7 | Eating seven foods starts the next level |
+| FLASH_COUNT = 3 | The screen flashes three times between levels |
+| FLASH_PHASE_MS = 120 | Each flash stays on for 120 ms and off for 120 ms |
+| READY_MS = 1000 | Each level has a one-second pause before play |
+| GAME_OVER_MS = 3000 | The game-over screen stays for three seconds |
 
-`const` means a setting stays the same while the program runs. Other values, such as `moveMs`, `level`, and `totalScore`, can change as the player plays.
+const means a setting stays the same while the program runs. Other values, such as moveMs, level, and totalScore, can change as the player plays.
 
 ```cpp
 // Starting time between movements.
@@ -176,15 +176,15 @@ const unsigned long GAME_OVER_MS = 3000;
 
 ### 2. Remember where everything is
 
-`snakeX[64]` and `snakeY[64]` are two lists of numbers. Together, they record the position of each part of the snake. They have space for 64 parts because the screen has 64 squares. The first position in each list is numbered 0, and that is the head. `snakeLength` records how many parts the snake currently has.
+snakeX[64] and snakeY[64] are two lists of numbers. Together, they record the position of each part of the snake. They have space for 64 parts because the screen has 64 squares. The first position in each list is numbered 0, and that is the head. snakeLength records how many parts the snake currently has.
 
-`dirX` and `dirY` record where the snake is moving. For example, (1, 0) moves it one square right, and (0, −1) moves it one square up. `nextDirX` and `nextDirY` save the snake’s new direction until the code tells it to move again.
+dirX and dirY record where the snake is moving. For example, (1, 0) moves it one square right, and (0, −1) moves it one square up. nextDirX and nextDirY save the snake’s new direction until the code tells it to move again.
 
-`foodX` and `foodY` record where the food is. Setting them to −1 means there is no food on the screen. `pixels[8][8]` is an eight-by-eight list that tells the Arduino which LEDs should be on.
+foodX and foodY record where the food is. Setting them to −1 means there is no food on the screen. pixels[8][8] is an eight-by-eight list that tells the Arduino which LEDs should be on.
 
-`foodsThisLevel` counts food eaten in the current level. `totalScore` counts food eaten during the whole game. These need to be separate because a new level resets the snake and the level’s food count, but keeps the total score.
+foodsThisLevel counts food eaten in the current level. totalScore counts food eaten during the whole game. These need to be separate because a new level resets the snake and the level’s food count, but keeps the total score.
 
-`state` tells the program what is happening: getting ready, playing, flashing between levels, or showing game over. `stateTime`, `lastMove`, and `lastInput` remember when things happened so the code knows when to do them again.
+state tells the program what is happening: getting ready, playing, flashing between levels, or showing game over. stateTime, lastMove, and lastInput remember when things happened so the code knows when to do them again.
 
 ```cpp
 byte snakeX[64];
@@ -223,9 +223,9 @@ unsigned long lastInput = 0;
 
 ### 3. Start a new game
 
-`setup()` runs once when the Arduino turns on or resets. It starts with the screen off and sets the screen pins to send signals out. `Serial.begin(9600)` lets the Arduino send text to the computer; the Serial Monitor should also be set to 9600 baud.
+setup() runs once when the Arduino turns on or resets. It starts with the screen off and sets the screen pins to send signals out. Serial.begin(9600) lets the Arduino send text to the computer; the Serial Monitor should also be set to 9600 baud.
 
-`randomSeed()` uses the current time and joystick readings as a starting number for choosing food positions. Then `setup()` starts the game and prepares the first picture.
+randomSeed() uses the current time and joystick readings as a starting number for choosing food positions. Then setup() starts the game and prepares the first picture.
 
 ```cpp
 void setup() {
@@ -246,7 +246,7 @@ void setup() {
 }
 ```
 
-`startGame()` puts the game back at level 1 with a score of 0. It clears the number of foods eaten in that level and sets the time between moves to 800 ms. It then resets the snake, places food, shows the starting information in the Serial Monitor, and sets the game to `READY`.
+startGame() puts the game back at level 1 with a score of 0. It clears the number of foods eaten in that level and sets the time between moves to 800 ms. It then resets the snake, places food, shows the starting information in the Serial Monitor, and sets the game to READY.
 
 ```cpp
 void startGame() {
@@ -264,9 +264,9 @@ void startGame() {
 }
 ```
 
-`resetSnake()` makes the snake three parts long. The head starts at (3, 4), followed by (2, 4) and (1, 4), so all three parts are on the same row. The snake starts facing right.
+resetSnake() makes the snake three parts long. The head starts at (3, 4), followed by (2, 4) and (1, 4), so all three parts are on the same row. The snake starts facing right.
 
-The game waits one second in `READY` before changing to `RUNNING`. It then waits the current time between moves before moving the snake for the first time.
+The game waits one second in READY before changing to RUNNING. It then waits the current time between moves before moving the snake for the first time.
 
 ```cpp
 void resetSnake() {
@@ -285,7 +285,7 @@ void resetSnake() {
 
 ### 4. Put food in an empty square
 
-`snakeAt(x, y, count)` checks whether the snake is on a certain square. It looks through the first `count` parts of the snake. If it finds a matching position, it returns `true`, meaning yes. Otherwise, it returns `false`, meaning no.
+snakeAt(x, y, count) checks whether the snake is on a certain square. It looks through the first count parts of the snake. If it finds a matching position, it returns true, meaning yes. Otherwise, it returns false, meaning no.
 
 ```cpp
 bool snakeAt(int x, int y, byte count) {
@@ -299,7 +299,7 @@ bool snakeAt(int x, int y, byte count) {
 }
 ```
 
-`placeFood()` works out how many squares are empty by subtracting the snake’s length from 64. It chooses a random number from those empty spaces, then checks the screen row by row. It skips squares containing the snake and counts through the empty ones until it reaches the chosen square. That is where the food goes.
+placeFood() works out how many squares are empty by subtracting the snake’s length from 64. It chooses a random number from those empty spaces, then checks the screen row by row. It skips squares containing the snake and counts through the empty ones until it reaches the chosen square. That is where the food goes.
 
 ```cpp
 void placeFood() {
@@ -332,7 +332,7 @@ If there are no empty squares, the food position becomes −1. With the current 
 
 ### 5. Read the joystick and choose a direction
 
-The Arduino checks the joystick about every **20 ms**, or 0.02 seconds, while the game is getting ready or being played. A4 reads left and right movement, and A5 reads up and down movement.
+The Arduino checks the joystick about every 20 ms, or 0.02 seconds, while the game is getting ready or being played. A4 reads left and right movement, and A5 reads up and down movement.
 
 ```cpp
 void readJoystick() {
@@ -357,13 +357,13 @@ void readJoystick() {
 }
 ```
 
-The joystick readings go from 0 to 1023. Subtracting 512 makes a centered joystick read close to zero. `REVERSE_X = false` leaves left and right unchanged. `REVERSE_Y = true` reverses the up-and-down reading so it matches the direction on the screen.
+The joystick readings go from 0 to 1023. Subtracting 512 makes a centered joystick read close to zero. REVERSE_X = false leaves left and right unchanged. REVERSE_Y = true reverses the up-and-down reading so it matches the direction on the screen.
 
-The code checks how far each reading is from zero, whether it is positive or negative. If both are below **170**, it keeps the current direction. This small area around the center is called the **dead zone**. It stops tiny changes in the reading from turning the snake by accident.
+The code checks how far each reading is from zero, whether it is positive or negative. If both are below 170, it keeps the current direction. This small area around the center is called the dead zone. It stops tiny changes in the reading from turning the snake by accident.
 
 If the joystick moves diagonally, the code chooses whichever direction has the bigger reading. If both are equal, it uses left or right. For example, X = 800 and Y = 520 become X = 288 and Y = −8 after the calculations. The left-and-right reading is bigger, so the code asks the snake to turn right.
 
-`requestDirection()` checks that turn before saving it. If the snake is moving right, it cannot immediately turn left into its own body. Any allowed turn is saved for the next move. Letting go of the joystick does not stop the snake. It keeps moving in its current direction. The joystick chooses direction, and the level sets the speed.
+requestDirection() checks that turn before saving it. If the snake is moving right, it cannot immediately turn left into its own body. Any allowed turn is saved for the next move. Letting go of the joystick does not stop the snake. It keeps moving in its current direction. The joystick chooses direction, and the level sets the speed.
 
 ```cpp
 void requestDirection(int x, int y) {
@@ -375,11 +375,11 @@ void requestDirection(int x, int y) {
 }
 ```
 
-The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. **Debouncing** means waiting until the signal stays steady before counting the press. This helps the program count one press once. 
+The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. Debouncing means waiting until the signal stays steady before counting the press. This helps the program count one press once. 
 
 ### 6. Move the snake and check what it hits
 
-When enough time has passed for the next move, `moveSnake()` does these steps:
+When enough time has passed for the next move, moveSnake() does these steps:
 
 1. Uses the direction the player chose.
 2. Works out the head’s next position. Moving right from (3, 4), for example, gives (4, 4).
@@ -451,11 +451,11 @@ This line decides how much of the body to check:
 byte checkLength = snakeLength - (eating ? 0 : 1);
 ```
 
-`eating ? 0 : 1` means “use 0 if the snake is eating, or 1 if it is not.” When the snake is not eating, the tail moves away, so the head is allowed to enter the square where the tail was. The code leaves that old tail square out of the check. When the snake eats and grows, the tail stays in place, so that square must still be checked.
+eating ? 0 : 1 means “use 0 if the snake is eating, or 1 if it is not.” When the snake is not eating, the tail moves away, so the head is allowed to enter the square where the tail was. The code leaves that old tail square out of the check. When the snake eats and grows, the tail stays in place, so that square must still be checked.
 
 ### 7. Count food and flash before the next level
 
-Each time the snake eats, the code adds 1 to both `totalScore` and `foodsThisLevel`. If it has eaten fewer than seven foods in that level, the code puts new food on the screen and shows the updated information in the Serial Monitor.
+Each time the snake eats, the code adds 1 to both totalScore and foodsThisLevel. If it has eaten fewer than seven foods in that level, the code puts new food on the screen and shows the updated information in the Serial Monitor.
 
 ```cpp
 if (eating) {
@@ -473,7 +473,7 @@ if (eating) {
  }
 ```
 
-Eating the seventh food runs `beginLevelFlash()`. It changes the game to `LEVEL_FLASH`, remembers when the flashing started, and sets the food position to −1. The snake stops moving while the flashes play.
+Eating the seventh food runs beginLevelFlash(). It changes the game to LEVEL_FLASH, remembers when the flashing started, and sets the food position to −1. The snake stops moving while the flashes play.
 
 ```cpp
 void beginLevelFlash() {
@@ -485,17 +485,17 @@ void beginLevelFlash() {
 }
 ```
 
-`drawDisplay()` makes the screen look fully on for 120 ms, then off for 120 ms. It repeats this three times:
+drawDisplay() makes the screen look fully on for 120 ms, then off for 120 ms. It repeats this three times:
 
 ```text
 3 × 2 × 120 ms = 720 ms
 ```
 
-The flashes take **720 ms**, or 0.72 seconds, altogether. The LEDs are still turned on one at a time very quickly, even when the whole screen looks lit.
+The flashes take 720 ms, or 0.72 seconds, altogether. The LEDs are still turned on one at a time very quickly, even when the whole screen looks lit.
 
 ### 8. Start the next level and make the snake faster
 
-After the flashes, `startNextLevel()` adds 1 to the level and resets the number of foods eaten in that level to 0. It then works out a shorter wait between moves.
+After the flashes, startNextLevel() adds 1 to the level and resets the number of foods eaten in that level to 0. It then works out a shorter wait between moves.
 
 ```cpp
 void startNextLevel() {
@@ -523,7 +523,7 @@ void startNextLevel() {
 }
 ```
 
-The calculation divides the time between moves by **1.15**, which makes the snake move about 15% faster. It rounds the answer to the nearest whole millisecond. The `UL` after numbers such as `100UL` tells the Arduino to use a number type that can hold larger whole numbers during the calculation.
+The calculation divides the time between moves by 1.15, which makes the snake move about 15% faster. It rounds the answer to the nearest whole millisecond. The UL after numbers such as 100UL tells the Arduino to use a number type that can hold larger whole numbers during the calculation.
 
 | Level | Time between moves |
 | --- | --- |
@@ -533,13 +533,13 @@ The calculation divides the time between moves by **1.15**, which makes the snak
 | 4 | 526 ms |
 | 18 onward | 80 ms |
 
-A smaller wait makes the snake faster. The code stops the wait from going below **80 ms**, so it cannot keep speeding up forever. The level number can still increase after that.
+A smaller wait makes the snake faster. The code stops the wait from going below 80 ms, so it cannot keep speeding up forever. The level number can still increase after that.
 
 The new level starts with a three-part snake, new food, and another one-second ready pause. For example, level 2 begins with a score of 7, even though the snake is three parts long again. There is no final win screen in this version.
 
 ### 9. Show the game on the LED screen
 
-`drawDisplay()` decides which LEDs should be on and saves that picture in `pixels`:
+drawDisplay() decides which LEDs should be on and saves that picture in pixels:
 
 - While getting ready or playing, the snake stays lit and the food blinks: 200 ms on, then 200 ms off.
 - Between levels, the whole screen picture flashes on and off.
@@ -585,11 +585,11 @@ void drawDisplay() {
 
 Before drawing food, the code checks that its position is not −1. This stops it from trying to draw food outside the screen.
 
-`scanDisplay()` turns the saved picture into lights on the real screen. It goes through the 64 LED positions one by one. Its `static` values remember which position it reached and when it last changed LEDs, so it can continue where it left off.
+scanDisplay() turns the saved picture into lights on the real screen. It goes through the 64 LED positions one by one. Its static values remember which position it reached and when it last changed LEDs, so it can continue where it left off.
 
-At least 100 microseconds must pass before it checks the next LED. `blankDisplay()` turns off the old LED first. The code then works out the next LED’s row and column and lights it if the saved picture says it should be on.
+At least 100 microseconds must pass before it checks the next LED. blankDisplay() turns off the old LED first. The code then works out the next LED’s row and column and lights it if the saved picture says it should be on.
 
-`index / 8` finds the row. `index % 8` gives the remainder after dividing by 8, which tells it the column. After the last LED, `% 64` brings the position back to 0. Repeating this quickly makes the picture appear on the screen.
+index / 8 finds the row. index % 8 gives the remainder after dividing by 8, which tells it the column. After the last LED, % 64 brings the position back to 0. Repeating this quickly makes the picture appear on the screen.
 
 ```cpp
 void blankDisplay() {
@@ -624,7 +624,7 @@ void scanDisplay() {
 
 ### 10. Show game over and keep the game running
 
-When the snake hits an edge or itself, `finishGame()` changes the game to `LOST`. It sends “GAME OVER!” and the final game information to the Serial Monitor, then starts the three-second wait. The screen shows an X during this time. Afterward, a new game starts from level 1 with score 0 and the starting speed.
+When the snake hits an edge or itself, finishGame() changes the game to LOST. It sends “GAME OVER!” and the final game information to the Serial Monitor, then starts the three-second wait. The screen shows an X during this time. Afterward, a new game starts from level 1 with score 0 and the starting speed.
 
 ```cpp
 void finishGame() {
@@ -638,7 +638,7 @@ void finishGame() {
 }
 ```
 
-`printStatus()` shows the level, total score, and time between moves in the computer’s Serial Monitor. The LED screen continues to show the game or its X symbol.
+printStatus() shows the level, total score, and time between moves in the computer’s Serial Monitor. The LED screen continues to show the game or its X symbol.
 
 ```cpp
 void printStatus() {
@@ -656,18 +656,18 @@ void printStatus() {
 }
 ```
 
-`loop()` runs over and over. It updates the LEDs, checks the joystick when the game allows it, decides what should happen next, and updates the screen again.
+loop() runs over and over. It updates the LEDs, checks the joystick when the game allows it, decides what should happen next, and updates the screen again.
 
 | Part of the game | What the code does |
 | --- | --- |
-| `READY` | Reads the joystick and waits one second before changing to `RUNNING` |
-| `RUNNING` | Reads the joystick and moves the snake when the wait between moves is over |
-| `LEVEL_FLASH` | Flashes for 720 ms, then starts the next level |
-| `LOST` | Shows an X for three seconds, then starts a new game |
+| READY | Reads the joystick and waits one second before changing to RUNNING |
+| RUNNING | Reads the joystick and moves the snake when the wait between moves is over |
+| LEVEL_FLASH | Flashes for 720 ms, then starts the next level |
+| LOST | Shows an X for three seconds, then starts a new game |
 
-`millis()` tells the program how many milliseconds have passed since the Arduino started. `micros()` does the same in microseconds. The code compares these times with the times it saved earlier to decide when to act.
+millis() tells the program how many milliseconds have passed since the Arduino started. micros() does the same in microseconds. The code compares these times with the times it saved earlier to decide when to act.
 
-There is no long `delay()` that makes the whole program wait. This lets the Arduino keep updating the screen while waiting for the next move, the next level, or a new game.
+There is no long delay() that makes the whole program wait. This lets the Arduino keep updating the screen while waiting for the next move, the next level, or a new game.
 
 ```cpp
 void loop() {
