@@ -1,6 +1,6 @@
 # Hi, I'm Matthew
 
-I am a student who is interested in technology, robotics, coding, and business. Outside of school, I also enjoy playing sports, listening to music, and playing drums.
+I am a student at Webb, and this is my development journal.
 
 ## My Interests
 
@@ -21,7 +21,7 @@ I have also worked on different coding and Arduino projects. These projects deep
 
 ## What Inspires Me
 
-I am inspired by a lot of YouTube videos online, and some projects made by other students at the Webb Schools. 
+I am inspired by many YouTube videos and by some projects made by other students at the Webb Schools. 
 
 My experience in robotics also inspired me to build things that are apart from the competition.
 
@@ -40,7 +40,5 @@ I hope to continue learning new things and exploring technology in the future.
 
 ## Project Journals
 
-[Arduino Snake Arcade — Innovator Journal](https://MatthewMa11.github.io/arduino-arcade-journal/) — Follow my joystick-controlled Snake game, circuit wiring, code explanation, CAD enclosure, and design reflections.
-
-Thanks for visiting my page!
+1. [Arduino Snake Arcade — Innovator Journal](https://MatthewMa11.github.io/arduino-arcade-journal/) — Arcade game designed with Arduino and a joystick.
 
