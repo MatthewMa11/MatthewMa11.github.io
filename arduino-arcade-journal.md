@@ -4,40 +4,16 @@ title: Arduino Snake Arcade — Innovator Journal
 permalink: /arduino-arcade-journal/
 ---
 
-<style>
-/* Keep all journal text plain and consistent. */
-.wrapper,
-.wrapper * {
-  font-family: Arial, sans-serif !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  font-style: normal !important;
-  font-variant: normal !important;
-  line-height: 1.5 !important;
-  color: #333 !important;
-  text-decoration: none !important;
-  text-transform: none !important;
-  text-shadow: none !important;
-  letter-spacing: normal !important;
-}
-.wrapper pre,
-.wrapper code,
-.wrapper .highlight,
-.wrapper .highlight * {
-  background: transparent !important;
-}
-</style>
-
 [← Back to my homepage](https://MatthewMa11.github.io/)
 
 # Arduino Snake Arcade — Innovator Journal
 
-Unit 1 Summative: Extend Your Circuit — Tech & Innovation  
-Date: September 21, 2026  
+**Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
+**Date:** September 21, 2026  
 
 ## The skills I developed throughout this project
 
-I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on analog input, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axis.
+I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axis.
 
 A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, or in numbers, but the code turns them into up, down, left, or right. This also includes decisions such as ignoring small movements near the center and choosing a single direction when the joystick moves diagonally.
 
@@ -156,7 +132,7 @@ const bool REVERSE_X = false;
 const bool REVERSE_Y = true;
 ```
 
-These settings control how the game works. A millisecond, written as ms, is one thousandth of a second.
+These settings control how the game works. A millisecond, written as **ms**, is one thousandth of a second.
 
 | Setting | What it controls |
 | --- | --- |
@@ -356,7 +332,7 @@ If there are no empty squares, the food position becomes −1. With the current 
 
 ### 5. Read the joystick and choose a direction
 
-The Arduino checks the joystick about every 20 ms, or 0.02 seconds, while the game is getting ready or being played. A4 reads left and right movement, and A5 reads up and down movement.
+The Arduino checks the joystick about every **20 ms**, or 0.02 seconds, while the game is getting ready or being played. A4 reads left and right movement, and A5 reads up and down movement.
 
 ```cpp
 void readJoystick() {
@@ -383,7 +359,7 @@ void readJoystick() {
 
 The joystick readings go from 0 to 1023. Subtracting 512 makes a centered joystick read close to zero. `REVERSE_X = false` leaves left and right unchanged. `REVERSE_Y = true` reverses the up-and-down reading so it matches the direction on the screen.
 
-The code checks how far each reading is from zero, whether it is positive or negative. If both are below 170, it keeps the current direction. This small area around the center is called the dead zone. It stops tiny changes in the reading from turning the snake by accident.
+The code checks how far each reading is from zero, whether it is positive or negative. If both are below **170**, it keeps the current direction. This small area around the center is called the **dead zone**. It stops tiny changes in the reading from turning the snake by accident.
 
 If the joystick moves diagonally, the code chooses whichever direction has the bigger reading. If both are equal, it uses left or right. For example, X = 800 and Y = 520 become X = 288 and Y = −8 after the calculations. The left-and-right reading is bigger, so the code asks the snake to turn right.
 
@@ -399,7 +375,7 @@ void requestDirection(int x, int y) {
 }
 ```
 
-The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. Debouncing means waiting until the signal stays steady before counting the press. This helps the program count one press once. 
+The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. **Debouncing** means waiting until the signal stays steady before counting the press. This helps the program count one press once. 
 
 ### 6. Move the snake and check what it hits
 
@@ -515,7 +491,7 @@ void beginLevelFlash() {
 3 × 2 × 120 ms = 720 ms
 ```
 
-The flashes take 720 ms, or 0.72 seconds, altogether. The LEDs are still turned on one at a time very quickly, even when the whole screen looks lit.
+The flashes take **720 ms**, or 0.72 seconds, altogether. The LEDs are still turned on one at a time very quickly, even when the whole screen looks lit.
 
 ### 8. Start the next level and make the snake faster
 
@@ -547,7 +523,7 @@ void startNextLevel() {
 }
 ```
 
-The calculation divides the time between moves by 1.15, which makes the snake move about 15% faster. It rounds the answer to the nearest whole millisecond. The `UL` after numbers such as `100UL` tells the Arduino to use a number type that can hold larger whole numbers during the calculation.
+The calculation divides the time between moves by **1.15**, which makes the snake move about 15% faster. It rounds the answer to the nearest whole millisecond. The `UL` after numbers such as `100UL` tells the Arduino to use a number type that can hold larger whole numbers during the calculation.
 
 | Level | Time between moves |
 | --- | --- |
@@ -557,7 +533,7 @@ The calculation divides the time between moves by 1.15, which makes the snake mo
 | 4 | 526 ms |
 | 18 onward | 80 ms |
 
-A smaller wait makes the snake faster. The code stops the wait from going below 80 ms, so it cannot keep speeding up forever. The level number can still increase after that.
+A smaller wait makes the snake faster. The code stops the wait from going below **80 ms**, so it cannot keep speeding up forever. The level number can still increase after that.
 
 The new level starts with a three-part snake, new food, and another one-second ready pause. For example, level 2 begins with a score of 7, even though the snake is three parts long again. There is no final win screen in this version.
 
