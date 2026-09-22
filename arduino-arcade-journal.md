@@ -8,8 +8,6 @@ permalink: /arduino-arcade-journal/
 
 # Arduino Snake Arcade — Innovator Journal
 
-[Watch the game demo](#working-demo)
-
 **Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
 **Date:** September 21, 2026  
 
@@ -377,7 +375,7 @@ void requestDirection(int x, int y) {
 }
 ```
 
-The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. **Debouncing** means waiting until the signal stays steady before counting the press. This helps the program count one press once. [Arduino debounce example](https://github.com/arduino/arduino-examples/blob/main/examples/02.Digital/Debounce/Debounce.ino)
+The joystick’s SW button is not connected. If a button were added later, one press could produce several quick on/off signals while the metal contacts settle. **Debouncing** means waiting until the signal stays steady before counting the press. This helps the program count one press once. 
 
 ### 6. Move the snake and check what it hits
 
@@ -718,7 +716,6 @@ This short video shows me using the joystick to control Snake on the LED matrix.
   Your browser does not support this video. <a href="/assets/arduino-arcade/snake-game-demo.mp4">Watch or download the Snake game demo.</a>
 </video>
 
-[Watch or download the video (25 seconds)](/assets/arduino-arcade/snake-game-demo.mp4)
 
 ## Peer support
 
