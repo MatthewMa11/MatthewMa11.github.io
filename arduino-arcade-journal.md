@@ -14,13 +14,13 @@ permalink: /arduino-arcade-journal/
 
 ## The skills I developed throughout this project
 
-I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axes.
+I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axis.
 
-A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, or in numbers, but the code turns them into up, down, left, or right. This adds decisions such as ignoring small movements near the center and choosing one direction when the joystick moves diagonally.
-
-The LED matrix also extends the digital-output work from class. Each LED is controlled with on/off signals, but the program selects positions across an 8 × 8 grid to draw a moving game.
+A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, or in numbers, but the code turns them into up, down, left, or right. This also includes decisions such as ignoring small movements near the center and choosing a single direction when the joystick moves diagonally.
 
 I finished the wiring and the first version of the code, then designed and 3D-printed the arcade. The screen fit inside, but the Arduino and both breadboards remained outside. The joystick mount did not print well enough for screws, so I used hot glue to attach the joystick. The latest code adds levels and increases speed.
+
+I learned the most from coding, as I greatly developed my C++ programming skills by building the snake game. I learned more about how the Joystick and the matrix screen work, also how to program the game with clear logic.
 
 ## Components and wiring
 
@@ -54,7 +54,7 @@ const byte COLS[8] = {6, 7, 8, 9, 10, 11, 12, 13};
 | GND | GND |
 | SW | Not connected |
 
-The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as `HIGH` or `LOW`. The joystick's GND connects to Arduino GND to give the power a way back. A0–A3 are used as outputs for the matrix in this sketch. A4 and A5 remain available for the joystick's two analog signals.
+The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as `HIGH` or `LOW`. The joystick's GND connects to Arduino GND to give the power a way back. A0–A3 are used as outputs for the screen in this sketch. A4 and A5 remain available for the joystick's two analog signals.
 
 ## Development process
 
@@ -62,23 +62,23 @@ The joystick sends two analog signals to the Arduino. Each reading ranges from 0
 | --- | --- |
 | Wiring | Connected the Arduino, matrix, joystick, and resistors using two breadboards |
 | Programming | Programmed Snake so the joystick controls direction and the matrix displays the game |
-| CAD | After the wiring and code were done, designed the arcade enclosure |
-| Printing | Most of the print was usable, but the failed joystick mount could not hold the intended screws |
-| Joystick assembly | With limited time, used hot glue to attach the joystick |
-| Fit problem | Had not allowed space for the wires, so the Arduino could not fit; it stayed outside with both breadboards |
-| Code revision | Added a level change after every seven foods, three flashes, and increasing speed |
+| CAD | After the wiring and code were done, I CAD the arcade |
+| Printing | Most of the print was usable; the joystick mount failed to print |
+| Joystick assembly | With limited time, I used hot glue to attach the joystick |
+| Fit problem | There is no space for the wires, so the Arduino could not fit; it stayed outside with both breadboards |
+| Code revision | Added a level change after eating seven foods |
 
 ### Building the arcade
 
 The 3D print failed, although most of the arcade printed well enough to use. The joystick mount did not print properly, so I could not install the joystick with screws as planned. With limited time, I attached it with hot glue.
 
-I also forgot to account for the space taken up by the wires. Once the circuit was connected, I could not fit the Arduino inside the arcade. The screen was inside, while the Arduino and both breadboards stayed outside.
+I also forgot to account for the space the wires take up. Once the circuit was connected, I could not fit the Arduino inside the arcade. The screen fits perfectly into the 3D printed arcade, while the Arduino and both breadboards stayed outside.
 
 There are two problems with the CAD arcade that I still need to fix: I will need to 3D print again, and its holes will need some slight adjustment. I also need to plan for space for the wire and the two breadboards.
 
 ![CAD preview of the arcade](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_easy_install_preview.png)
 
-The CAD model is about **100 × 110 × 145 mm**. It has an open back, a removable joystick panel, and a frame for the screen. The planned joystick attachment differs from the hot-glued attachment used on the actual build.
+The CAD model is about 100 × 110 × 145 mm. It has an open back, a removable joystick panel, and a frame for the screen. The planned joystick attachment differs from the hot-glued attachment used on the actual build.
 
 ![Removable joystick panel](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_joystick_exploded.png)
 
@@ -88,7 +88,7 @@ The CAD model is about **100 × 110 × 145 mm**. It has an open back, a removabl
 
 ### 1. Set the pins and game settings
 
-`#include <Arduino.h>` provides the Arduino functions and types used by the sketch. `ROWS` and `COLS` map screen coordinates to the matrix wiring listed above. With `ROWS_ARE_ANODES = true`, a selected row is HIGH and a selected column is LOW. The OFF values reverse those signals.
+`#include <Arduino.h>` provides the Arduino functions and types used by the sketch. `ROWS` and `COLS` map screen coordinates to the matrix wiring listed above. With `ROWS_ARE_ANODES = true`, a selected row is HIGH and a selected column is LOW.
 
 ```cpp
 #include <Arduino.h>
@@ -123,8 +123,8 @@ The settings at the top control the game:
 | --- | --- |
 | `START_MOVE_MS = 800` | Start with 800 ms between moves |
 | `SPEED_INCREASE_PERCENT = 15` | Increase movement speed by about 15% per level |
-| `MIN_MOVE_MS = 80` | Never reduce the movement interval below 80 ms |
-| `FOODS_PER_LEVEL = 7` | Advance after seven foods in a level |
+| `MIN_MOVE_MS = 80` | Never reduce the movement speed below 80 ms |
+| `FOODS_PER_LEVEL = 7` | level up after seven foods in a level |
 | `FLASH_COUNT = 3` | Flash three times at a level change |
 | `FLASH_PHASE_MS = 120` | Each flash has 120 ms on and 120 ms off |
 | `READY_MS = 1000` | Wait one second before entering the running state |
