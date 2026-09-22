@@ -14,13 +14,13 @@ permalink: /arduino-arcade-journal/
 
 ## The skills I developed throughout this project
 
-I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practised with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axes.
+I built a Snake game using an Arduino, a joystick, and an 8 × 8 LED matrix. I built on **analog input**, which we practiced with a potentiometer. My new input component is the joystick: instead of reading one position, the Arduino reads its horizontal and vertical axes.
 
-A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, but the code turns them into up, down, left, or right. This adds decisions such as ignoring small movements near the center and choosing one direction when the joystick moves diagonally.
+A joystick suits Snake because its movement maps to the four directions in the game. The readings are analog, or in numbers, but the code turns them into up, down, left, or right. This adds decisions such as ignoring small movements near the center and choosing one direction when the joystick moves diagonally.
 
 The LED matrix also extends the digital-output work from class. Each LED is controlled with on/off signals, but the program selects positions across an 8 × 8 grid to draw a moving game.
 
-I finished the wiring and the first version of the code, then designed and 3D-printed the arcade. The screen fit inside, but the Arduino and both breadboards remained outside. The joystick mount did not print well enough for screws, so I used hot glue to attach the joystick. The latest code adds levels and increasing speed.
+I finished the wiring and the first version of the code, then designed and 3D-printed the arcade. The screen fit inside, but the Arduino and both breadboards remained outside. The joystick mount did not print well enough for screws, so I used hot glue to attach the joystick. The latest code adds levels and increases speed.
 
 ## Components and wiring
 
@@ -37,11 +37,7 @@ I finished the wiring and the first version of the code, then designed and 3D-pr
 
 ![Arduino Uno and 1588BS matrix wiring reference](https://MatthewMa11.github.io/assets/arduino-arcade/matrix-wiring-reference.png)
 
-*Matrix wiring reference. The joystick connections are listed below.*
-
-The diagram shows four 220 Ω resistors on D2–D5 and four 200 Ω resistors on A0–A3. These are the row connections. D6–D13 control the columns. The eight row and eight column connections let the Arduino select any of the 64 LEDs.
-
-The sketch treats the rows as anodes. To light an LED, it sets that row HIGH and its column LOW. Current passes through the row resistor and the selected LED to the LOW column pin. The resistor limits the current. All eight resistors stay in the circuit.
+The diagram shows four 220 Ohm resistors on D2–D5 and four 200 Ohm resistors on A0–A3. These are the row connections. D6–D13 control the columns. The eight row and eight column connections let the Arduino select any of the 64 LEDs.
 
 ```cpp
 const byte ROWS[8] = {2, 3, 4, 5, A3, A2, A1, A0};
@@ -58,11 +54,7 @@ const byte COLS[8] = {6, 7, 8, 9, 10, 11, 12, 13};
 | GND | GND |
 | SW | Not connected |
 
-The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as `HIGH` or `LOW`. [Arduino analogRead reference](https://github.com/arduino/reference-en/blob/master/Language/Functions/Analog%20IO/analogRead.adoc)
-
-On a breadboard, holes in the same connected strip share an electrical connection. The center gap separates the strips on each side. Power rails run separately and can have breaks, so their connections need checking. The joystick's GND connects to Arduino GND to give its voltage readings a common reference.
-
-A0–A3 are used as digital outputs for the matrix in this sketch. A4 and A5 remain available for the joystick's two analog signals.
+The joystick sends two analog signals to the Arduino. Each reading ranges from 0 to 1023, while a digital input is read as `HIGH` or `LOW`. The joystick's GND connects to Arduino GND to give the power a way back. A0–A3 are used as outputs for the matrix in this sketch. A4 and A5 remain available for the joystick's two analog signals.
 
 ## Development process
 
@@ -82,36 +74,17 @@ The 3D print failed, although most of the arcade printed well enough to use. The
 
 I also forgot to account for the space taken up by the wires. Once the circuit was connected, I could not fit the Arduino inside the arcade. The screen was inside, while the Arduino and both breadboards stayed outside.
 
-These were two different assembly problems: the printed mount could not support the planned screw attachment, and the connected circuit needed more room than I had allowed.
+There are two problems with the CAD arcade that I still need to fix: I will need to 3D print again, and its holes will need some slight adjustment. I also need to plan for space for the wire and the two breadboards.
 
 ![CAD preview of the arcade](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_easy_install_preview.png)
-
-*CAD view of the planned enclosure; this is not a photo of the finished print.*
 
 The CAD model is about **100 × 110 × 145 mm**. It has an open back, a removable joystick panel, and a frame for the screen. The planned joystick attachment differs from the hot-glued attachment used on the actual build.
 
 ![Removable joystick panel](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_joystick_exploded.png)
 
-*Planned removable joystick panel. The actual mount did not print well enough to use screws.*
-
-### Code revision — September 21, 2026
-
-The earlier sketch used a fixed movement interval and ended with a win when the board filled. The new sketch uses levels. After seven foods, the screen flashes three times, the snake resets to three segments, and the next level runs faster. A separate total score keeps track of food eaten across levels.
-
 ## Code explanation
 
 [View the full code](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/arduino-arcade/snake_arcade.ino) · [Download the Arduino sketch](https://MatthewMa11.github.io/assets/arduino-arcade/snake_arcade.ino)
-
-### Running the sketch in Arduino IDE
-
-To run the saved code:
-
-1. Save `snake_arcade.ino` inside a folder named `snake_arcade` and open it in Arduino IDE.
-2. Connect the Uno with a USB data cable. Select **Arduino Uno** and its port in the IDE.
-3. Click **Verify** to check compilation, then **Upload** to send the sketch to the board.
-4. Open the Serial Monitor at **9600 baud** to see new-game, score, and game-over messages.
-
-If uploading fails, check the selected board, port, and USB connection. These are reproduction steps; the game rules and expected behavior are explained below. [Arduino upload guide](https://support.arduino.cc/hc/en-us/articles/4733418441116-Upload-a-sketch-in-Arduino-IDE)
 
 ### 1. Set the pins and game settings
 
