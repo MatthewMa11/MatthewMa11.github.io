@@ -9,7 +9,8 @@ permalink: /arduino-arcade-journal/
 # Arduino Snake Arcade — Innovator Journal
 
 **Unit 1 Summative: Extend Your Circuit — Tech & Innovation**  
-**Date:** September 20, 2026
+**Date:** September 20, 2026  
+**Updated:** September 21, 2026
 
 ## The skills I developed throughout this project
 
@@ -19,7 +20,7 @@ A joystick suits Snake because its movement maps to the four directions in the g
 
 The LED matrix also extends the digital-output work from class. Each LED is controlled with on/off signals, but the program selects positions across an 8 × 8 grid to draw a moving game.
 
-I finished the wiring and code first, then designed and 3D-printed the arcade. I put the screen and Arduino inside. The two breadboards did not fit, so I left them outside.
+I finished the wiring and the first version of the code, then designed and 3D-printed the arcade. The screen fit inside, but the Arduino and both breadboards remained outside. The joystick mount did not print well enough for screws, so I used hot glue to attach the joystick. The latest code adds levels and increasing speed.
 
 ## Components and wiring
 
@@ -70,22 +71,32 @@ A0–A3 are used as digital outputs for the matrix in this sketch. A4 and A5 rem
 | Wiring | Connected the Arduino, matrix, joystick, and resistors using two breadboards |
 | Programming | Programmed Snake so the joystick controls direction and the matrix displays the game |
 | CAD | After the wiring and code were done, designed the arcade enclosure |
-| Assembly | Put the screen and Arduino inside the arcade |
-| Fit problem | The two breadboards did not fit, so I left them outside and kept the circuit connected |
+| Printing | Most of the print was usable, but the failed joystick mount could not hold the intended screws |
+| Joystick assembly | With limited time, used hot glue to attach the joystick |
+| Fit problem | Had not allowed space for the wires, so the Arduino could not fit; it stayed outside with both breadboards |
+| Code revision | Added a level change after every seven foods, three flashes, and increasing speed |
 
 ### Building the arcade
 
-The enclosure had room for the screen and Arduino, but not the breadboards. I left the breadboards outside and kept them connected.
+The 3D print failed, although most of the arcade printed well enough to use. The joystick mount did not print properly, so I could not install the joystick with screws as planned. With limited time, I attached it with hot glue.
+
+I also forgot to account for the space taken up by the wires. Once the circuit was connected, I could not fit the Arduino inside the arcade. The screen was inside, while the Arduino and both breadboards stayed outside.
+
+These were two different assembly problems: the printed mount could not support the planned screw attachment, and the connected circuit needed more room than I had allowed.
 
 ![CAD preview of the arcade](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_easy_install_preview.png)
 
-*CAD view of the arcade.*
+*CAD view of the planned enclosure; this is not a photo of the finished print.*
 
-The model is about **100 × 110 × 145 mm**. It has an open back, a removable joystick panel, and a frame that holds the screen.
+The CAD model is about **100 × 110 × 145 mm**. It has an open back, a removable joystick panel, and a frame for the screen. The planned joystick attachment differs from the hot-glued attachment used on the actual build.
 
 ![Removable joystick panel](https://MatthewMa11.github.io/assets/arduino-arcade/arcade_joystick_exploded.png)
 
-*The joystick panel can be installed separately.*
+*Planned removable joystick panel. The actual mount did not print well enough to use screws.*
+
+### Code revision — September 21, 2026
+
+The earlier sketch used a fixed movement interval and ended with a win when the board filled. The new sketch uses levels. After seven foods, the screen flashes three times, the snake resets to three segments, and the next level runs faster. A separate total score keeps track of food eaten across levels.
 
 ## Code explanation
 
@@ -102,63 +113,154 @@ To run the saved code:
 
 If uploading fails, check the selected board, port, and USB connection. These are reproduction steps; the game rules and expected behavior are explained below. [Arduino upload guide](https://support.arduino.cc/hc/en-us/articles/4733418441116-Upload-a-sketch-in-Arduino-IDE)
 
-### Starting the game
+### 1. Set the pins and game settings
 
-`setup()` configures the matrix pins as outputs and starts Serial communication at **9600 baud**. It also seeds the random-number generator and starts a new game.
+`#include <Arduino.h>` provides the Arduino functions and types used by the sketch. `ROWS` and `COLS` map screen coordinates to the matrix wiring listed above. With `ROWS_ARE_ANODES = true`, a selected row is HIGH and a selected column is LOW. The OFF values reverse those signals.
 
-`startGame()` creates a three-segment snake facing right, resets the timers, and places food in an empty cell.
+The settings at the top control the game:
 
-### Reading the joystick
+| Setting | Meaning |
+| --- | --- |
+| `START_MOVE_MS = 800` | Start with 800 ms between moves |
+| `SPEED_INCREASE_PERCENT = 15` | Increase movement speed by about 15% per level |
+| `MIN_MOVE_MS = 80` | Never reduce the movement interval below 80 ms |
+| `FOODS_PER_LEVEL = 7` | Advance after seven foods in a level |
+| `FLASH_COUNT = 3` | Flash three times at a level change |
+| `FLASH_PHASE_MS = 120` | Each flash has 120 ms on and 120 ms off |
+| `READY_MS = 1000` | Wait one second before entering the running state |
+| `GAME_OVER_MS = 3000` | Show game over for three seconds |
 
-`readJoystick()` reads A4 and A5:
+`const` settings stay fixed while the game runs. Variables such as `moveMs`, `level`, and `totalScore` change during play.
+
+### 2. Store the snake, food, and game state
+
+`snakeX[64]` and `snakeY[64]` hold the coordinates of up to 64 body segments. Index 0 is the head. `snakeLength` tells the code how many entries are currently used.
+
+`dirX` and `dirY` store the current direction. For example, (1, 0) means right and (0, −1) means one row upward. `nextDirX` and `nextDirY` store the requested direction for the next move.
+
+`foodX` and `foodY` locate the food. A value of −1 means no food is active. `pixels[8][8]` stores the image to display: each value says whether that LED should appear lit.
+
+`foodsThisLevel` counts food in the current level. `totalScore` counts food across all levels in the current game. They are separate because the snake and level food count reset between levels, while the total score stays.
+
+### 3. Start a new game
+
+`setup()` runs once when the Arduino starts. It sets the matrix pins to their OFF values, configures them as outputs, and starts Serial communication at **9600 baud**. It seeds the random-number generator using the time and joystick readings, then calls `startGame()` and `drawDisplay()`.
+
+`startGame()` resets the level to 1, both food counters to 0, and the movement interval to 800 ms. It calls `resetSnake()`, `placeFood()`, and `printStatus()`, then enters `READY`.
+
+`resetSnake()` puts a three-segment snake at (3, 4), (2, 4), and (1, 4), facing right. After one second in `READY`, the game enters `RUNNING`. The first move happens one movement interval later.
+
+### 4. Place food in an empty cell
+
+`snakeAt(x, y, count)` checks whether a position matches any of the first `count` body segments.
+
+`placeFood()` calculates the number of empty cells, chooses a random number within that count, and walks through the grid. It skips cells occupied by the snake and places food at the selected empty cell. If no empty cells remain, it sets the food coordinates to −1.
+
+This avoids placing food inside the snake. In normal play, the next-level reset happens long before all 64 cells could fill.
+
+### 5. Read the joystick and request a turn
+
+While the game is `READY` or `RUNNING`, the joystick is checked about every **20 ms**:
 
 ```cpp
 int x = analogRead(A4) - 512;
 int y = analogRead(A5) - 512;
 ```
 
-Subtracting 512 makes the center reading close to zero. `REVERSE_X = false` keeps the X direction unchanged, while `REVERSE_Y = true` flips the Y direction. These settings control how the joystick's physical orientation matches the screen.
+Subtracting 512 puts the center near zero. `REVERSE_X = false` keeps X unchanged, and `REVERSE_Y = true` flips Y to match the screen direction.
 
-The code ignores input when both axes are less than **170** from center. This area is called a **dead zone**. It stops small changes near the center from turning the snake. For diagonal input, it uses the axis with the larger movement.
+The code finds the size of each axis reading, ignoring its sign. When both are below **170**, it returns without changing direction. This is the **dead zone**, which stops small center changes from causing turns.
 
-For example, raw readings of X = 800 and Y = 520 become X = 288 and Y = −8 after centering and reversing Y. X is the stronger axis, so the code requests a right turn. The turn is accepted unless it would reverse directly into the snake's body.
+For diagonal input, the larger axis determines the direction; X wins a tie. For example, raw X = 800 and Y = 520 become X = 288 and Y = −8 after centering and reversing Y, so the code requests a right turn.
 
-`requestDirection()` blocks a turn directly backward into the snake's body. It saves an accepted direction for the next move. The joystick is checked about every **20 ms**.
+`requestDirection()` rejects the exact opposite of the current direction. Otherwise, it saves the turn for the next move. Releasing the joystick does not stop the snake; it keeps its direction. The joystick controls direction, while the level controls speed.
 
-The joystick's SW button is not connected, so this sketch does not read a digital pushbutton. A digital input gives a HIGH or LOW state. A mechanical button can briefly switch between those states as its contacts settle, making one press look like several. Debouncing accepts a change only after it stays stable for a short time. That would be useful if a restart or selection button were added. [Arduino debounce example](https://github.com/arduino/arduino-examples/blob/main/examples/02.Digital/Debounce/Debounce.ino)
+The SW button is not connected, so this sketch does not read a digital pushbutton. Mechanical buttons can briefly switch HIGH and LOW as their contacts settle. Debouncing waits for a stable change so one press is not counted several times. That would matter if a restart or selection button were added. [Arduino debounce example](https://github.com/arduino/arduino-examples/blob/main/examples/02.Digital/Debounce/Debounce.ino)
 
-### Moving the snake
+### 6. Move the snake and check collisions
 
-`snakeX[64]` and `snakeY[64]` store the body coordinates. Index 0 is the head, and `snakeLength` tracks the number of segments.
+When the current movement interval has elapsed, `moveSnake()`:
 
-Every **800 ms**, `moveSnake()` calculates the next head position by adding the direction to the current coordinates. For example, moving right from (3, 4) gives (4, 4). Hitting the edge or the body ends the game. Eating food adds one segment.
+1. Applies the requested direction.
+2. Adds that direction to the head coordinates. Right from (3, 4), for example, gives (4, 4).
+3. Ends the game if either coordinate is outside 0–7.
+4. Checks whether the new head position contains food.
+5. Checks for a collision with the body.
+6. Adds a segment if food was eaten, shifts the body positions from tail to head, and writes the new head position.
 
-The code moves each body segment into the previous segment's old position, then updates the head. It allows the head to enter the old tail position when the tail is moving away.
+The body check uses:
 
-### Food and score
+```cpp
+byte checkLength = snakeLength - (eating ? 0 : 1);
+```
 
-`snakeAt()` checks whether a cell contains part of the snake. `placeFood()` randomly selects an empty cell.
+The expression `eating ? 0 : 1` means “use 0 when eating, otherwise use 1.” When the snake is not eating, the old tail moves away, so that cell is excluded from collision checking. When it grows, the tail stays and must be included.
 
-The score is `snakeLength - 3`, since the snake starts with three segments. Scores appear in the Serial Monitor. Filling all **64 cells** wins the game.
+### 7. Count food and flash between levels
 
-### Displaying the game
+After eating, the code increases both `totalScore` and `foodsThisLevel`. Before the seventh food, it places new food and prints the updated status.
 
-`drawDisplay()` stores the screen pattern in `pixels[8][8]`. The snake stays solid, and the food blinks for **200 ms on and 200 ms off**. An X means game over; a square outline means a win.
+The seventh food calls `beginLevelFlash()`. This switches to `LEVEL_FLASH`, records the start time, and removes the active food. The snake stops moving during this state.
 
-`scanDisplay()` selects one LED at a time, with at least **100 microseconds** between scan steps. It turns off the previous selection before lighting the next one. Repeating this makes the pattern appear continuous. A selected row is `HIGH`, and a selected column is `LOW`.
+`drawDisplay()` alternates the entire screen pattern on and off every 120 ms. Three flashes take:
 
-### Timing and restart
+```text
+3 × 2 × 120 ms = 720 ms
+```
 
-| State | What happens |
+The screen only appears fully lit: `scanDisplay()` still lights at most one LED at a time.
+
+### 8. Start the next level and increase speed
+
+After the flashes, `startNextLevel()` increases `level` and resets `foodsThisLevel`. It calculates the next movement interval:
+
+```cpp
+unsigned long divisor = 100UL + SPEED_INCREASE_PERCENT;
+moveMs = (moveMs * 100UL + divisor / 2) / divisor;
+```
+
+With a 15% increase, this divides the interval by **1.15** and rounds to the nearest whole millisecond. A shorter interval means more moves per second. The `UL` suffix makes the constants unsigned long values, keeping this arithmetic in a type large enough for the calculation.
+
+| Level | Time between moves |
 | --- | --- |
-| `READY` | Waits one second before movement starts |
-| `RUNNING` | Reads the joystick and moves the snake |
-| `LOST` | Shows an X, then restarts after three seconds |
-| `WON` | Shows a square outline, then restarts after three seconds |
+| 1 | 800 ms |
+| 2 | 696 ms |
+| 3 | 605 ms |
+| 4 | 526 ms |
+| 18 onward | 80 ms minimum |
 
-`loop()` uses `millis()` and `micros()` to track time. Joystick input, snake movement, and display scanning have separate timers. This lets the program check the controls and refresh the display between moves. Using a long `delay()` for the snake's movement would stop that work while the delay runs.
+The code clamps the interval at **80 ms**. Levels can keep increasing after that, but the movement speed stops increasing.
 
-The movement speed stays at one step every 800 ms, regardless of how far the joystick is pushed. The joystick chooses direction, not speed.
+Each new level resets the snake to three segments, places food, prints the status, and returns to the one-second `READY` state. The total score is preserved. For example, level 2 starts with score 7 and a three-segment snake. There is no final win screen in this version.
+
+### 9. Draw and refresh the LED matrix
+
+`drawDisplay()` prepares the picture in `pixels`:
+
+- During play or the ready pause, the snake is solid and the food blinks for 200 ms on and 200 ms off.
+- During `LEVEL_FLASH`, every pixel alternates between on and off.
+- During `LOST`, two diagonal lines form an X.
+
+The food-coordinate check prevents the code from using −1 as an array index when food is inactive.
+
+`scanDisplay()` sends this picture to the hardware. Its `static` variables remember the current pixel and scan time between calls. At least **100 microseconds** must pass before it scans the next position. It blanks the previous LED, calculates `y = index / 8` and `x = index % 8`, and lights the selected LED if its pixel is true. `% 8` gives the remainder; `% 64` wraps the scan back to the start after the last cell.
+
+### 10. Handle game over and keep the tasks running
+
+An edge or body collision calls `finishGame()`. It enters `LOST`, prints “GAME OVER!” and the final status, and starts a three-second timer. The display shows an X. After that, `startGame()` resets the score, level, speed, and snake for a new game.
+
+`printStatus()` sends the level, total score, and movement interval to the Serial Monitor. Those numbers are not drawn on the 8 × 8 display.
+
+`loop()` repeatedly scans the display, reads the joystick when allowed, handles the current state, redraws the picture, and scans again:
+
+| State | What the main loop does |
+| --- | --- |
+| `READY` | Accepts direction input and waits one second before entering `RUNNING` |
+| `RUNNING` | Reads the joystick and moves the snake when `moveMs` has elapsed |
+| `LEVEL_FLASH` | Flashes for 720 ms, then starts the next level |
+| `LOST` | Shows an X for three seconds, then starts a new game |
+
+The timers use `millis()` for game events and `micros()` for scanning. There is no long `delay()`, so display scanning continues during the ready pause, level flashes, and game-over screen.
 
 ## Working demo
 
@@ -169,6 +271,8 @@ A photo or video of the actual game still needs to be added. The images above sh
 I helped **Blair Wen** with wiring his circuit. I also helped **Sean Wei** CAD his fan holder.
 
 ## Reflection
+
+The final assembly differed from the CAD plan. A usable-looking enclosure still had a failed joystick mount, and I had left out the space needed by the wires. Hot glue let me attach the joystick within the time available, but it did not solve the Arduino fit problem. The build therefore kept the Arduino and breadboards outside.
 
 This project connects three skills: wiring an input, interpreting its readings, and using digital outputs to show a response. The code needs rules for those readings: the dead zone ignores small center changes, the stronger-axis check handles diagonal input, and the reverse-turn rule stops an invalid move. Reading a value is only the first step; deciding what it should do is what makes the control usable.
 
