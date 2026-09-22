@@ -90,6 +90,33 @@ The CAD model is about **100 × 110 × 145 mm**. It has an open back, a removabl
 
 `#include <Arduino.h>` provides the Arduino functions and types used by the sketch. `ROWS` and `COLS` map screen coordinates to the matrix wiring listed above. With `ROWS_ARE_ANODES = true`, a selected row is HIGH and a selected column is LOW. The OFF values reverse those signals.
 
+```cpp
+#include <Arduino.h>
+
+// Arduino Uno + 1588BS.
+// Keep all eight matrix resistors installed.
+//
+// Joystick:
+// VRx -> A4
+// VRy -> A5
+// VCC -> 5V
+// GND -> GND
+// SW  -> not connected
+
+const byte ROWS[8] = {2, 3, 4, 5, A3, A2, A1, A0};
+const byte COLS[8] = {6, 7, 8, 9, 10, 11, 12, 13};
+
+const bool ROWS_ARE_ANODES = true;
+
+const byte ROW_ON  = ROWS_ARE_ANODES ? HIGH : LOW;
+const byte ROW_OFF = ROWS_ARE_ANODES ? LOW : HIGH;
+const byte COL_ON  = ROWS_ARE_ANODES ? LOW : HIGH;
+const byte COL_OFF = ROWS_ARE_ANODES ? HIGH : LOW;
+
+const bool REVERSE_X = false;
+const bool REVERSE_Y = true;
+```
+
 The settings at the top control the game:
 
 | Setting | Meaning |
@@ -105,6 +132,33 @@ The settings at the top control the game:
 
 `const` settings stay fixed while the game runs. Variables such as `moveMs`, `level`, and `totalScore` change during play.
 
+```cpp
+// Starting time between movements.
+// Larger number = slower snake.
+const unsigned long START_MOVE_MS = 800;
+
+// Speed increases by this percentage each level.
+const unsigned int SPEED_INCREASE_PERCENT = 15;
+
+// Fastest allowed time between movements.
+const unsigned long MIN_MOVE_MS = 80;
+
+// Eat 7 foods to advance to the next level.
+const byte FOODS_PER_LEVEL = 7;
+
+// Flash the screen three times.
+const byte FLASH_COUNT = 3;
+
+// Each flash: 120 milliseconds on, 120 milliseconds off.
+const unsigned long FLASH_PHASE_MS = 120;
+
+// Pause before starting each level.
+const unsigned long READY_MS = 1000;
+
+// Show game over for three seconds.
+const unsigned long GAME_OVER_MS = 3000;
+```
+
 ### 2. Store the snake, food, and game state
 
 `snakeX[64]` and `snakeY[64]` hold the coordinates of up to 64 body segments. Index 0 is the head. `snakeLength` tells the code how many entries are currently used.
@@ -115,19 +169,143 @@ The settings at the top control the game:
 
 `foodsThisLevel` counts food in the current level. `totalScore` counts food across all levels in the current game. They are separate because the snake and level food count reset between levels, while the total score stays.
 
+```cpp
+byte snakeX[64];
+byte snakeY[64];
+byte snakeLength = 3;
+
+int dirX = 1;
+int dirY = 0;
+int nextDirX = 1;
+int nextDirY = 0;
+
+int foodX = -1;
+int foodY = -1;
+
+bool pixels[8][8];
+
+unsigned long level = 1;
+unsigned long totalScore = 0;
+byte foodsThisLevel = 0;
+
+unsigned long moveMs = START_MOVE_MS;
+
+enum GameState {
+ READY,
+ RUNNING,
+ LEVEL_FLASH,
+ LOST
+};
+
+GameState state = READY;
+
+unsigned long stateTime = 0;
+unsigned long lastMove = 0;
+unsigned long lastInput = 0;
+```
+
 ### 3. Start a new game
 
 `setup()` runs once when the Arduino starts. It sets the matrix pins to their OFF values, configures them as outputs, and starts Serial communication at **9600 baud**. It seeds the random-number generator using the time and joystick readings, then calls `startGame()` and `drawDisplay()`.
 
+```cpp
+void setup() {
+ for (byte i = 0; i < 8; i++) {
+   digitalWrite(ROWS[i], ROW_OFF);
+   digitalWrite(COLS[i], COL_OFF);
+
+   pinMode(ROWS[i], OUTPUT);
+   pinMode(COLS[i], OUTPUT);
+ }
+
+ Serial.begin(9600);
+
+ randomSeed(micros() + analogRead(A4) + analogRead(A5));
+
+ startGame();
+ drawDisplay();
+}
+```
+
 `startGame()` resets the level to 1, both food counters to 0, and the movement interval to 800 ms. It calls `resetSnake()`, `placeFood()`, and `printStatus()`, then enters `READY`.
 
+```cpp
+void startGame() {
+ level = 1;
+ totalScore = 0;
+ foodsThisLevel = 0;
+ moveMs = START_MOVE_MS;
+
+ resetSnake();
+ placeFood();
+ printStatus();
+
+ state = READY;
+ stateTime = lastMove = lastInput = millis();
+}
+```
+
 `resetSnake()` puts a three-segment snake at (3, 4), (2, 4), and (1, 4), facing right. After one second in `READY`, the game enters `RUNNING`. The first move happens one movement interval later.
+
+```cpp
+void resetSnake() {
+ snakeLength = 3;
+
+ // Start in the middle, moving right.
+ for (byte i = 0; i < snakeLength; i++) {
+   snakeX[i] = 3 - i;
+   snakeY[i] = 4;
+ }
+
+ dirX = nextDirX = 1;
+ dirY = nextDirY = 0;
+}
+```
 
 ### 4. Place food in an empty cell
 
 `snakeAt(x, y, count)` checks whether a position matches any of the first `count` body segments.
 
+```cpp
+bool snakeAt(int x, int y, byte count) {
+ for (byte i = 0; i < count; i++) {
+   if (snakeX[i] == x && snakeY[i] == y) {
+     return true;
+   }
+ }
+
+ return false;
+}
+```
+
 `placeFood()` calculates the number of empty cells, chooses a random number within that count, and walks through the grid. It skips cells occupied by the snake and places food at the selected empty cell. If no empty cells remain, it sets the food coordinates to −1.
+
+```cpp
+void placeFood() {
+ int emptyCells = 64 - snakeLength;
+
+ if (emptyCells <= 0) {
+   foodX = foodY = -1;
+   return;
+ }
+
+ int choice = random(emptyCells);
+
+ for (byte y = 0; y < 8; y++) {
+   for (byte x = 0; x < 8; x++) {
+     if (!snakeAt(x, y, snakeLength)) {
+       if (choice == 0) {
+         foodX = x;
+         foodY = y;
+         return;
+       }
+
+       choice--;
+     }
+   }
+ }
+}
+```
 
 This avoids placing food inside the snake. In normal play, the next-level reset happens long before all 64 cells could fill.
 
@@ -136,8 +314,26 @@ This avoids placing food inside the snake. In normal play, the next-level reset 
 While the game is `READY` or `RUNNING`, the joystick is checked about every **20 ms**:
 
 ```cpp
-int x = analogRead(A4) - 512;
-int y = analogRead(A5) - 512;
+void readJoystick() {
+ int x = analogRead(A4) - 512;
+ int y = analogRead(A5) - 512;
+
+ if (REVERSE_X) x = -x;
+ if (REVERSE_Y) y = -y;
+
+ int amountX = x < 0 ? -x : x;
+ int amountY = y < 0 ? -y : y;
+
+ // Ignore small movements near the center.
+ if (amountX < 170 && amountY < 170) return;
+
+ // Choose the stronger axis for diagonal input.
+ if (amountX >= amountY) {
+   requestDirection(x < 0 ? -1 : 1, 0);
+ } else {
+   requestDirection(0, y < 0 ? -1 : 1);
+ }
+}
 ```
 
 Subtracting 512 puts the center near zero. `REVERSE_X = false` keeps X unchanged, and `REVERSE_Y = true` flips Y to match the screen direction.
@@ -147,6 +343,16 @@ The code finds the size of each axis reading, ignoring its sign. When both are b
 For diagonal input, the larger axis determines the direction; X wins a tie. For example, raw X = 800 and Y = 520 become X = 288 and Y = −8 after centering and reversing Y, so the code requests a right turn.
 
 `requestDirection()` rejects the exact opposite of the current direction. Otherwise, it saves the turn for the next move. Releasing the joystick does not stop the snake; it keeps its direction. The joystick controls direction, while the level controls speed.
+
+```cpp
+void requestDirection(int x, int y) {
+ // Prevent reversing directly into the snake's neck.
+ if (x == -dirX && y == -dirY) return;
+
+ nextDirX = x;
+ nextDirY = y;
+}
+```
 
 The SW button is not connected, so this sketch does not read a digital pushbutton. Mechanical buttons can briefly switch HIGH and LOW as their contacts settle. Debouncing waits for a stable change so one press is not counted several times. That would matter if a restart or selection button were added. [Arduino debounce example](https://github.com/arduino/arduino-examples/blob/main/examples/02.Digital/Debounce/Debounce.ino)
 
@@ -161,6 +367,61 @@ When the current movement interval has elapsed, `moveSnake()`:
 5. Checks for a collision with the body.
 6. Adds a segment if food was eaten, shifts the body positions from tail to head, and writes the new head position.
 
+```cpp
+void moveSnake() {
+ if (state != RUNNING) return;
+
+ dirX = nextDirX;
+ dirY = nextDirY;
+
+ int x = snakeX[0] + dirX;
+ int y = snakeY[0] + dirY;
+
+ // Hitting an edge ends the game.
+ if (x < 0 || x > 7 || y < 0 || y > 7) {
+   finishGame();
+   return;
+ }
+
+ bool eating = x == foodX && y == foodY;
+
+ // The tail moves away unless the snake eats.
+ byte checkLength = snakeLength - (eating ? 0 : 1);
+
+ if (snakeAt(x, y, checkLength)) {
+   finishGame();
+   return;
+ }
+
+ if (eating && snakeLength < 64) {
+   snakeLength++;
+ }
+
+ // Move each segment into the previous segment's position.
+ for (int i = snakeLength - 1; i > 0; i--) {
+   snakeX[i] = snakeX[i - 1];
+   snakeY[i] = snakeY[i - 1];
+ }
+
+ snakeX[0] = x;
+ snakeY[0] = y;
+
+ if (eating) {
+   totalScore++;
+   foodsThisLevel++;
+
+   // Every seven foods triggers the next level.
+   if (foodsThisLevel >= FOODS_PER_LEVEL) {
+     beginLevelFlash();
+     return;
+   }
+
+   placeFood();
+   printStatus();
+ }
+}
+```
+
 The body check uses:
 
 ```cpp
@@ -173,7 +434,33 @@ The expression `eating ? 0 : 1` means “use 0 when eating, otherwise use 1.” 
 
 After eating, the code increases both `totalScore` and `foodsThisLevel`. Before the seventh food, it places new food and prints the updated status.
 
+```cpp
+if (eating) {
+   totalScore++;
+   foodsThisLevel++;
+
+   // Every seven foods triggers the next level.
+   if (foodsThisLevel >= FOODS_PER_LEVEL) {
+     beginLevelFlash();
+     return;
+   }
+
+   placeFood();
+   printStatus();
+ }
+```
+
 The seventh food calls `beginLevelFlash()`. This switches to `LEVEL_FLASH`, records the start time, and removes the active food. The snake stops moving during this state.
+
+```cpp
+void beginLevelFlash() {
+ state = LEVEL_FLASH;
+ stateTime = millis();
+
+ foodX = foodY = -1;
+ blankDisplay();
+}
+```
 
 `drawDisplay()` alternates the entire screen pattern on and off every 120 ms. Three flashes take:
 
@@ -188,8 +475,29 @@ The screen only appears fully lit: `scanDisplay()` still lights at most one LED 
 After the flashes, `startNextLevel()` increases `level` and resets `foodsThisLevel`. It calculates the next movement interval:
 
 ```cpp
-unsigned long divisor = 100UL + SPEED_INCREASE_PERCENT;
-moveMs = (moveMs * 100UL + divisor / 2) / divisor;
+void startNextLevel() {
+ level++;
+ foodsThisLevel = 0;
+
+ // Divide the movement interval by 1.15 for 15% more speed.
+ // Round to the nearest whole millisecond.
+ unsigned long divisor = 100UL + SPEED_INCREASE_PERCENT;
+
+ moveMs = (moveMs * 100UL + divisor / 2) / divisor;
+
+ if (moveMs < MIN_MOVE_MS) {
+   moveMs = MIN_MOVE_MS;
+ }
+
+ // Reset the snake each level so the board cannot fill permanently.
+ // Keep the total score and level.
+ resetSnake();
+ placeFood();
+ printStatus();
+
+ state = READY;
+ stateTime = lastMove = lastInput = millis();
+}
 ```
 
 With a 15% increase, this divides the interval by **1.15** and rounds to the nearest whole millisecond. A shorter interval means more moves per second. The `UL` suffix makes the constants unsigned long values, keeping this arithmetic in a type large enough for the calculation.
@@ -214,15 +522,112 @@ Each new level resets the snake to three segments, places food, prints the statu
 - During `LEVEL_FLASH`, every pixel alternates between on and off.
 - During `LOST`, two diagonal lines form an X.
 
+```cpp
+void drawDisplay() {
+ unsigned long now = millis();
+
+ bool flashOn =
+   state == LEVEL_FLASH &&
+   ((now - stateTime) / FLASH_PHASE_MS) % 2 == 0;
+
+ for (byte y = 0; y < 8; y++) {
+   for (byte x = 0; x < 8; x++) {
+     pixels[y][x] = flashOn;
+   }
+ }
+
+ if (state == LEVEL_FLASH) return;
+
+ if (state == LOST) {
+   // Show an X after losing.
+   for (byte i = 0; i < 8; i++) {
+     pixels[i][i] = true;
+     pixels[i][7 - i] = true;
+   }
+
+   return;
+ }
+
+ // Snake stays solid.
+ for (byte i = 0; i < snakeLength; i++) {
+   pixels[snakeY[i]][snakeX[i]] = true;
+ }
+
+ // Only food blinks.
+ if (foodX >= 0 && foodY >= 0 && now % 400 < 200) {
+   pixels[foodY][foodX] = true;
+ }
+}
+```
+
 The food-coordinate check prevents the code from using −1 as an array index when food is inactive.
 
 `scanDisplay()` sends this picture to the hardware. Its `static` variables remember the current pixel and scan time between calls. At least **100 microseconds** must pass before it scans the next position. It blanks the previous LED, calculates `y = index / 8` and `x = index % 8`, and lights the selected LED if its pixel is true. `% 8` gives the remainder; `% 64` wraps the scan back to the start after the last cell.
+
+```cpp
+void blankDisplay() {
+ for (byte i = 0; i < 8; i++) {
+   digitalWrite(ROWS[i], ROW_OFF);
+   digitalWrite(COLS[i], COL_OFF);
+ }
+}
+
+void scanDisplay() {
+ static byte index = 0;
+ static unsigned long lastScan = 0;
+
+ unsigned long now = micros();
+
+ if (now - lastScan < 100) return;
+
+ lastScan = now;
+ blankDisplay();
+
+ byte y = index / 8;
+ byte x = index % 8;
+
+ if (pixels[y][x]) {
+   digitalWrite(COLS[x], COL_ON);
+   digitalWrite(ROWS[y], ROW_ON);
+ }
+
+ index = (index + 1) % 64;
+}
+```
 
 ### 10. Handle game over and keep the tasks running
 
 An edge or body collision calls `finishGame()`. It enters `LOST`, prints “GAME OVER!” and the final status, and starts a three-second timer. The display shows an X. After that, `startGame()` resets the score, level, speed, and snake for a new game.
 
+```cpp
+void finishGame() {
+ state = LOST;
+
+ blankDisplay();
+ Serial.println(F("GAME OVER!"));
+ printStatus();
+
+ stateTime = millis();
+}
+```
+
 `printStatus()` sends the level, total score, and movement interval to the Serial Monitor. Those numbers are not drawn on the 8 × 8 display.
+
+```cpp
+void printStatus() {
+ blankDisplay();
+
+ Serial.print(F("Level: "));
+ Serial.print(level);
+
+ Serial.print(F(" | Score: "));
+ Serial.print(totalScore);
+
+ Serial.print(F(" | Move: "));
+ Serial.print(moveMs);
+ Serial.println(F(" ms"));
+}
+```
 
 `loop()` repeatedly scans the display, reads the joystick when allowed, handles the current state, redraws the picture, and scans again:
 
@@ -234,6 +639,44 @@ An edge or body collision calls `finishGame()`. It enters `LOST`, prints “GAME
 | `LOST` | Shows an X for three seconds, then starts a new game |
 
 The timers use `millis()` for game events and `micros()` for scanning. There is no long `delay()`, so display scanning continues during the ready pause, level flashes, and game-over screen.
+
+```cpp
+void loop() {
+ scanDisplay();
+
+ unsigned long now = millis();
+
+ if ((state == READY || state == RUNNING) &&
+     now - lastInput >= 20) {
+   lastInput = now;
+   readJoystick();
+ }
+
+ if (state == READY) {
+   if (now - stateTime >= READY_MS) {
+     state = RUNNING;
+     lastMove = now;
+   }
+
+ } else if (state == RUNNING) {
+   if (now - lastMove >= moveMs) {
+     lastMove = now;
+     moveSnake();
+   }
+
+ } else if (state == LEVEL_FLASH) {
+   if (now - stateTime >= FLASH_COUNT * 2UL * FLASH_PHASE_MS) {
+     startNextLevel();
+   }
+
+ } else if (state == LOST && now - stateTime >= GAME_OVER_MS) {
+   startGame();
+ }
+
+ drawDisplay();
+ scanDisplay();
+}
+```
 
 ## Working demo
 
