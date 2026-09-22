@@ -733,13 +733,3 @@ This project helped me develop my skills in wiring and programming an LED matrix
 One possible real-world use for this project would be a simple menu controller for someone who finds several small buttons difficult to operate. The joystick could be used to move a highlighted selection between different options. To make this practical, the design would need a clearer display, a button or other method to confirm a selection, and adjustable joystick sensitivity. The current 8 × 8 LED matrix would also need to be replaced or redesigned so that the menu choices could be displayed clearly. I would also need to consider whether the user could comfortably grip and move the joystick.
 
 The skill I would rely on most when improving this project is debugging analog input. I would print the raw X and Y joystick readings, check the center position and movement range, and compare each joystick movement with the response shown on the display. This would help me choose an appropriate dead zone and make sure each direction is detected accurately. The current center value of 512 and threshold of 170 work as starting points, but different joysticks or users may require different settings.
-
-## References
-
-- Wiring diagram shown above: original source link still to add.
-- [My Snake code](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/arduino-arcade/snake_arcade.ino).
-- [Arduino analogRead reference](https://github.com/arduino/reference-en/blob/master/Language/Functions/Analog%20IO/analogRead.adoc).
-- [Arduino debounce example](https://github.com/arduino/arduino-examples/blob/main/examples/02.Digital/Debounce/Debounce.ino).
-- [Arduino upload guide](https://support.arduino.cc/hc/en-us/articles/4733418441116-Upload-a-sketch-in-Arduino-IDE).
-
-The Arduino references support the explanations in this journal. The original source used while building the circuit still needs to be identified.
