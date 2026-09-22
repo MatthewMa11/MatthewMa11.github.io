@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 
-// Arduino Uno + 1588BS
+// Arduino Uno + 1588BS.
 // Keep all eight matrix resistors installed.
 //
 // Joystick:
@@ -25,13 +25,47 @@ const byte COL_ON  = ROWS_ARE_ANODES ? LOW : HIGH;
 const byte COL_OFF = ROWS_ARE_ANODES ? HIGH : LOW;
 
 
-// Corrected joystick directions.
 const bool REVERSE_X = false;
 const bool REVERSE_Y = true;
 
 
+// ---------------- SETTINGS ----------------
+
+
+// Starting time between movements.
 // Larger number = slower snake.
-const unsigned long MOVE_MS = 800;
+const unsigned long START_MOVE_MS = 800;
+
+
+// Speed increases by this percentage each level.
+const unsigned int SPEED_INCREASE_PERCENT = 15;
+
+
+// Fastest allowed time between movements.
+const unsigned long MIN_MOVE_MS = 80;
+
+
+// Eat 7 foods to advance to the next level.
+const byte FOODS_PER_LEVEL = 7;
+
+
+// Flash the screen three times.
+const byte FLASH_COUNT = 3;
+
+
+// Each flash: 120 milliseconds on, 120 milliseconds off.
+const unsigned long FLASH_PHASE_MS = 120;
+
+
+// Pause before starting each level.
+const unsigned long READY_MS = 1000;
+
+
+// Show game over for three seconds.
+const unsigned long GAME_OVER_MS = 3000;
+
+
+// ---------------- GAME VARIABLES ----------------
 
 
 byte snakeX[64];
@@ -45,18 +79,26 @@ int nextDirX = 1;
 int nextDirY = 0;
 
 
-int foodX = 6;
-int foodY = 4;
+int foodX = -1;
+int foodY = -1;
 
 
 bool pixels[8][8];
 
 
+unsigned long level = 1;
+unsigned long totalScore = 0;
+byte foodsThisLevel = 0;
+
+
+unsigned long moveMs = START_MOVE_MS;
+
+
 enum GameState {
  READY,
  RUNNING,
- LOST,
- WON
+ LEVEL_FLASH,
+ LOST
 };
 
 
@@ -79,7 +121,7 @@ void blankDisplay() {
 }
 
 
-// Light one LED at a time to limit pin current.
+// Light one LED at a time, including during full-screen flashes.
 void scanDisplay() {
  static byte index = 0;
  static unsigned long lastScan = 0;
@@ -124,17 +166,32 @@ bool snakeAt(int x, int y, byte count) {
 }
 
 
+void resetSnake() {
+ snakeLength = 3;
+
+
+ // Start in the middle, moving right.
+ for (byte i = 0; i < snakeLength; i++) {
+   snakeX[i] = 3 - i;
+   snakeY[i] = 4;
+ }
+
+
+ dirX = nextDirX = 1;
+ dirY = nextDirY = 0;
+}
+
+
 void placeFood() {
  int emptyCells = 64 - snakeLength;
 
 
- if (emptyCells == 0) {
+ if (emptyCells <= 0) {
    foodX = foodY = -1;
    return;
  }
 
 
- // Randomly select one unoccupied square.
  int choice = random(emptyCells);
 
 
@@ -155,49 +212,94 @@ void placeFood() {
 }
 
 
-void finishGame(bool win) {
- state = win ? WON : LOST;
- stateTime = millis();
+// ---------------- LEVELS ----------------
 
 
+void printStatus() {
  blankDisplay();
 
 
- if (win) {
-   Serial.print(F("YOU WIN! Score: "));
- } else {
-   Serial.print(F("GAME OVER! Score: "));
- }
+ Serial.print(F("Level: "));
+ Serial.print(level);
 
 
- Serial.println(snakeLength - 3);
+ Serial.print(F(" | Score: "));
+ Serial.print(totalScore);
+
+
+ Serial.print(F(" | Move: "));
+ Serial.print(moveMs);
+ Serial.println(F(" ms"));
 }
 
 
 void startGame() {
- snakeLength = 3;
+ level = 1;
+ totalScore = 0;
+ foodsThisLevel = 0;
+ moveMs = START_MOVE_MS;
 
 
- // Start with a horizontal snake moving right.
- for (byte i = 0; i < snakeLength; i++) {
-   snakeX[i] = 3 - i;
-   snakeY[i] = 4;
- }
-
-
- dirX = nextDirX = 1;
- dirY = nextDirY = 0;
+ resetSnake();
+ placeFood();
+ printStatus();
 
 
  state = READY;
  stateTime = lastMove = lastInput = millis();
+}
 
 
- placeFood();
+void finishGame() {
+ state = LOST;
+
+
  blankDisplay();
+ Serial.println(F("GAME OVER!"));
+ printStatus();
 
 
- Serial.println(F("New game! Score: 0"));
+ stateTime = millis();
+}
+
+
+void beginLevelFlash() {
+ state = LEVEL_FLASH;
+ stateTime = millis();
+
+
+ foodX = foodY = -1;
+ blankDisplay();
+}
+
+
+void startNextLevel() {
+ level++;
+ foodsThisLevel = 0;
+
+
+ // Divide the movement interval by 1.15 for 15% more speed.
+ // Round to the nearest whole millisecond.
+ unsigned long divisor = 100UL + SPEED_INCREASE_PERCENT;
+
+
+ moveMs = (moveMs * 100UL + divisor / 2) / divisor;
+
+
+ if (moveMs < MIN_MOVE_MS) {
+   moveMs = MIN_MOVE_MS;
+ }
+
+
+ // Reset the snake each level so the board cannot fill permanently.
+ // Keep the total score and level.
+ resetSnake();
+ placeFood();
+ printStatus();
+
+
+ state = READY;
+ stateTime = lastMove = lastInput = millis();
 }
 
 
@@ -205,7 +307,7 @@ void startGame() {
 
 
 void requestDirection(int x, int y) {
- // Prevent an immediate reverse into the snake's neck.
+ // Prevent reversing directly into the snake's neck.
  if (x == -dirX && y == -dirY) return;
 
 
@@ -255,9 +357,9 @@ void moveSnake() {
  int y = snakeY[0] + dirY;
 
 
- // Hitting a screen edge ends the game.
+ // Hitting an edge ends the game.
  if (x < 0 || x > 7 || y < 0 || y > 7) {
-   finishGame(false);
+   finishGame();
    return;
  }
 
@@ -270,17 +372,17 @@ void moveSnake() {
 
 
  if (snakeAt(x, y, checkLength)) {
-   finishGame(false);
+   finishGame();
    return;
  }
 
 
- if (eating) {
+ if (eating && snakeLength < 64) {
    snakeLength++;
  }
 
 
- // Move each body segment into the previous one's place.
+ // Move each segment into the previous segment's position.
  for (int i = snakeLength - 1; i > 0; i--) {
    snakeX[i] = snakeX[i - 1];
    snakeY[i] = snakeY[i - 1];
@@ -292,18 +394,19 @@ void moveSnake() {
 
 
  if (eating) {
-   if (snakeLength == 64) {
-     finishGame(true);
+   totalScore++;
+   foodsThisLevel++;
+
+
+   // Every seven foods triggers the next level.
+   if (foodsThisLevel >= FOODS_PER_LEVEL) {
+     beginLevelFlash();
      return;
    }
 
 
    placeFood();
-   blankDisplay();
-
-
-   Serial.print(F("Score: "));
-   Serial.println(snakeLength - 3);
+   printStatus();
  }
 }
 
@@ -312,42 +415,45 @@ void moveSnake() {
 
 
 void drawDisplay() {
+ unsigned long now = millis();
+
+
+ bool flashOn =
+   state == LEVEL_FLASH &&
+   ((now - stateTime) / FLASH_PHASE_MS) % 2 == 0;
+
+
  for (byte y = 0; y < 8; y++) {
    for (byte x = 0; x < 8; x++) {
-     pixels[y][x] = false;
+     pixels[y][x] = flashOn;
    }
  }
 
 
+ if (state == LEVEL_FLASH) return;
+
+
  if (state == LOST) {
-   // An X means game over.
+   // Show an X after losing.
    for (byte i = 0; i < 8; i++) {
      pixels[i][i] = true;
      pixels[i][7 - i] = true;
    }
 
 
- } else if (state == WON) {
-   // A square outline means you won.
-   for (byte i = 0; i < 8; i++) {
-     pixels[0][i] = true;
-     pixels[7][i] = true;
-     pixels[i][0] = true;
-     pixels[i][7] = true;
-   }
+   return;
+ }
 
 
- } else {
-   // Snake stays solid.
-   for (byte i = 0; i < snakeLength; i++) {
-     pixels[snakeY[i]][snakeX[i]] = true;
-   }
+ // Snake stays solid.
+ for (byte i = 0; i < snakeLength; i++) {
+   pixels[snakeY[i]][snakeX[i]] = true;
+ }
 
 
-   // Only the food blinks.
-   if (millis() % 400 < 200) {
-     pixels[foodY][foodX] = true;
-   }
+ // Only food blinks.
+ if (foodX >= 0 && foodY >= 0 && now % 400 < 200) {
+   pixels[foodY][foodX] = true;
  }
 }
 
@@ -369,9 +475,7 @@ void setup() {
  Serial.begin(9600);
 
 
- randomSeed(
-   micros() + analogRead(A4) + analogRead(A5)
- );
+ randomSeed(micros() + analogRead(A4) + analogRead(A5));
 
 
  startGame();
@@ -397,20 +501,26 @@ void loop() {
 
 
  if (state == READY) {
-   if (now - stateTime >= 1000) {
+   if (now - stateTime >= READY_MS) {
      state = RUNNING;
      lastMove = now;
    }
 
 
  } else if (state == RUNNING) {
-   if (now - lastMove >= MOVE_MS) {
+   if (now - lastMove >= moveMs) {
      lastMove = now;
      moveSnake();
    }
 
 
- } else if (now - stateTime >= 3000) {
+ } else if (state == LEVEL_FLASH) {
+   if (now - stateTime >= FLASH_COUNT * 2UL * FLASH_PHASE_MS) {
+     startNextLevel();
+   }
+
+
+ } else if (state == LOST && now - stateTime >= GAME_OVER_MS) {
    startGame();
  }
 
@@ -418,4 +528,6 @@ void loop() {
  drawDisplay();
  scanDisplay();
 }
+
+
 
