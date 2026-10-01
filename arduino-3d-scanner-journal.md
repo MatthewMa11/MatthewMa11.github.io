@@ -93,15 +93,6 @@ My first test will use a flat object at a known distance. I will compare the sen
 
 I will also check the servo's return movement. At the end of the sweep, the code commands it back from 180° to 0°. That large movement may need more settling time than the smaller scan steps. A missing echo is another case to check because the current code can print zero when pulseIn times out.
 
-I will document the build with:
-
-- A photo showing the Arduino, servo, sensor, and wiring.
-- A photo showing how the sensor is attached to the servo.
-- A photo of the test setup with the target and ruler visible.
-- A screenshot of the serial readings or first 2D plot, with notes on what worked and what I changed.
-
-Build photos and measured results are still to be added to this entry.
-
 ## Reflection and next steps
 
 Reviewing this code helped me understand how a loop can connect motor movement with sensor input. A distance reading becomes more useful when I know the angle at which it was taken. I also learned why timing matters: the servo needs time to move, and the sensor needs time to receive an echo.
