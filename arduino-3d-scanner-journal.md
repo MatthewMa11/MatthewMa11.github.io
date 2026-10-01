@@ -31,6 +31,12 @@ This is my minimum testable prototype: a small version that lets me check whethe
 
 The trigger and echo pins in my code are for an ultrasonic distance sensor. I need to confirm its model and power requirements when wiring it. The servo also needs a suitable power supply and a common ground with the Arduino.
 
+### My wiring setup
+
+![Wiring diagram showing my Arduino Uno connected to an HC-SR04 ultrasonic sensor and an SG90 servo through a breadboard](https://raw.githubusercontent.com/MatthewMa11/MatthewMa11.github.io/main/arduino-3d-scanner-wiring.png)
+
+*This diagram shows how I wired the Arduino Uno, HC-SR04 ultrasonic distance sensor, and SG90 servo using a breadboard.*
+
 ## Development process
 
 I started with a simple sequence: move the servo, wait briefly, measure distance, and print the result. Keeping these steps together makes it easier to understand how each reading relates to the direction of the sensor.
@@ -101,4 +107,5 @@ Build photos and measured results are still to be added to this entry.
 Reviewing this code helped me understand how a loop can connect motor movement with sensor input. A distance reading becomes more useful when I know the angle at which it was taken. I also learned why timing matters: the servo needs time to move, and the sensor needs time to receive an echo.
 
 This prototype measures one scanning plane. My next step is to test that plane reliably and plot the readings. Later entries will document improvements and the additional controlled movement needed to build toward a 3D scanner.
+
 
