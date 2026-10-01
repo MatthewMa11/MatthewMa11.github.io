@@ -41,5 +41,8 @@ I hope to continue learning new things and exploring technology in the future.
 ## Project Journals
 
 1. [Arduino Snake Arcade — Innovator Journal](https://MatthewMa11.github.io/arduino-arcade-journal/) — Arcade game designed with Arduino and a joystick.
-2. [Arduino 3D Scanner — Development Journal](https://MatthewMa11.github.io/arduino-3d-scanner-journal/) — Scanning prototype using an Arduino Uno, SG90 servo, and a distance sensor.
+
+<p style="margin: 24px 0 8px;"><a href="/arduino-3d-scanner-journal/" style="display: inline-block; padding: 12px 20px; border: 1px solid #267cb9; border-radius: 6px; background: #267cb9; color: #ffffff; font-weight: 600; text-decoration: none;">Open 3D Scanner Journal &rarr;</a></p>
+
+Arduino Uno, SG90 servo, and distance sensor — follow my scanner development.
 
