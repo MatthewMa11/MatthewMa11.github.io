@@ -33,13 +33,17 @@ The trigger and echo pins in my code are for an ultrasonic distance sensor. I ne
 
 ### My wiring setup
 
+I used circuitio.io to help me wire the SG90 servo motor to the Arduino Uno. I used its wiring guidance as a reference for connecting the motor to the board. The diagram below documents my wiring setup.
+
 ![Wiring diagram showing my Arduino Uno connected to an HC-SR04 ultrasonic sensor and an SG90 servo through a breadboard](https://raw.githubusercontent.com/MatthewMa11/MatthewMa11.github.io/main/arduino-3d-scanner-wiring.png)
 
 *This diagram shows how I wired the Arduino Uno, HC-SR04 ultrasonic distance sensor, and SG90 servo using a breadboard.*
 
 ## Development process
 
-I started with a simple sequence: move the servo, wait briefly, measure distance, and print the result. Keeping these steps together makes it easier to understand how each reading relates to the direction of the sensor.
+I used ChatGPT to generate the initial Arduino code for this prototype. The AI-generated code gave me a starting point for moving the servo, taking distance readings, and sending the results to the computer. I then reviewed how the code works, as explained below, and planned tests to check it with my hardware.
+
+The code follows a simple sequence: move the servo, wait briefly, measure distance, and print the result. Keeping these steps together makes it easier to understand how each reading relates to the direction of the sensor.
 
 My loop runs from -90° to +90° in 2° steps. Adding 90 to the scan angle converts that range into servo commands from 0° to 180°. This gives 91 measurement positions in a sweep. I will check the actual usable range once the sensor is mounted.
 
@@ -98,5 +102,6 @@ I will also check the servo's return movement. At the end of the sweep, the code
 Reviewing this code helped me understand how a loop can connect motor movement with sensor input. A distance reading becomes more useful when I know the angle at which it was taken. I also learned why timing matters: the servo needs time to move, and the sensor needs time to receive an echo.
 
 This prototype measures one scanning plane. My next step is to test that plane reliably and plot the readings. Later entries will document improvements and the additional controlled movement needed to build toward a 3D scanner.
+
 
 
