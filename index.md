@@ -42,5 +42,5 @@ I hope to continue learning new things and exploring technology in the future.
 
 1. [Arduino Snake Arcade — Innovator Journal](https://MatthewMa11.github.io/arduino-arcade-journal/) — Arcade game designed with Arduino and a joystick.
 2. [Arduino 3D Scanner — Innovator Journal](https://MatthewMa11.github.io/arduino-3d-scanner-journal/) — Entry 1: a spinning 2D scanner using an Arduino Uno and SG90 servo.
-3. [Neon Dash — Development Journal](https://MatthewMa11.github.io/neon-dash-journal/) — Geometry Dash style browser game with five levels, a double jump, code explanations and weekly goals.
+3. [Geometry Dash My Version — Development Journal](https://MatthewMa11.github.io/neon-dash-journal/) — Geometry Dash style browser game with five levels, a double jump, code explanations and weekly goals.
 

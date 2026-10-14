@@ -1,18 +1,18 @@
 ---
 layout: default
-title: Neon Dash Development Journal
+title: Geometry Dash My Version
 permalink: /neon-dash-journal/
 ---
 
 [← Back to my homepage](/)
 
-# Neon Dash Development Journal
+# Geometry Dash My Version
 
 **Innovators Journal entry · October 13, 2026**
 
-[Play Neon Dash](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
+[Play Geometry Dash My Version](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
-In class, I asked WebGPT to make a game like Geometry Dash. I wanted a square that jumps over spikes and goes through different levels. The game is called Neon Dash. It has five levels and a double jump.
+In class, I asked WebGPT to make a game like Geometry Dash. I wanted a square that jumps over spikes and goes through different levels. My game is called Geometry Dash My Version. It has five levels and a double jump.
 
 ## My process
 
@@ -20,7 +20,7 @@ I told WebGPT to use Space or other buttons to jump. I wanted squares that were 
 
 WebGPT put the game in one HTML file. The file has the page layout, colors, and game code. Looking through it helped me understand what happens after a jump button is pressed.
 
-![Neon Dash start screen with keyboard controls and double jump instructions](/assets/neon-dash/menu.png)
+![Game start screen with keyboard controls and double jump instructions](/assets/neon-dash/menu.png)
 
 *Figure 1. The start screen shows the controls. Some symbols appear as strange text, like \u26A1. I want to fix that.*
 
