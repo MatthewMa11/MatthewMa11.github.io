@@ -109,7 +109,7 @@ I will test jumping ten times. I will check the first jump, the double jump, and
 
 ### Fix the instructions by October 16
 
-I will make a copy of the game and fix the strange symbols on the start screen. I will also explain that squares are only safe when landing on top. I will save a screenshot to show the changes.
+I will create an introductory course at the beginning that tells the player which button to press and what each ability does. I will save a screenshot to show the changes.
 
 ### Check the levels by October 18
 
