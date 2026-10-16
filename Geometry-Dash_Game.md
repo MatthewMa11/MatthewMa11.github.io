@@ -101,3 +101,5 @@ There are no points. `attempts++` counts crashes (line 262). `player.x / levelEn
 - **By October 18:** Compare 800 × 600 and 1280 × 720 screenshots. Check the ground and controls, and fix the strange menu symbols.
 
 I used WebGPT for the game code and Codex to help edit this journal.
+
+**Journal credit:** ChatGPT helped me with the format and theme of this journal.
