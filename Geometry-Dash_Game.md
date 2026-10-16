@@ -12,27 +12,27 @@ permalink: /geometry-dash-game/
 
 [Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
-In class, I used WebGPT to make a game like Geometry Dash. I chose the features and gave feedback while WebGPT generated the code. The linked game and screenshots show the five-level version. Later versions from my WebGPT chat add more features.
+In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I chose features, tried the results, and reported problems. The linked game and screenshots show the five-level version. Later versions from my WebGPT chat add more features.
 
 ## My development process
 
 ### October 12
 
-I started with jumping, spikes, safe platforms, levels, and portals. The first game showed a black screen, so I reported it and WebGPT added canvas size checks. Level 1 was too hard, so I asked for an easier start and harder later levels. The base speed dropped from 7.2 to 6.0. I then requested a double jump and comments to help explain the code. Landing restores the extra jump.
+I started with jumping, spikes, safe platforms, levels, and portals. The first result showed a black screen. I reported the problem, and WebGPT added checks for the canvas size. When Level 1 was too hard, I asked for an easier start and harder later levels. WebGPT lowered the base speed from 7.2 to 6.0 and spread out the early spikes. My feedback changed how the game worked and how hard it was. Next, I requested a double jump. WebGPT returned a version with one extra jump in the air, restored by landing. I also asked for comments to explain the code.
 
 ### October 14
 
-I asked for menus, Dash-Lite and Dash-Extreme with 50 levels each, English, Spanish, Chinese, and a tutorial. WebGPT returned an expanded version with generated levels and saved progress. Another revision added wave movement: a blue portal changes the cube into an arrow, holding makes it rise, releasing makes it fall, and a yellow portal finishes the level. My last request was to make Extreme much harder; the chat ends before a reply. These later versions still need testing.
+I expanded my prompt to include menus, Dash-Lite and Dash-Extreme with 50 levels each, three languages, and a tutorial. WebGPT returned a version with generated levels and saved progress. I then asked for a flying-line form and a yellow finish portal. WebGPT interpreted this as wave mode: a blue portal changes the cube into an arrow, holding makes it rise, and releasing makes it fall. My last request was to make Extreme ten times harder; the chat ends before a reply. These later versions still need testing.
 
 ## What I learned
 
-HTML provides the canvas and buttons, CSS controls their appearance, and JavaScript handles movement and rules. Variables remember things like the extra jump, while hitboxes check collisions. A square is safe to land on from above, but hitting its side makes the player lose. The expanded version also introduced repeatable level generation, translated text, and saved settings.
+HTML provides the canvas and buttons, CSS controls their appearance, and JavaScript handles movement and rules. Double jumping helped me understand state: the game remembers whether the player has landed, whether the button press is new, and whether the extra jump is available. Landing resets that extra jump.
 
-Next time, I would test one short level before adding more features. I would describe what I expected, what happened, and how to repeat a problem. Saving versions, screenshots, and test results would help me track changes and understand the code better.
+I also learned that drawing and collision checks are separate. Invisible hitboxes decide whether the player lands or crashes. A block can look safe but still cause a crash when hit from the side. The later versions introduced generated levels, translated text, and saved settings, which I still need to study and test further.
 
-![Game start screen with jump controls](/assets/neon-dash/menu.png)
+## How I would build software next time
 
-*The five-level game's start screen. Some symbols still display as strange text.*
+I would build one short level and test it before adding features. After each AI revision, I would read the changed code, repeat the test, and save the version, screenshot, and result. My prompts would explain what should happen, what went wrong, and how to repeat the problem. For difficulty, I would give clear targets such as speed and obstacle spacing.
 
 ## How the published game works
 
@@ -109,6 +109,10 @@ There are no points. `attempts++` adds a try after a crash (line 262). Lines 380
 ### Original game
 
 > Create a Geometry Dash-like game where you have to press space or other buttons to jump, and there are squares, which are safe to land on, and spikes, which will end the game once you touch them. Be creative with the maps. Add levels to this thing. once you completeed a level there will be a portal for you to enter. The color of the background color changes as you level up. Make everything very cool and intriguing.
+
+![Game start screen with jump controls](/assets/neon-dash/menu.png)
+
+*The five-level game's start screen. Some symbols still display as strange text.*
 
 ### Menus levels and languages
 
