@@ -12,114 +12,92 @@ permalink: /geometry-dash-game/
 
 [Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
-In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I chose features, tried the results, and reported problems. The linked game and screenshots show the five-level version. Later versions from my WebGPT chat add more features.
+In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I gave the ideas, tried the results, and asked for fixes.
 
 ## My development process
 
-### October 12
+### October 12: Starting and fixing the game
 
-I started with jumping, spikes, safe platforms, levels, and portals. The first result showed a black screen. I reported the problem, and WebGPT added checks for the canvas size. When Level 1 was too hard, I asked for an easier start and harder later levels. WebGPT lowered the base speed from 7.2 to 6.0 and spread out the early spikes. My feedback changed how the game worked and how hard it was. Next, I requested a double jump. WebGPT returned a version with one extra jump in the air, restored by landing. I also asked for comments to explain the code.
+> Create a Geometry Dash-like game where you have to press space or other buttons to jump, and there are squares, which are safe to land on, and spikes, which will end the game once you touch them. Be creative with the maps. Add levels to this thing. once you completeed a level there will be a portal for you to enter. The color of the background color changes as you level up. Make everything very cool and intriguing.
 
-### October 14
+The first result had a black screen. I reported it, and WebGPT added canvas size checks. Level 1 was too hard, so I asked for an easier start. WebGPT lowered the speed and spread out the spikes. I then asked for double jumping and code comments. The new version allowed one extra jump in the air, which resets after landing.
 
-I expanded my prompt to include menus, Dash-Lite and Dash-Extreme with 50 levels each, three languages, and a tutorial. WebGPT returned a version with generated levels and saved progress. I then asked for a flying-line form and a yellow finish portal. WebGPT interpreted this as wave mode: a blue portal changes the cube into an arrow, holding makes it rise, and releasing makes it fall. My last request was to make Extreme ten times harder; the chat ends before a reply. These later versions still need testing.
+### October 14: Adding more choices
+
+> Create a starting menu, add options for Dash-Lite and Dash-Extreme, each with 50 levels, each increasing in difficulty, and a setting to adjust the language, supporting Spanish, English, and Chinese. When you first enter the game, you are required to go through an instruction course that teaches you which button to press and what it does, such as jumping, double jumping, etc. Make the UI 1000000000% better.
+
+After working on jumping, I asked for more ways to play. WebGPT returned a version with menus, generated levels, a tutorial, languages, and saved progress.
+
+### October 14: Changing the portals
+
+> I want that when you hit the portal, you switch into the flying line- another form, just like the real Geometry Dash- and when you hit a yellow, you win. Check how the real Geometry Dash is. I want it just like it is in the original game.
+
+WebGPT added wave movement: a blue portal changes the player into an arrow, holding makes it rise, and releasing makes it fall. A yellow finish portal ends the level. My last request was to make Extreme ten times harder, but the chat ends before a reply.
+
+The game and screenshots linked here show the five-level version. The later versions still need testing.
 
 ## What I learned
 
-HTML provides the canvas and buttons, CSS controls their appearance, and JavaScript handles movement and rules. Double jumping helped me understand state: the game remembers whether the player has landed, whether the button press is new, and whether the extra jump is available. Landing resets that extra jump.
-
-I also learned that drawing and collision checks are separate. Invisible hitboxes decide whether the player lands or crashes. A block can look safe but still cause a crash when hit from the side. The later versions introduced generated levels, translated text, and saved settings, which I still need to study and test further.
+HTML sets up the page, CSS controls its look, and JavaScript runs the rules. Double jumping helped me understand how variables remember things: the game tracks the extra jump and resets it after landing. I also learned that invisible hitboxes decide collisions. A block's top is safe, but its sides can cause a crash.
 
 ## How I would build software next time
 
-I would build one short level and test it before adding features. After each AI revision, I would read the changed code, repeat the test, and save the version, screenshot, and result. My prompts would explain what should happen, what went wrong, and how to repeat the problem. For difficulty, I would give clear targets such as speed and obstacle spacing.
+I would start with one level and test each AI change before adding more. I would read the changed code and save working versions. My prompts would explain what should happen, what went wrong, and how to repeat the problem.
 
 ## How the published game works
 
 ### The canvas
 
-`<canvas id="game"></canvas>` is at line 58. `syncSize()` matches it to the browser window (lines 78–89). These screenshots use 1280 × 600 pixels. A wider window shows more of the map; a taller one moves the ground. Blocks stay the same size.
+`<canvas id="game"></canvas>` is at line 58. `syncSize()` fits it to the window (lines 78–89). These screenshots are 1280 × 600 pixels. More width shows more map; more height moves the ground. Blocks stay the same size.
 
 ### The state variables
 
-Most variables are declared under STATE; jump controls are under INPUT.
-
-| Variable | What it remembers | Code lines |
-| --- | --- | --- |
-| `state`, `levelIdx`, `attempts` | Game status, level, and tries | 198–200 |
-| `player` | Position `x, y`, vertical speed `vy`, rotation, landing, and extra jumps | 212 |
-| `W`, `H`, `camX` | Canvas size and camera position | 79; 200 |
-| `jumpHeld`, `jumpQueued` | Holding jump or making a new press | 230 |
-
-Forward speed uses `BASE_SPEED` and the level's speed setting (line 207).
+Under STATE (lines 198–212), `state`, `levelIdx`, and `attempts` track game status, level, and tries. `player` stores position, vertical speed, and jumps. Forward speed uses `BASE_SPEED` and the level setting. Jump flags are under INPUT (line 230).
 
 ### The game loop
 
-`loop(now)` repeats through `requestAnimationFrame`, often about 60 times a second (lines 561–574). `update(dt)` moves objects and checks the rules. `draw()` draws the next picture. `dt` adjusts for the time between frames.
-
-```javascript
-if(state !== 'menu' && state !== 'win') update(dt);
-try { draw(); } catch(e) {}
-requestAnimationFrame(loop);
-```
+`loop(now)` uses `requestAnimationFrame`, often about 60 times a second (lines 561–574). It calls `update(dt)` to move things and check rules, then `draw()` to draw the frame. `dt` adjusts for time between frames.
 
 ### Input handling
 
-Space, Up, W, clicking, or tapping makes the player jump. The listener changes `jumpHeld` and `jumpQueued` (lines 230–243). `update()` changes `player.vy` to move upward. Releasing and pressing again in the air uses the double jump; landing restores it.
+Space, Up, W, clicking, or tapping jumps. The listeners change `jumpHeld` and `jumpQueued`; `update()` changes `player.vy`. A new press in the air uses the extra jump (lines 230–243).
 
 ### Collision and win or lose logic
 
-`rectsOverlap(a,b)` checks whether invisible rectangular hitboxes overlap (line 258):
+`rectsOverlap(a,b)` checks hitboxes (line 258):
 
 ```javascript
 a.x < b.x+b.w && a.x+a.w > b.x &&
 a.y < b.y+b.h && a.y+a.h > b.y
 ```
 
-A spike collision runs `die()`. Blocks are safe when falling onto their tops; the check is `player.vy >= 0 && prevBottom <= oy + 14` (lines 364–371). A crash restarts the level. Reaching the portal starts the next level, and completing all five shows YOU WIN! (lines 308–315 and 383).
+Spikes call `die()`. Safe landings check `player.vy >= 0 && prevBottom <= oy + 14` (lines 364–371). Crashes restart the level. Portals lead to the next level; finishing all five shows YOU WIN!
 
 ### Scoring and progress
 
-There are no points. `attempts++` adds a try after a crash (line 262). Lines 380–381 calculate `player.x / levelEndX()` and update the progress bar. A recorded test reached Level 2 with a new background, then confirmed that a spike added an attempt.
+There are no points. `attempts++` counts crashes (line 262). `player.x / levelEndX()` fills the progress bar (lines 380–381). A recorded test reached Level 2 and confirmed that a spike added an attempt.
 
 *Line numbers refer to the linked five-level source file.*
 
 ## Screenshots and goals
 
+![Game start screen with jump controls](/assets/neon-dash/menu.png)
+
 ![The square double jumps above a spike](/assets/neon-dash/double-jump.png)
 
-*The ring below the square shows that the extra jump was used.*
+*The start screen and double jump. Some menu symbols still appear as strange text.*
 
 ![The portal near the end of Level 1](/assets/neon-dash/level-one-portal.png)
 
 ![Level 2 with a different background](/assets/neon-dash/level-two.png)
 
-*The Level 1 portal and the new background in Level 2.*
+*The Level 1 portal leads to Level 2 with a different background.*
 
 ### Goals for October 15 to October 18
 
-- **By October 16:** Test jumping ten times, including a second jump, an attempted third jump, and landing to restore the extra jump.
-- **By October 16:** Check that the expanded tutorial teaches jumping, double jumping, and wave controls. Test its first visit and replay options, and save a screenshot.
-- **By October 18:** Try each published level five times. Sample early, middle, and late levels in both expanded modes. Record progress, unfair sections, and whether both portals work.
-- **By October 18:** Compare the same level at 800 × 600 and 1280 × 720. Save screenshots and check the ground, controls, and visible map.
-- **By October 18:** Check all three languages for missing text or layout problems. Reload the expanded game to check that language and unlocked levels are saved.
+- **By October 16:** Test double jumping ten times. Check that a third jump fails and landing restores the extra jump.
+- **By October 18:** Try each published level five times and sample both expanded modes. Record unfair obstacles and check both portal types.
+- **By October 18:** Test the later tutorial, all three languages, and saved progress after reloading.
+- **By October 18:** Compare 800 × 600 and 1280 × 720 screenshots. Check the ground and controls, and fix the strange menu symbols.
 
-## Complete WebGPT prompts
-
-### Original game
-
-> Create a Geometry Dash-like game where you have to press space or other buttons to jump, and there are squares, which are safe to land on, and spikes, which will end the game once you touch them. Be creative with the maps. Add levels to this thing. once you completeed a level there will be a portal for you to enter. The color of the background color changes as you level up. Make everything very cool and intriguing.
-
-![Game start screen with jump controls](/assets/neon-dash/menu.png)
-
-*The five-level game's start screen. Some symbols still display as strange text.*
-
-### Menus levels and languages
-
-> Create a starting menu, add options for Dash-Lite and Dash-Extreme, each with 50 levels, each increasing in difficulty, and a setting to adjust the language, supporting Spanish, English, and Chinese. When you first enter the game, you are required to go through an instruction course that teaches you which button to press and what it does, such as jumping, double jumping, etc. Make the UI 1000000000% better.
-
-### Wave movement and portals
-
-> I want that when you hit the portal, you switch into the flying line- another form, just like the real Geometry Dash- and when you hit a yellow, you win. Check how the real Geometry Dash is. I want it just like it is in the original game.
-
-I used WebGPT for the game code and Codex to help organize and edit this journal.
+I used WebGPT for the game code and Codex to help edit this journal.
