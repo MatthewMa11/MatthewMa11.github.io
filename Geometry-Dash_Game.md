@@ -12,37 +12,95 @@ permalink: /neon-dash-journal/
 
 [Play Geometry Dash My Version](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the original Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
-In class, I asked WebGPT to make a game like Geometry Dash. I wanted a square that jumps over spikes and goes through different levels. My game is called Geometry Dash My Version. It has five levels and a double jump.
+In class, I used WebGPT to develop a browser game inspired by Geometry Dash. I started with a square that jumps over spikes, then guided several revisions after seeing problems and deciding what I wanted to change. The first published version has five levels and a double jump. My later WebGPT conversation produced expanded versions with menus, two modes, language settings, a tutorial, and wave movement.
 
-## My process
+[Play the published five-level version](/assets/neon-dash/neon-dash-v4-doublejump.html). The screenshots and detailed code walkthrough below show that earlier version. The later versions are documented here from my WebGPT chat export dated October 15; they are separate from the game linked above.
 
-I told WebGPT to use Space or other buttons to jump. I wanted squares that were safe to land on and spikes that would make the player lose. I also asked for creative maps, portals between levels, and background colors that changed with each level. I wanted the game to look cool and be fun to play.
+## How I used AI
 
-WebGPT put the game in one HTML file. The file has the page layout, colors, and game code. Looking through it helped me understand what happens after a jump button is pressed.
+WebGPT generated the HTML, CSS, and JavaScript. I did not independently write all of the code. My role was to describe the game, respond to the results, identify problems, and choose changes. The conversation shows that I kept directing the project instead of accepting the first file as the finished game.
 
-### How I used AI
+The prompt excerpts below are copied from my chat export. The descriptions distinguish my feedback from the AI's explanations and the revisions it returned.
 
-WebGPT generated the game code from my requests. I did not write all of the code myself. My role was to describe the experience I wanted, choose the controls and features, and compare the result with my idea. AI helped turn those requests into a playable starting point.
+## My development process
 
-My requests included a Geometry Dash style game, several ways to jump, platforms, spikes, creative maps, portals, and changing background colors. These are summaries of the requests recorded in this journal, not exact quotations from a saved chat. The current game includes five levels and a double jump, but the journal does not preserve a prompt by prompt record of how each feature was added.
+### October 12 — The first game
 
-### How I evaluated the result and would guide the next prompt
+I asked WebGPT to create a Geometry Dash style game with jumping, squares, spikes, levels, portals, and background colors that changed between levels. Part of my initial prompt was:
 
-The result helped me see where my instructions needed more detail. I had described squares as safe to land on. In the game, landing on top is safe, but hitting a square from the side causes a crash. That distinction matters because a player could read the instructions and expect every contact with a square to be safe.
+> Be creative with the maps. Add levels to this thing.
 
-The start screen also displays some symbols as literal text, such as \\u26A1. A game can have working movement while still needing clearer instructions and better presentation. I need to check both the rules and what the player sees.
+WebGPT returned a single HTML file called neon-dash.html. It chose the NEON DASH name and added neon graphics, particle effects, a progress bar, and an attempt counter. I supplied the general idea and rules, while AI made many of the implementation and visual choices.
 
-A more specific next prompt would be:
+### October 12 — Reporting the black screen
 
-> Keep landing on top of blocks safe and side collisions deadly. Explain both rules clearly. Add a short introductory section where players can practice a normal jump and a double jump before facing spikes. Replace the visible Unicode escape text in the instructions with correctly displayed characters. Explain what you changed.
+The first result did not display properly. I wrote:
 
-This is a proposed next prompt, not a revision I am claiming to have completed. It gives AI a specific problem, the behavior I want to keep, and the outcome I would check. After a revision, I would test the same situations again and save a screenshot and notes. That would show whether the change improved the game.
+> it is showing me a black screen. Fix this issue
+
+WebGPT explained that the canvas could be receiving a zero width or height in the preview environment. It pointed to the visible HUD and increasing attempt count as clues that the game loop could still be running even though the game world was invisible. That was the AI's diagnosis, rather than something I had independently measured.
+
+It returned neon-dash-fixed.html with repeated canvas size checks, a ResizeObserver, and a condition that waits for a valid size before updating and drawing. This revision showed me that a page can load while one part of it still fails. It also showed why the environment where a game opens matters.
+
+### October 12 — Changing the difficulty curve
+
+After the display issue, my feedback shifted to how the game played:
+
+> level 1 is too hard, is should be easy first and hard later at a harder level
+
+WebGPT returned neon-dash-v3.html. It described a slower first level with single spikes and wider gaps, followed by levels with more difficult patterns and increasing speed. The base speed changed from 7.2 to 6.0, with separate speed multipliers for later levels.
+
+This was a more useful request than simply saying to improve the game. I identified the problem and the progression I wanted. The revision changed the level layouts and speed, rather than only changing the appearance. I still needed repeated playtesting to judge whether the new difficulty curve felt fair.
+
+### October 12 — Adding double jumping
+
+Next I asked:
+
+> make that you can double jump
+
+WebGPT returned neon-dash-v4-doublejump.html, the version linked on this page. It separated holding the jump button from making a fresh press. Holding the button still allows automatic ground jumps, while releasing and pressing again in the air uses one extra jump. Landing restores that extra jump.
+
+AI also added a ring effect, particles, and an indicator for the available air jump, and adjusted harder levels around the new ability. I requested the mechanic, while AI chose those supporting details. This helped me see that adding an ability can affect input handling, visual feedback, and level design at the same time.
+
+### October 12 — Asking to understand the code
+
+I then asked:
+
+> for the source, comment on each segment of code explaining what it does and how it contributs to the game
+
+I wanted the source to help me learn how the parts contributed to the game. The export does not show a separate answer immediately after this request. In the later overhaul, WebGPT said it had organized the source into 14 commented sections.
+
+### October 14 — Expanding the game
+
+My next large request asked for a starting menu, Dash-Lite and Dash-Extreme with 50 levels each, English, Spanish, and Chinese settings, and a required instruction course. I also asked for a much better interface.
+
+WebGPT returned neon-dash-ultimate.html after retrying a tool session that it said had expired. It described a menu system, level selection, saved progress, language dictionaries, and a tutorial. To support 100 levels, it changed from individually listed maps to a seeded level generator. The intention was that the same mode and level number would produce the same layout each time.
+
+This request made the project much larger. A returned file and an AI feature summary do not establish that all 100 levels are fair or completable. The menus, saved settings, tutorial, and generated levels each need their own checks.
+
+### October 14 — Requesting another movement form
+
+I wanted the portal to change how the player moved, rather than only move to another level. I wrote:
+
+> I want that when you hit the portal, you switch into the flying line- another form, just like the real Geometry Dash- and when you hit a yellow, you win.
+
+WebGPT interpreted the flying line as wave mode and returned neon-dash-ultimate-wave.html. It described a cube section followed by a blue portal that changes the player into a wave arrow. Holding the control makes the arrow rise diagonally; releasing makes it descend. A yellow portal ends the level.
+
+This was a change to the game's rules, not just its graphics. The same control needed to behave differently depending on the player's form. Although I asked for behavior like the original Geometry Dash, I would need to compare and test the result before claiming it exactly matches that game.
+
+### October 14 — The latest pending request
+
+My last message in the export was:
+
+> tge extreme should be 10 times harder
+
+There is no AI reply or new file after this message in the export, so this remains a request rather than a completed revision. “Ten times harder” also needs a clearer definition. I could guide the next revision by specifying speed, corridor width, obstacle spacing, and the difference I want between Lite and Extreme.
 
 ![Game start screen with keyboard controls and double jump instructions](/assets/neon-dash/menu.png)
 
 *Figure 1. The start screen shows the controls. Some symbols appear as strange text, like \u26A1. I want to fix that.*
 
-## How it turned out
+## Results recorded for the published five-level version
 
 The square moves forward on its own, so the player has to time each jump. The game has glowing platforms, spikes, and a portal at the end of each level. A test showed that the Level 1 portal led to Level 2 and the background changed. Hitting a spike added one to the attempt count and restarted the level.
 
@@ -58,17 +116,21 @@ Collision detection also showed me that drawing an obstacle and deciding whether
 
 The portal and spike results recorded here are useful checks, but they do not show that every level is balanced or that every interaction works. I need repeated tests before calling the whole game successful.
 
+The later AI explanations introduced me to procedural generation, localization, and saved state. A seeded generator uses rules and a repeatable starting value to build levels, so making more levels also means testing the generator's rules. Language support requires the interface to look up translated text consistently. Saving progress means some information has to remain after the page closes, while information such as the player's current position can reset.
+
+Wave mode also gave me a clearer example of game state. A cube uses gravity and jumps, while a wave uses held or released input to choose its direction. The program needs to know which form is active before deciding what the control does. I am still building my understanding of these larger systems; requesting them is only the first step toward understanding their implementation.
+
 ## How I would approach software development in the future
 
 Next time, I would start with one short level, basic movement, and one obstacle. I would check those parts before adding more levels and visual effects. Smaller steps would make it easier to connect a problem to the change that caused it.
 
-When asking AI for help, I would explain what I expected, what actually happened, and how to reproduce the problem. I would ask it to explain the relevant code so I could understand the change and check it myself.
+When asking AI for help, I would explain what I expected, what actually happened, and how to reproduce the problem. My black screen and difficulty feedback were useful starting points, but I could make future reports more precise by including the browser, level, controls, and steps involved. I would ask AI to explain the relevant code so I could understand the change and check it myself.
 
 I would also save my prompts, versions, screenshots, and test results as I worked. For each revision, I would record the problem, my request, the change, and the result of testing it. That would make my journal more complete and show which decisions I made and which code AI generated.
 
 My goal is to become better at reading, changing, and testing code. AI can help me build a starting point quickly, but I still need to understand the rules, judge the results, and decide what to improve.
 
-## How the code works
+## How the published five-level code works
 
 ### The canvas
 
@@ -137,20 +199,28 @@ Code reference: [neon-dash-v4-doublejump.html](https://github.com/MatthewMa11/Ma
 
 *Figure 3 shows the portal at the end of Level 1. Figure 4 shows the new background in Level 2.*
 
-### My goals for October 14 to October 18
+### Updated goals for October 15 to October 18
 
-### Test the double jump by October 14
+### Test the double jump by October 16
 
 I will test jumping ten times. I will check the first jump, the double jump, and what happens if I try a third jump. I will also check that landing gives the extra jump back. This will help me understand the jump variables.
 
 ### Fix the instructions by October 16
 
-I will create an introductory course at the beginning that tells the player which button to press and what each ability does. I will save a screenshot to show the changes.
+WebGPT returned a version with an introductory course after my October 14 request. I will check whether it teaches jumping, double jumping, and wave controls clearly, including whether it appears on a first visit and can be replayed. I will save a screenshot and record anything that needs another revision.
 
 ### Check the levels by October 18
 
-I will try each level five times and record my attempts and farthest progress. I can use a practice copy to start harder levels. If a section feels too hard, I will change the spacing and try it five more times to see if it feels better.
+I will try each of the five published levels five times and record my attempts and farthest progress. For the expanded version, I will sample early, middle, and late levels in both modes and check the cube to wave transition and yellow victory portal. I will record the mode and level number for any unfair section so that a follow-up prompt can target a specific problem.
 
 ### Try two window sizes by October 18
 
 I will try the game at 800 × 600 and 1280 × 720. I will take screenshots of the same level and compare the ground, controls, and how much of the map I can see. This will help me understand how the canvas size affects the game.
+
+### Check languages and saved progress by October 18
+
+I will check the menus and tutorial in English, Spanish, and Chinese for missing text or layout problems. I will also reload the expanded version to check whether the chosen language and unlocked levels are saved as intended. I will keep these results separate from the features described by AI.
+
+## AI assistance with this journal
+
+I used Codex to help organize and write this journal from my existing entry and the WebGPT chat export. The quoted prompts are my messages from that export. WebGPT generated the game revisions; Codex helped explain and document the development history. The exported conversation ends with my request for a harder Extreme mode.
