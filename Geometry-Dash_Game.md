@@ -8,9 +8,9 @@ permalink: /neon-dash-journal/
 
 # Geometry Dash My Version
 
-**Innovators Journal entry · October 13, 2026**
+**Innovators Journal entry · October 13, 2026 · Reflection updated October 15, 2026**
 
-[Play Geometry Dash My Version](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
+[Play Geometry Dash My Version](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the original Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
 In class, I asked WebGPT to make a game like Geometry Dash. I wanted a square that jumps over spikes and goes through different levels. My game is called Geometry Dash My Version. It has five levels and a double jump.
 
@@ -19,6 +19,24 @@ In class, I asked WebGPT to make a game like Geometry Dash. I wanted a square th
 I told WebGPT to use Space or other buttons to jump. I wanted squares that were safe to land on and spikes that would make the player lose. I also asked for creative maps, portals between levels, and background colors that changed with each level. I wanted the game to look cool and be fun to play.
 
 WebGPT put the game in one HTML file. The file has the page layout, colors, and game code. Looking through it helped me understand what happens after a jump button is pressed.
+
+### How I used AI
+
+WebGPT generated the game code from my requests. I did not write all of the code myself. My role was to describe the experience I wanted, choose the controls and features, and compare the result with my idea. AI helped turn those requests into a playable starting point.
+
+My requests included a Geometry Dash style game, several ways to jump, platforms, spikes, creative maps, portals, and changing background colors. These are summaries of the requests recorded in this journal, not exact quotations from a saved chat. The current game includes five levels and a double jump, but the journal does not preserve a prompt by prompt record of how each feature was added.
+
+### How I evaluated the result and would guide the next prompt
+
+The result helped me see where my instructions needed more detail. I had described squares as safe to land on. In the game, landing on top is safe, but hitting a square from the side causes a crash. That distinction matters because a player could read the instructions and expect every contact with a square to be safe.
+
+The start screen also displays some symbols as literal text, such as \\u26A1. A game can have working movement while still needing clearer instructions and better presentation. I need to check both the rules and what the player sees.
+
+A more specific next prompt would be:
+
+> Keep landing on top of blocks safe and side collisions deadly. Explain both rules clearly. Add a short introductory section where players can practice a normal jump and a double jump before facing spikes. Replace the visible Unicode escape text in the instructions with correctly displayed characters. Explain what you changed.
+
+This is a proposed next prompt, not a revision I am claiming to have completed. It gives AI a specific problem, the behavior I want to keep, and the outcome I would check. After a revision, I would test the same situations again and save a screenshot and notes. That would show whether the change improved the game.
 
 ![Game start screen with keyboard controls and double jump instructions](/assets/neon-dash/menu.png)
 
@@ -31,6 +49,24 @@ The square moves forward on its own, so the player has to time each jump. The ga
 ## What I learned
 
 I learned that the game has several parts working together. Button presses start jumps, variables remember what is happening, and the game loop keeps everything moving. I also noticed that squares are only safe to land on from above. Hitting their sides still makes the player lose. I need to be more exact when I explain the rules to WebGPT.
+
+Looking at one HTML file helped me distinguish three jobs: HTML provides elements such as the canvas and buttons, CSS controls their appearance, and JavaScript handles movement and rules. This makes it easier to decide where to look when something needs to change.
+
+The double jump deepened my understanding of variables and conditions. The program has to remember whether the player is on the ground, whether a new jump press happened, and whether an extra jump is still available. Landing restores the extra jump. A simple player action depends on several pieces of information working together.
+
+Collision detection also showed me that drawing an obstacle and deciding whether it was hit are separate tasks. The program uses invisible hitboxes and checks the player's movement to distinguish a safe landing from a crash. Understanding those checks helps me describe a problem more precisely than just saying that jumping feels wrong.
+
+The portal and spike results recorded here are useful checks, but they do not show that every level is balanced or that every interaction works. I need repeated tests before calling the whole game successful.
+
+## How I would approach software development in the future
+
+Next time, I would start with one short level, basic movement, and one obstacle. I would check those parts before adding more levels and visual effects. Smaller steps would make it easier to connect a problem to the change that caused it.
+
+When asking AI for help, I would explain what I expected, what actually happened, and how to reproduce the problem. I would ask it to explain the relevant code so I could understand the change and check it myself.
+
+I would also save my prompts, versions, screenshots, and test results as I worked. For each revision, I would record the problem, my request, the change, and the result of testing it. That would make my journal more complete and show which decisions I made and which code AI generated.
+
+My goal is to become better at reading, changing, and testing code. AI can help me build a starting point quickly, but I still need to understand the rules, judge the results, and decide what to improve.
 
 ## How the code works
 
