@@ -104,4 +104,18 @@ There are no points. `attempts++` adds a try after a crash (line 262). Lines 380
 - **By October 18:** Compare the same level at 800 × 600 and 1280 × 720. Save screenshots and check the ground, controls, and visible map.
 - **By October 18:** Check all three languages for missing text or layout problems. Reload the expanded game to check that language and unlocked levels are saved.
 
+## Complete WebGPT prompts
+
+### Original game
+
+> Create a Geometry Dash-like game where you have to press space or other buttons to jump, and there are squares, which are safe to land on, and spikes, which will end the game once you touch them. Be creative with the maps. Add levels to this thing. once you completeed a level there will be a portal for you to enter. The color of the background color changes as you level up. Make everything very cool and intriguing.
+
+### Menus levels and languages
+
+> Create a starting menu, add options for Dash-Lite and Dash-Extreme, each with 50 levels, each increasing in difficulty, and a setting to adjust the language, supporting Spanish, English, and Chinese. When you first enter the game, you are required to go through an instruction course that teaches you which button to press and what it does, such as jumping, double jumping, etc. Make the UI 1000000000% better.
+
+### Wave movement and portals
+
+> I want that when you hit the portal, you switch into the flying line- another form, just like the real Geometry Dash- and when you hit a yellow, you win. Check how the real Geometry Dash is. I want it just like it is in the original game.
+
 I used WebGPT for the game code and Codex to help organize and edit this journal.
