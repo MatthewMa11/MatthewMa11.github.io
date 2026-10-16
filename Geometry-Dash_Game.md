@@ -66,11 +66,9 @@ The game checks invisible hitboxes to decide when the player hits a spike or blo
 
 ### Goals for October 15 to October 18
 
-- **By October 16:** Test double jumping ten times. Check that a third jump fails and landing restores the extra jump.
+- **By October 16:** Test that a third jump fails, and landing restores the extra jump.
 - **By October 18:** Try each published level five times and sample both expanded modes. Record unfair obstacles and check both portal types.
-- **By October 18:** Test the later tutorial, all three languages, and saved progress after reloading.
+- **By October 18:** Refine the tutorials that I already have and improve upon them further. 
 - **By October 18:** Compare 800 × 600 and 1280 × 720 screenshots. Check the ground and controls, and fix the strange menu symbols.
 
-I used WebGPT for the game code and Codex to help edit this journal.
-
-**Journal credit:** ChatGPT helped me with the format and theme of this journal.
+ChatGPT helped me with the format and theme of this journal.
