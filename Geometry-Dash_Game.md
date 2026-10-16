@@ -42,42 +42,13 @@ HTML sets up the page, CSS controls its look, and JavaScript runs the rules. Dou
 
 ## How I would build software next time
 
-I would start with one level and test each AI change before adding more. I would read the changed code and save working versions. My prompts would explain what should happen, what went wrong, and how to repeat the problem.
+Next time, I would start with one level and test each change before adding more. I would save working versions and ask AI to explain code I do not understand. My prompts would explain what should happen, what went wrong, and how to repeat the problem. AI helped me build the game, but I still needed to decide what worked and what to improve.
 
-## How the published game works
+## How the game works
 
-### The canvas
+The canvas is where the game is drawn. The game loop keeps moving the player, checking for hits, and drawing the next picture. Variables remember the level, attempts, and whether an extra jump is available.
 
-`<canvas id="game"></canvas>` is at line 58. `syncSize()` fits it to the window (lines 78–89). These screenshots are 1280 × 600 pixels. More width shows more map; more height moves the ground. Blocks stay the same size.
-
-### The state variables
-
-Under STATE (lines 198–212), `state`, `levelIdx`, and `attempts` track game status, level, and tries. `player` stores position, vertical speed, and jumps. Forward speed uses `BASE_SPEED` and the level setting. Jump flags are under INPUT (line 230).
-
-### The game loop
-
-`loop(now)` uses `requestAnimationFrame`, often about 60 times a second (lines 561–574). It calls `update(dt)` to move things and check rules, then `draw()` to draw the frame. `dt` adjusts for time between frames.
-
-### Input handling
-
-Space, Up, W, clicking, or tapping jumps. The listeners change `jumpHeld` and `jumpQueued`; `update()` changes `player.vy`. A new press in the air uses the extra jump (lines 230–243).
-
-### Collision and win or lose logic
-
-`rectsOverlap(a,b)` checks hitboxes (line 258):
-
-```javascript
-a.x < b.x+b.w && a.x+a.w > b.x &&
-a.y < b.y+b.h && a.y+a.h > b.y
-```
-
-Spikes call `die()`. Safe landings check `player.vy >= 0 && prevBottom <= oy + 14` (lines 364–371). Crashes restart the level. Portals lead to the next level; finishing all five shows YOU WIN!
-
-### Scoring and progress
-
-There are no points. `attempts++` counts crashes (line 262). `player.x / levelEndX()` fills the progress bar (lines 380–381). A recorded test reached Level 2 and confirmed that a spike added an attempt.
-
-*Line numbers refer to the linked five-level source file.*
+The game checks invisible hitboxes to decide when the player hits a spike or block. Landing on top of a block is safe, but hitting its side causes a crash. The attempt counter tracks crashes, and the progress bar shows how close the player is to the portal.
 
 ## Screenshots and goals
 
