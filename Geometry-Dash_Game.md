@@ -8,7 +8,7 @@ permalink: /geometry-dash-game/
 
 # Geometry Dash My Version
 
-**Innovators Journal · October 13, 2026 · Updated October 15, 2026**
+**Innovators Journal · October 13, 2026 · Updated October 18, 2026**
 
 [Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
@@ -39,6 +39,8 @@ The game and screenshots linked here show the five-level version. The later vers
 ## What I learned
 
 HTML sets up the page, CSS controls its look, and JavaScript runs the rules. Double jumping helped me understand how variables remember things: the game tracks the extra jump and resets it after landing. I also learned that invisible hitboxes decide collisions. A block's top is safe, but its sides can cause a crash.
+
+I now understand more about how HTML, CSS, and JavaScript work together. In HTML, the `<head>` holds page information and styles, and the `<body>` holds visible parts like buttons and the canvas. CSS controls how they look, while JavaScript adds movement and controls. I also learned that AI prompts need clear details. Asking for a UI that is millions of percent better does not tell the AI what to change. I should name specific effects and settings, like buttons that are 20% bigger, a dark blue background, or a jump height of two blocks, so the AI has a clear direction.
 
 ## How I would build software next time
 
