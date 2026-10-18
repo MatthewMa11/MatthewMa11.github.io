@@ -8,7 +8,7 @@ permalink: /geometry-dash-game/
 
 # Geometry Dash My Version
 
-**Innovators Journal · October 13, 2026 · Updated October 18, 2026**
+**Innovators Journal · October 13, 2026**
 
 [Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
 
