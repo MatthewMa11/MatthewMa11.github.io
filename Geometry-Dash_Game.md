@@ -42,6 +42,41 @@ HTML sets up the page, CSS controls its look, and JavaScript runs the rules. Dou
 
 I now understand more about how HTML, CSS, and JavaScript work together. In HTML, the `<head>` holds page information and styles, and the `<body>` holds visible parts like buttons and the canvas. CSS controls how they look, while JavaScript adds movement and controls. I also learned that AI prompts need clear details. Asking for a UI that is millions of percent better does not tell the AI what to change. I should name specific effects and settings, like buttons that are 20% bigger, a dark blue background, or a jump height of two blocks, so the AI has a clear direction.
 
+### Connecting HTML CSS and JavaScript
+
+Looking at my actual game helped me understand how the three languages connect. In the first examples below, HTML creates the canvas and gives it the ID `game`. CSS makes the canvas fill the screen. JavaScript uses `document.getElementById('game')` to find that same element, then `getContext('2d')` gets the tools for drawing the player and obstacles. I learned that the ID connects the HTML element to the JavaScript code. The `<style>` section is where I would change the layout, while the `<script>` section controls the game.
+
+```html
+<canvas id="game"></canvas>
+```
+
+```css
+canvas { display:block; position:fixed; inset:0; width:100%; height:100%; }
+```
+
+```javascript
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+```
+
+### Understanding the jump code
+
+The jump code helped me understand variables and conditions. `player.onGround` separates ground jumps from jumps in the air. The `&&` means both checks must be true: there must be a new button press, and `player.airJumps` must be above zero. `player.vy = DJUMP_V` makes the player rise because `DJUMP_V` is `-12.2`. The `--` uses up one extra jump, and `jumpQueued = false` clears that press so it cannot count twice. Landing runs `player.airJumps = 1` to restore the extra jump. Now I can ask AI to change a specific jump setting or rule and understand which part of the code should change.
+
+```javascript
+if(player.onGround){
+  if(jumpHeld){
+    player.vy = JUMP_V; player.onGround = false;
+    jumpQueued = false;
+  }
+} else if(jumpQueued && player.airJumps > 0){
+  player.vy = DJUMP_V;
+  player.airJumps--;
+  jumpQueued = false;
+  doubleJumpFX();
+}
+```
+
 ## How I would build software next time
 
 Next time, I would start with one level and test each change before adding more. I would save working versions and ask AI to explain code I do not understand. My prompts would explain what should happen, what went wrong, and how to repeat the problem. AI helped me build the game, but I still needed to decide what worked and what to improve.
