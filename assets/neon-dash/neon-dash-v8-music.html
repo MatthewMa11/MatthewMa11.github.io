@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON DASH ULTIMATE</title>
+
+<!-- ============================================================
+     STYLES - everything that is NOT drawn on the canvas (menus, HUD).
+     ============================================================ -->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#02030a;
+    font-family:'Segoe UI', Arial, sans-serif; color:#fff; }
+  canvas { display:block; position:fixed; inset:0; width:100%; height:100%; }
+
+  /* Screen system: every menu is a .screen; .off fades it out. */
+  .screen {
+    position:fixed; inset:0; z-index:10;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:24px; text-align:center;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(0,240,255,.10), transparent 60%),
+      radial-gradient(1000px 700px at 110% 110%, rgba(255,0,224,.12), transparent 60%),
+      rgba(2,3,12,.72);
+    backdrop-filter: blur(6px);
+    transition: opacity .35s ease, visibility .35s;
+  }
+  .screen.off { opacity:0; visibility:hidden; pointer-events:none; }
+
+  .floater { position:absolute; border:2px solid rgba(0,255,255,.25); border-radius:6px;
+    animation:floatUp linear infinite; pointer-events:none; }
+  @keyframes floatUp {
+    from { transform:translateY(110vh) rotate(0deg); opacity:0; }
+    12%  { opacity:.8; }
+    to   { transform:translateY(-15vh) rotate(360deg); opacity:0; }
+  }
+
+  .logo {
+    font-size:clamp(44px, 9vw, 92px); font-weight:900; letter-spacing:.16em; line-height:1.05;
+    background:linear-gradient(90deg,#00f0ff 0%,#8a7dff 35%,#ff00e0 70%,#ffe600 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 24px rgba(0,240,255,.55));
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  .logo small { display:block; font-size:.28em; letter-spacing:.55em; opacity:.95;
+    background:linear-gradient(90deg,#fff,#9ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
+  .subtitle { margin-top:14px; font-size:15px; letter-spacing:.3em; opacity:.75; text-transform:uppercase; }
+
+  .btn {
+    cursor:pointer; user-select:none; border-radius:14px; font-weight:800;
+    letter-spacing:.25em; text-transform:uppercase; transition:all .18s ease;
+    border:2px solid #0ff; color:#0ff; background:rgba(0,255,255,.06);
+    box-shadow:0 0 22px rgba(0,255,255,.35), inset 0 0 18px rgba(0,255,255,.08);
+    padding:16px 54px; font-size:19px; margin-top:14px;
+  }
+  .btn:hover { background:#0ff; color:#012; transform:translateY(-3px) scale(1.05);
+    box-shadow:0 10px 36px rgba(0,255,255,.55); }
+  .btn.ghost { border-color:rgba(255,255,255,.35); color:#cde; background:transparent;
+    box-shadow:none; font-size:13px; padding:10px 26px; letter-spacing:.2em; }
+  .btn.ghost:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateY(-2px); }
+
+  .cards { display:flex; gap:26px; flex-wrap:wrap; justify-content:center; margin-top:30px; }
+  .card {
+    width:min(330px, 84vw); padding:30px 26px 26px; cursor:pointer; position:relative;
+    border-radius:20px; background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(10px);
+    transition:all .22s ease; overflow:hidden;
+  }
+  .card::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.08) 50%, transparent 70%);
+    transform:translateX(-100%); transition:transform .6s ease;
+  }
+  .card:hover::before { transform:translateX(100%); }
+  .card:hover { transform:translateY(-8px) scale(1.03); }
+  .card h2 { font-size:26px; letter-spacing:.14em; margin-bottom:8px; }
+  .card p  { font-size:13px; letter-spacing:.12em; opacity:.75; line-height:1.7; }
+  .card .em { display:inline-block; margin-top:14px; font-size:40px; }
+  .card.lite    { box-shadow:0 0 0 1px rgba(0,255,255,.25), 0 14px 40px rgba(0,255,255,.12); }
+  .card.lite:hover    { box-shadow:0 0 0 2px #0ff, 0 20px 60px rgba(0,255,255,.35); }
+  .card.lite h2 { color:#0ff; text-shadow:0 0 14px rgba(0,255,255,.7); }
+  .card.extreme { box-shadow:0 0 0 1px rgba(255,60,90,.3), 0 14px 40px rgba(255,60,90,.12); }
+  .card.extreme:hover { box-shadow:0 0 0 2px #f45, 0 20px 60px rgba(255,60,90,.4); }
+  .card.extreme h2 { color:#f56; text-shadow:0 0 14px rgba(255,80,100,.7); }
+
+  .lvlwrap { width:min(760px, 94vw); max-height:52vh; overflow-y:auto; margin-top:24px;
+    padding:18px; border-radius:18px; background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.12); }
+  .lvlgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px,1fr)); gap:10px; }
+  .lvl {
+    aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:15px; cursor:pointer; user-select:none;
+    border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.05);
+    transition:all .15s ease; position:relative;
+  }
+  .lvl.open { border-color:#0ff; color:#0ff; box-shadow:0 0 12px rgba(0,255,255,.35); }
+  .lvl.open:hover { background:#0ff; color:#012; transform:scale(1.12); }
+  .lvl.done { background:linear-gradient(135deg, rgba(0,255,180,.25), rgba(0,160,255,.25));
+    border-color:#0fa; color:#aff; }
+  .lvl.done::after { content:'\2713'; position:absolute; top:2px; right:5px; font-size:10px; color:#0fa; }
+  .lvl.done:hover { transform:scale(1.12); box-shadow:0 0 14px rgba(0,255,170,.5); }
+  .lvl.lock { opacity:.28; cursor:not-allowed; }
+  .lvl.lock::before { content:'\1F512'; font-size:13px; position:absolute; }
+  .lvl.lock span { visibility:hidden; }
+  .gridTitle { font-size:30px; font-weight:900; letter-spacing:.2em; }
+  .gridTitle.lite { color:#0ff; text-shadow:0 0 18px rgba(0,255,255,.6); }
+  .gridTitle.extreme { color:#f56; text-shadow:0 0 18px rgba(255,80,100,.6); }
+
+  .langRow { display:flex; gap:18px; margin-top:26px; flex-wrap:wrap; justify-content:center; }
+  .langBtn {
+    padding:16px 34px; border-radius:16px; cursor:pointer; font-size:17px; letter-spacing:.1em;
+    border:2px solid rgba(255,255,255,.25); background:rgba(255,255,255,.05); transition:all .18s;
+  }
+  .langBtn:hover { transform:translateY(-3px); background:rgba(255,255,255,.12); }
+  .langBtn.sel { border-color:#0ff; color:#0ff; box-shadow:0 0 18px rgba(0,255,255,.45);
+    background:rgba(0,255,255,.1); }
+  .langBtn .big { font-size:26px; display:block; margin-bottom:4px; }
+
+  .dialogBox { width:min(580px,92vw); padding:44px 36px; border-radius:24px;
+    background:rgba(8,10,26,.92); border:1px solid rgba(0,255,255,.35);
+    box-shadow:0 0 60px rgba(0,255,255,.25); display:flex; flex-direction:column; align-items:center; }
+  .dialogBox h1 { font-size:clamp(30px,6vw,48px); letter-spacing:.12em;
+    background:linear-gradient(90deg,#0ff,#f0f,#fe6); -webkit-background-clip:text;
+    background-clip:text; color:transparent; filter:drop-shadow(0 0 16px rgba(0,255,255,.5)); }
+  .dialogBox p { margin-top:16px; font-size:16px; line-height:1.8; letter-spacing:.06em; opacity:.9; }
+
+  /* In-game HUD. pointer-events:none so clicks reach the canvas (click = jump). */
+  #hud { position:fixed; top:0; left:0; width:100%; padding:14px 20px; z-index:5;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    pointer-events:none; text-shadow:0 0 10px rgba(255,255,255,.8);
+    opacity:0; transition:opacity .3s; }
+  body.playing #hud { opacity:1; }
+  #levelName { font-size:21px; font-weight:800; letter-spacing:.2em; }
+  #levelSub  { font-size:11px; letter-spacing:.3em; opacity:.8; margin-top:2px; }
+  #formTag   { font-size:11px; letter-spacing:.3em; margin-top:4px; color:#0ef; }
+  .hudRight { text-align:right; font-size:14px; letter-spacing:.15em; }
+  .hudBtn { pointer-events:auto; margin-top:8px; margin-left:6px; display:inline-block; cursor:pointer;
+    font-size:11px; letter-spacing:.2em; padding:7px 16px; border-radius:10px;
+    border:1px solid rgba(255,255,255,.4); background:rgba(0,0,0,.4); transition:all .15s; }
+  .hudBtn:hover { background:rgba(255,255,255,.2); }
+  #skipBtn { display:none; border-color:#fd0; color:#fd0; }
+  body.tutorial #skipBtn { display:inline-block; }
+  #progressWrap { position:fixed; top:12px; left:50%; transform:translateX(-50%);
+    width:min(420px,44vw); height:10px; border:1px solid rgba(255,255,255,.4); border-radius:6px;
+    overflow:hidden; z-index:5; background:rgba(0,0,0,.35); opacity:0; transition:opacity .3s; }
+  body.playing #progressWrap { opacity:1; }
+  #progressBar { height:100%; width:0%; background:linear-gradient(90deg,#0ff,#f0f); box-shadow:0 0 12px #0ff; }
+
+  /* ---- Music controls (settings screen + HUD button) ---- */
+  .toggleBtn {
+    padding:16px 34px; border-radius:16px; cursor:pointer; font-size:17px; letter-spacing:.1em;
+    border:2px solid rgba(255,255,255,.25); background:rgba(255,255,255,.05); transition:all .18s;
+  }
+  .toggleBtn:hover { transform:translateY(-3px); background:rgba(255,255,255,.12); }
+  .toggleBtn.sel { border-color:#0ff; color:#0ff; box-shadow:0 0 18px rgba(0,255,255,.45); background:rgba(0,255,255,.1); }
+  #musicVolWrap { margin-top:22px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  #musicVolWrap label { font-size:12px; letter-spacing:.3em; opacity:.75; text-transform:uppercase; }
+  #musicVol { -webkit-appearance:none; appearance:none; width:min(300px,70vw); height:8px; border-radius:6px; background:rgba(255,255,255,.2); outline:none; cursor:pointer; }
+  #musicVol::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#0ff; box-shadow:0 0 14px #0ff; }
+  #musicVol::-moz-range-thumb { width:22px; height:22px; border:none; border-radius:50%; background:#0ff; box-shadow:0 0 14px #0ff; }
+  #musicBtn { border-color:#0ef; color:#0ef; }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- IN-GAME HUD -->
+<div id="hud">
+  <div><div id="levelName"></div><div id="levelSub"></div><div id="formTag"></div></div>
+  <div class="hudRight">
+    <div><span data-i18n="attempts">ATTEMPTS</span>: <span id="attempts">1</span></div>
+    <div><span class="hudBtn" id="skipBtn" data-i18n="skipTut">SKIP TUTORIAL</span><span class="hudBtn" id="musicBtn" title="M">&#9834;</span><span class="hudBtn" id="menuBtn" data-i18n="menuHint">ESC = MENU</span></div>
+  </div>
+</div>
+<div id="progressWrap"><div id="progressBar"></div></div>
+
+<!-- SCREEN 1: TITLE -->
+<div class="screen" id="scr-title">
+  <div class="logo">NEON DASH<small>ULTIMATE</small></div>
+  <div class="subtitle" data-i18n="tagline">100 LEVELS &bull; 2 MODES &bull; CUBE + WAVE</div>
+  <button class="btn" id="btnPlay" data-i18n="play">PLAY</button>
+  <button class="btn ghost" id="btnSettings" data-i18n="settings">SETTINGS</button>
+</div>
+
+<!-- SCREEN 2: MODE SELECT -->
+<div class="screen off" id="scr-modes">
+  <div class="logo" style="font-size:clamp(28px,5vw,44px)" data-i18n="chooseMode">CHOOSE YOUR MODE</div>
+  <div class="cards">
+    <div class="card lite" id="cardLite">
+      <span class="em">&#x1F30A;</span>
+      <h2>DASH-LITE</h2>
+      <p data-i18n="liteDesc">50 levels</p>
+      <p style="margin-top:10px;color:#0ff" id="liteProg"></p>
+    </div>
+    <div class="card extreme" id="cardExtreme">
+      <span class="em">&#x1F525;</span>
+      <h2>DASH-EXTREME</h2>
+      <p data-i18n="extremeDesc">50 levels</p>
+      <p style="margin-top:10px;color:#f56" id="extremeProg"></p>
+    </div>
+  </div>
+  <button class="btn ghost" id="btnReplayTut" data-i18n="replayTut">REPLAY TUTORIAL</button>
+  <button class="btn ghost" id="btnBackTitle" data-i18n="back">BACK</button>
+</div>
+
+<!-- SCREEN 3: LEVEL SELECT -->
+<div class="screen off" id="scr-levels">
+  <div class="gridTitle" id="gridTitle"></div>
+  <div class="subtitle" data-i18n="selectLevel">SELECT LEVEL</div>
+  <div class="lvlwrap"><div class="lvlgrid" id="lvlGrid"></div></div>
+  <button class="btn ghost" id="btnBackModes" data-i18n="back">BACK</button>
+</div>
+
+<!-- SCREEN 4: SETTINGS -->
+<div class="screen off" id="scr-settings">
+  <div class="logo" style="font-size:clamp(28px,5vw,44px)" data-i18n="settings">SETTINGS</div>
+  <div class="subtitle" data-i18n="language">LANGUAGE</div>
+  <div class="langRow">
+    <div class="langBtn" data-lang="en"><span class="big">&#x1F1EC;&#x1F1E7;</span>English</div>
+    <div class="langBtn" data-lang="es"><span class="big">&#x1F1EA;&#x1F1F8;</span>Espa&ntilde;ol</div>
+    <div class="langBtn" data-lang="zh"><span class="big">&#x1F1E8;&#x1F1F3;</span>&#x4E2D;&#x6587;</div>
+  </div>
+  <div class="subtitle" style="margin-top:34px" data-i18n="music">MUSIC</div>
+  <div class="langRow" style="margin-top:16px"><div class="toggleBtn" id="musicToggle"></div></div>
+  <div id="musicVolWrap">
+    <label for="musicVol" data-i18n="volume">VOLUME</label>
+    <input type="range" id="musicVol" min="0" max="100" step="1" value="60">
+  </div>
+  <button class="btn ghost" id="btnBackSettings" data-i18n="back">BACK</button>
+</div>
+
+<!-- SCREEN 5: DIALOG (tutorial choice / tutorial done / victory) -->
+<div class="screen off" id="scr-dialog">
+  <div class="dialogBox">
+    <h1 id="dlgTitle"></h1>
+    <p id="dlgMsg"></p>
+    <button class="btn" id="dlgBtn"></button>
+    <button class="btn ghost" id="dlgBtn2" style="display:none"></button>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ==================================================================
+   SECTION 1 - CANVAS & ROBUST SIZING
+   The canvas is re-measured EVERY frame, because embedded viewers can
+   report a 0x0 window at load (the original black-screen bug). The game
+   stays paused until the canvas has a real size.
+   ================================================================== */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0;
+function syncSize(){
+  const rect = canvas.getBoundingClientRect();
+  const w = Math.round(rect.width  || canvas.clientWidth  || innerWidth  || 0);
+  const h = Math.round(rect.height || canvas.clientHeight || innerHeight || 0);
+  if(w > 0 && h > 0 && (w !== W || h !== H)){ W = canvas.width = w; H = canvas.height = h; }
+}
+function sized(){ return W > 50 && H > 50; }
+syncSize();
+addEventListener('resize', syncSize);
+if(typeof ResizeObserver !== 'undefined') new ResizeObserver(syncSize).observe(document.documentElement);
+
+/* ==================================================================
+   SECTION 2 - INTERNATIONALIZATION (English / Espa\u00F1ol / \u4E2D\u6587)
+   All user-facing text lives in this dictionary. Elements with a
+   data-i18n attribute are swapped by applyLang(); text drawn on the
+   canvas (tutorial hints) calls t(key) live every frame.
+   ================================================================== */
+const I18N = {
+  en: {
+    tagline:'100 LEVELS \u2022 2 MODES \u2022 CUBE + WAVE', play:'PLAY', settings:'SETTINGS',
+    language:'LANGUAGE', back:'BACK', chooseMode:'CHOOSE YOUR MODE',
+    liteDesc:'50 levels \u2022 smooth ride \u2022 learn the flow',
+    extremeDesc:'50 levels \u2022 pure chaos \u2022 every level proven beatable',
+    replayTut:'REPLAY TUTORIAL', selectLevel:'SELECT LEVEL', attempts:'ATTEMPTS',
+    menuHint:'ESC = MENU', tutorial:'TUTORIAL', completedOf:'completed',
+    cleared:'LEVEL CLEAR!', finish:'FINISH',
+    formCube:'\u25A0 CUBE', formWave:'\u25B6 WAVE',
+    tutAskTitle:'TUTORIAL?', tutAskMsg:'New here? The tutorial teaches jumping, double jumping and the wave. Or skip it and jump straight in.',
+    startTut:'START TUTORIAL', skipTut:'SKIP TUTORIAL',
+    tutDone:'TUTORIAL COMPLETE!', tutDoneMsg:'Cube AND wave mastered. Now go conquer 100 levels!',
+    youWin:'YOU WIN!', winLite:'You conquered all 50 DASH-LITE levels! Ready for EXTREME?',
+    winExtreme:'ALL 50 EXTREME LEVELS DOWN. You are officially a legend. \u2726',
+    cont:'CONTINUE',
+    music:'MUSIC', volume:'VOLUME', musicOn:'MUSIC: ON', musicOff:'MUSIC: OFF',
+    tut_welcome:'Welcome! Your cube runs forward by itself.',
+    tut_jump:'Press SPACE / \u2191 / W or CLICK to JUMP the spike!',
+    tut_land:'Squares are SAFE \u2014 land on top of them!',
+    tut_double:'Wide gap! Press AGAIN in MID-AIR to DOUBLE JUMP!',
+    tut_dot:'White dot on your cube = double jump ready. Use it to climb!',
+    tut_wavePortal:'Blue portal ahead \u2014 it transforms you into a WAVE!',
+    tut_wave:'WAVE MODE: HOLD to fly UP, RELEASE to dive DOWN!',
+    tut_wave2:'Touch NOTHING \u2014 floor, ceiling, spikes or walls = death!',
+    tut_yellow:'The YELLOW LINE is the FINISH. Cross it to win!'
+  },
+  es: {
+    tagline:'100 NIVELES \u2022 2 MODOS \u2022 CUBO + ONDA', play:'JUGAR', settings:'AJUSTES',
+    language:'IDIOMA', back:'ATR\u00C1S', chooseMode:'ELIGE TU MODO',
+    liteDesc:'50 niveles \u2022 viaje suave \u2022 aprende el ritmo',
+    extremeDesc:'50 niveles \u2022 caos puro \u2022 cada nivel demostrado superable',
+    replayTut:'REPETIR TUTORIAL', selectLevel:'ELIGE NIVEL', attempts:'INTENTOS',
+    menuHint:'ESC = MEN\u00DA', tutorial:'TUTORIAL', completedOf:'completados',
+    cleared:'\u00A1NIVEL SUPERADO!', finish:'META',
+    formCube:'\u25A0 CUBO', formWave:'\u25B6 ONDA',
+    tutAskTitle:'\u00BFTUTORIAL?', tutAskMsg:'\u00BFPrimera vez? El tutorial ense\u00F1a a saltar, doble salto y la onda. O s\u00E1ltatelo y juega ya.',
+    startTut:'EMPEZAR TUTORIAL', skipTut:'SALTAR TUTORIAL',
+    tutDone:'\u00A1TUTORIAL COMPLETADO!', tutDoneMsg:'Dominas el cubo Y la onda. \u00A1Ve a conquistar 100 niveles!',
+    youWin:'\u00A1GANASTE!', winLite:'\u00A1Superaste los 50 niveles de DASH-LITE! \u00BFListo para EXTREME?',
+    winExtreme:'LOS 50 NIVELES EXTREME SUPERADOS. Eres oficialmente una leyenda. \u2726',
+    cont:'CONTINUAR',
+    music:'M\u00DASICA', volume:'VOLUMEN', musicOn:'M\u00DASICA: S\u00CD', musicOff:'M\u00DASICA: NO',
+    tut_welcome:'\u00A1Bienvenido! Tu cubo corre solo hacia adelante.',
+    tut_jump:'\u00A1Pulsa ESPACIO / \u2191 / W o CLIC para SALTAR el pincho!',
+    tut_land:'Los cuadrados son SEGUROS \u2014 \u00A1aterriza encima!',
+    tut_double:'\u00A1Hueco ancho! \u00A1Pulsa OTRA VEZ en el AIRE para DOBLE SALTO!',
+    tut_dot:'Punto blanco = doble salto listo. \u00A1\u00DAsalo para subir!',
+    tut_wavePortal:'\u00A1Portal azul adelante \u2014 te transforma en ONDA!',
+    tut_wave:'MODO ONDA: \u00A1MANT\u00C9N para subir, SUELTA para bajar!',
+    tut_wave2:'\u00A1No toques NADA \u2014 suelo, techo, pinchos o muros = muerte!',
+    tut_yellow:'La L\u00CDNEA AMARILLA es la META. \u00A1Cr\u00FAzala para ganar!'
+  },
+  zh: {
+    tagline:'100 \u5173\u5361 \u2022 2 \u79CD\u6A21\u5F0F \u2022 \u65B9\u5757 + \u6CE2\u6D6A', play:'\u5F00\u59CB\u6E38\u620F', settings:'\u8BBE\u7F6E',
+    language:'\u8BED\u8A00', back:'\u8FD4\u56DE', chooseMode:'\u9009\u62E9\u6A21\u5F0F',
+    liteDesc:'50 \u5173 \u2022 \u8F7B\u677E\u4E4B\u65C5 \u2022 \u638C\u63E1\u8282\u594F',
+    extremeDesc:'50 \u5173 \u2022 \u7EAF\u7CB9\u6DF7\u4E71 \u2022 \u6BCF\u5173\u90FD\u9A8C\u8BC1\u53EF\u901A\u5173',
+    replayTut:'\u91CD\u73A9\u6559\u7A0B', selectLevel:'\u9009\u62E9\u5173\u5361', attempts:'\u5C1D\u8BD5\u6B21\u6570',
+    menuHint:'ESC = \u83DC\u5355', tutorial:'\u6559\u7A0B', completedOf:'\u5DF2\u5B8C\u6210',
+    cleared:'\u8FC7\u5173\uFF01', finish:'\u7EC8\u70B9',
+    formCube:'\u25A0 \u65B9\u5757', formWave:'\u25B6 \u6CE2\u6D6A',
+    tutAskTitle:'\u8981\u6559\u7A0B\u5417\uFF1F', tutAskMsg:'\u7B2C\u4E00\u6B21\u73A9\uFF1F\u6559\u7A0B\u4F1A\u6559\u4F60\u8DF3\u8DC3\u3001\u4E8C\u6BB5\u8DF3\u548C\u6CE2\u6D6A\u3002\u4F60\u4E5F\u53EF\u4EE5\u8DF3\u8FC7\u76F4\u63A5\u5F00\u59CB\u3002',
+    startTut:'\u5F00\u59CB\u6559\u7A0B', skipTut:'\u8DF3\u8FC7\u6559\u7A0B',
+    tutDone:'\u6559\u7A0B\u5B8C\u6210\uFF01', tutDoneMsg:'\u65B9\u5757\u548C\u6CE2\u6D6A\u90FD\u638C\u63E1\u4E86\uFF0C\u53BB\u5F81\u670D 100 \u5173\u5427\uFF01',
+    youWin:'\u4F60\u8D62\u4E86\uFF01', winLite:'\u4F60\u901A\u5173\u4E86 DASH-LITE \u5168\u90E8 50 \u5173\uFF01\u6311\u6218 EXTREME \u5427\uFF01',
+    winExtreme:'EXTREME \u5168\u90E8 50 \u5173\u901A\u5173\uFF01\u4F60\u662F\u4F20\u5947\uFF01\u2726',
+    cont:'\u7EE7\u7EED',
+    music:'\u97F3\u4E50', volume:'\u97F3\u91CF', musicOn:'\u97F3\u4E50\uFF1A\u5F00', musicOff:'\u97F3\u4E50\uFF1A\u5173',
+    tut_welcome:'\u6B22\u8FCE\uFF01\u65B9\u5757\u4F1A\u81EA\u52A8\u5411\u524D\u5954\u8DD1\u3002',
+    tut_jump:'\u6309 \u7A7A\u683C / \u2191 / W \u6216\u70B9\u51FB\u8DF3\u8FC7\u5C16\u523A\uFF01',
+    tut_land:'\u65B9\u5757\u662F\u5B89\u5168\u7684 \u2014 \u843D\u5728\u4E0A\u9762\uFF01',
+    tut_double:'\u5BBD\u6C9F\uFF01\u5728\u7A7A\u4E2D\u518D\u6309\u4E00\u6B21 \u2192 \u4E8C\u6BB5\u8DF3\uFF01',
+    tut_dot:'\u767D\u70B9 = \u4E8C\u6BB5\u8DF3\u53EF\u7528\u3002\u7528\u5B83\u722C\u4E0A\u53BB\uFF01',
+    tut_wavePortal:'\u524D\u65B9\u84DD\u8272\u4F20\u9001\u95E8 \u2014 \u5B83\u4F1A\u628A\u4F60\u53D8\u6210\u6CE2\u6D6A\uFF01',
+    tut_wave:'\u6CE2\u6D6A\u6A21\u5F0F\uFF1A\u6309\u4F4F\u4E0A\u5347\uFF0C\u677E\u5F00\u4FEF\u51B2\uFF01',
+    tut_wave2:'\u4EC0\u4E48\u90FD\u4E0D\u80FD\u78B0 \u2014 \u5730\u677F\u3001\u5929\u82B1\u677F\u3001\u5C16\u523A = \u6B7B\u4EA1\uFF01',
+    tut_yellow:'\u9EC4\u8272\u7AD6\u7EBF\u662F\u7EC8\u70B9\uFF0C\u51B2\u8FC7\u53BB\u5C31\u8D62\u4E86\uFF01'
+  }
+};
+function t(key){ const d = I18N[save.lang] || I18N.en; return d[key] || I18N.en[key] || key; }
+
+/* ==================================================================
+   SECTION 3 - PERSISTENCE
+   Language, the "tutorial handled" flag and the set of CLEARED levels
+   are saved in localStorage (in-memory fallback for sandboxed viewers).
+   Levels are never locked: you can play any of the 100 in any order.
+   ================================================================== */
+const store = (() => {
+  try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return localStorage; }
+  catch(e){ const m = {}; return { getItem:k=>m[k]??null, setItem:(k,v)=>{m[k]=String(v);} }; }
+})();
+const SAVE_KEY = 'neonDashUltimateSave3';
+let save = { lang:'en', tut:false, done:{ lite:0, extreme:0 } };
+try { const s = JSON.parse(store.getItem(SAVE_KEY)); if(s && s.done) save = s; } catch(e){}
+/* ALL LEVELS ARE UNLOCKED, so progress is no longer "how far in order you got".
+   save.cleared[mode][i] = 1 records every individual level you have beaten.
+   Old saves (which only stored a count) are migrated here. */
+if(!save.cleared){
+  save.cleared = { lite:{}, extreme:{} };
+  for(const m of ['lite','extreme']) for(let i=0;i<(save.done[m]||0);i++) save.cleared[m][i] = 1;
+}
+function clearedCount(mode){ return Object.keys(save.cleared[mode] || {}).length; }
+function persist(){ try { store.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e){} }
+if(save.music === undefined) save.music = true;     // music on by default
+if(save.vol === undefined) save.vol = 60;           // volume slider, 0-100
+
+/* ==================================================================
+   SECTION 3b - ORIGINAL MUSIC ENGINE (Web Audio API)
+   No audio files are used. The soundtrack is SYNTHESIZED live from
+   oscillators and noise, so it needs no downloads and has no licensing
+   issues. A 16-step sequencer plays: drums (kick, snare, hi-hat), a bass
+   line, a square-wave arpeggio and a soft pad over a 4-chord minor
+   progression. Each level seeds its own key, tempo and arpeggio shape.
+   INTENSITY: 0 = menu (calm), 1 = cube (full beat), 2 = wave (driving
+   four-on-the-floor + busier bass + higher arp). Browsers block audio
+   until a user gesture, so everything starts from unlock().
+   ================================================================== */
+const Music = (() => {
+  let ac = null, master = null, bus = null, noiseBuf = null, timer = null;
+  let unlocked = false, inMenu = true, step = 0, nextT = 0, duckUntil = 0;
+  let want = { intensity:0, bpm:100, root:45, seed:0 };       // current song settings
+  const PROG = [0, -4, 3, -2];                                 // chord roots (semitones): i - VI - III - VII
+  const ARPS = [                                               // 3 arpeggio shapes (indexes into the chord)
+    [0,1,2,3,2,1,2,3,0,1,2,3,2,1,3,2],
+    [0,2,1,3,0,2,1,3,2,3,1,2,0,3,2,1],
+    [0,1,2,1,3,2,1,2,0,1,2,1,3,2,3,1]
+  ];
+  function mtof(m){ return 440 * Math.pow(2, (m - 69) / 12); } // MIDI note number -> frequency in Hz
+
+  /* Create the audio graph once: sounds -> bus -> master volume -> compressor -> speakers. */
+  function ensure(){
+    if(ac) return true;
+    const AC = (typeof AudioContext !== 'undefined') ? AudioContext : ((typeof webkitAudioContext !== 'undefined') ? webkitAudioContext : null);
+    if(!AC) return false;                                      // browser has no Web Audio: game just stays silent
+    try {
+      ac = new AC();
+      master = ac.createGain(); master.gain.value = 0;
+      const comp = ac.createDynamicsCompressor();              // glues the layers together, prevents clipping
+      bus = ac.createGain(); bus.gain.value = 1;
+      bus.connect(master); master.connect(comp); comp.connect(ac.destination);
+      noiseBuf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.5), ac.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;   // white noise for snare + hi-hats
+    } catch(e){ ac = null; return false; }
+    return true;
+  }
+
+  /* One pitched note: oscillator -> lowpass filter -> envelope (fast attack, exponential decay). */
+  function tone(f, t, d, type, g, cut){
+    const o = ac.createOscillator(), v = ac.createGain(), fl = ac.createBiquadFilter();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    fl.type = 'lowpass'; fl.frequency.setValueAtTime(cut, t);
+    v.gain.setValueAtTime(0.0001, t);
+    v.gain.linearRampToValueAtTime(g, t + 0.008);
+    v.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(fl); fl.connect(v); v.connect(bus);
+    o.start(t); o.stop(t + d + 0.05);
+  }
+  /* Kick drum: a sine wave whose pitch drops fast (160Hz -> 42Hz) = the "thump". */
+  function kick(t, g){
+    const o = ac.createOscillator(), v = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13);
+    v.gain.setValueAtTime(g, t); v.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    o.connect(v); v.connect(bus); o.start(t); o.stop(t + 0.35);
+  }
+  /* Noise burst through a highpass filter: low cutoff = snare/clap, high cutoff = hi-hat. */
+  function noise(t, d, g, hp){
+    const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), v = ac.createGain();
+    s.buffer = noiseBuf; fl.type = 'highpass'; fl.frequency.setValueAtTime(hp, t);
+    v.gain.setValueAtTime(g, t); v.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(fl); fl.connect(v); v.connect(bus); s.start(t); s.stop(t + d + 0.02);
+  }
+
+  /* Play everything that happens on ONE sixteenth-note step (s = global step count, t = audio time). */
+  function playStep(s, t, sd){
+    const I = want.intensity, k = s % 16, off = PROG[Math.floor(s / 16) % 4];
+    const ch = [0, off === 0 ? 3 : 4, 7, 12];                  // chord tones: minor for the i chord, major for the others
+    const dk = (t < duckUntil) ? 0.25 : 1;                     // quiet "duck" right after dying
+    const arp = ARPS[want.seed % 3];
+    if(k === 0){                                               // pad: 3 soft triangle notes held for the whole bar
+      for(let i = 0; i < 3; i++) tone(mtof(want.root + 24 + off + ch[i]), t, sd * 15, 'triangle', 0.035 * dk, 1400);
+    }
+    if(I === 0){                                               // MENU: gentle kick + sparse arp, nothing else
+      if(k === 0 || k === 8) kick(t, 0.45 * dk);
+      if(k % 4 === 0) tone(mtof(want.root + 36 + off + ch[arp[k]]), t, sd * 3, 'square', 0.022 * dk, 2500);
+      return;
+    }
+    const four = I >= 2;                                       // WAVE: four-on-the-floor
+    if(four ? (k % 4 === 0 || k === 14) : (k === 0 || k === 6 || k === 10)) kick(t, 0.85 * dk);
+    if(k === 4 || k === 12) noise(t, 0.16, 0.34 * dk, 1500);   // snare/clap on beats 2 and 4
+    if(four || k % 2 === 0) noise(t, (k === 14) ? 0.12 : 0.04, 0.12 * dk, 7000);   // hi-hats (open one at the end of the bar)
+    if(four ? (k % 2 === 0) : (k === 0 || k === 3 || k === 6 || k === 10 || k === 12))
+      tone(mtof(want.root + off), t, sd * 1.8, 'sawtooth', 0.15 * dk, four ? 900 : 520);   // bass line
+    const hi = (four && k % 8 >= 4) ? 12 : 0;                  // wave mode: arp jumps up an octave
+    tone(mtof(want.root + 24 + hi + off + ch[arp[k]]), t, sd * 1.4, 'square', 0.04 * dk, 3200);   // lead arpeggio
+  }
+
+  /* Scheduler: every 25ms, queue any steps due in the next 150ms. Audio time (not setTimeout) keeps the beat tight. */
+  function schedule(){
+    if(!ac) return;
+    const sd = 60 / want.bpm / 4;                              // seconds per sixteenth note
+    if(nextT < ac.currentTime) nextT = ac.currentTime + 0.05;  // fell behind (e.g. tab was hidden): resync
+    let guard = 0;
+    while(nextT < ac.currentTime + 0.15 && guard++ < 8){ playStep(step, nextT, sd); nextT += sd; step++; }
+  }
+  function startTimer(){ if(!timer && save.music !== false && ac) timer = setInterval(schedule, 25); }
+  function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
+  function applyVol(){                                         // smooth volume change (no clicks)
+    if(!ac) return;
+    master.gain.setTargetAtTime(save.music !== false ? (save.vol / 100) * 0.55 : 0, ac.currentTime, 0.03);
+  }
+  function retime(){ step = 0; if(ac) nextT = ac.currentTime + 0.06; }   // restart from the top of the bar
+
+  return {
+    /* Called from any user gesture (click/key): browsers only allow audio after one. */
+    unlock(){
+      if(unlocked && ac && ac.state === 'running') return;
+      if(!ensure()) return;
+      unlocked = true;
+      if(ac.state === 'suspended' && ac.resume) ac.resume();
+      if(!timer) nextT = ac.currentTime + 0.06;
+      startTimer(); applyVol();
+    },
+    /* A level (re)starts: pick its key/tempo from the level number, restart the song, like Geometry Dash. */
+    play(lvl, intensity){
+      inMenu = false;
+      const seed = lvl ? (lvl.mode === 'extreme' ? 50 : 0) + (lvl.idx || 0) : 0;
+      const bpm = (!lvl || lvl.isTutorial) ? 112 : ((lvl.mode === 'extreme' ? 138 : 120) + (lvl.idx || 0) * 0.9);
+      want = { intensity:intensity, bpm:bpm, root:40 + (seed * 5) % 12, seed:seed };
+      retime();
+    },
+    menu(){ if(inMenu) return; inMenu = true; want = { intensity:0, bpm:100, root:45, seed:0 }; retime(); },
+    setIntensity(i){ if(!inMenu) want.intensity = i; },        // e.g. 2 when you become the wave
+    duck(){ if(ac) duckUntil = ac.currentTime + 0.6; },        // dip the volume briefly when you die
+    toggle(){
+      save.music = !(save.music !== false); persist();
+      if(save.music){ if(ac) nextT = ac.currentTime + 0.05; startTimer(); } else stopTimer();
+      applyVol();
+      return save.music;
+    },
+    setVol(v){ save.vol = Math.max(0, Math.min(100, v|0)); persist(); applyVol(); },
+    pause(){ if(ac && ac.suspend) ac.suspend(); },             // tab hidden
+    resume(){ if(ac && save.music !== false && ac.resume) ac.resume(); },
+    debug(){ return { intensity:want.intensity, bpm:want.bpm, root:want.root, on:save.music !== false, timer:!!timer }; }
+  };
+})();
+/* Pause the soundtrack when the tab is hidden, resume when it returns. */
+if(typeof document.addEventListener === 'function')
+  document.addEventListener('visibilitychange', () => { if(document.hidden) Music.pause(); else Music.resume(); });
+
+/* ==================================================================
+   SECTION 4 - GAME-ONLY CONSTANTS
+   TIME_SCALE is the global game-speed multiplier. It sets how many
+   physics ticks run per 60Hz frame. 1 = the original speed. Raising it
+   makes everything faster while keeping every jump arc the SAME shape
+   (multiplying only horizontal speed would stretch jumps and change
+   how hard the levels are). The 100 levels were verified beatable per
+   physics tick, so they stay beatable at any TIME_SCALE.
+   ================================================================== */
+const GROUND_FRAC = 0.78;
+const TIME_SCALE = 1;          // 1 = original speed
+const DEATH_PAUSE = 38;       // frames before respawn
+
+/* ==================================================================
+   SECTION 5 - SHARED PHYSICS & LEVEL BUILDER (identical to the solver)
+   This block is the exact code the offline solver used to PROVE every
+   level is beatable. Coordinates: ground is y = 0, up is negative.
+   stepCore() advances the player by one tick; the game and the solver
+   both call it, so "verified" means verified against the real rules.
+   ================================================================== */
+
+/* ---------- shared constants: ground is y=0, up is negative ---------- */
+const U = 46;
+const BASE_SPEED = 6.0;
+const GRAVITY = 0.72;
+const JUMP_V = -13.4;
+const DJUMP_V = -12.2;
+const PLAYER = U * 0.82;
+
+/* ---------- object builders ---------- */
+function spike(x, y){ return {t:'spike', x:x, y:y||0, w:1, h:1}; }
+function spikes(x, n, y){ const a=[]; for(let i=0;i<n;i++) a.push(spike(x+i, y||0)); return a; }
+function block(x, y, w, h){ return {t:'block', x:x, y:y||0, w:w||1, h:h||1}; }
+function stairs(x, steps){ const a=[]; for(let i=0;i<steps;i++) a.push(block(x+i, 0, 1, i+1)); return a; }
+function floatPad(x, y, w){ return block(x, y, w||2, 1); }
+function ispike(x){ return {t:'ispike', x:x, w:1, h:1}; }
+function cblock(x, h, w){ return {t:'cblock', x:x, w:w||1, h:h}; }
+
+/* ---------- cube-phase pattern templates ---------- */
+function cubePat(pid, x, v){
+  switch(pid){
+    case 0: return [[spike(x)], 1];
+    case 1: return [spikes(x, v), v];
+    case 2: return [[block(x,0,v,1)], v];
+    case 3: return [[block(x,0,1,v)], 1];
+    case 4: { const y=Math.floor(v/10), w=v%10; return [[floatPad(x,y,w)].concat(spikes(x,w)), w]; }
+    case 5: return [stairs(x,3).concat(spikes(x+3,v)), 3+v];
+    case 6: return [[block(x,0,3,1), spike(x+1,1)], 3];
+    case 7: { const o=[]; const mid=Math.floor(v/2); for(let i=0;i<v;i++){ if(i===mid) o.push(block(x+i,0,1,1)); else o.push(spike(x+i)); } return [o, v]; }
+    case 8: return [[floatPad(x,2,2), floatPad(x+3,4,2)].concat(spikes(x,5)), 5];
+    case 9: return [[block(x,0,1,v), spike(x+1), block(x+2,0,1,v)], 3];
+    case 10: return [[spike(x), spike(x+v), spike(x+2*v)], 2*v+1];
+    case 11: return [[block(x,0,1,3), block(x+1,0,1,2), block(x+2,0,1,1)].concat(spikes(x+3,v)), 3+v];
+    case 12: return [[block(x,0,1,1)].concat(spikes(x+1,2), [block(x+3,0,1,2)], spikes(x+4,2), [block(x+6,0,1,3)]), 7];
+    case 13: return [spikes(x,2).concat([block(x+2,0,v,1)], spikes(x+2+v,2)), v+4];
+  }
+  return [[], 0];
+}
+
+/* ---------- wave-phase pattern templates (v packs 2 digits for gates) ---------- */
+function wavePat(pid, x, v, C){
+  switch(pid){
+    case 0: return [spikes(x, v), v];
+    case 1: { const a=[]; for(let i=0;i<v;i++) a.push(ispike(x+i)); return [a, v]; }
+    case 2: return [[block(x,0,1,v)], 1];
+    case 3: return [[cblock(x,v,1)], 1];
+    case 4: { const h1=Math.floor(v/10), h2=v%10; return [[block(x,0,1,h1), cblock(x,h2,1)], 1]; }
+    case 5: { const a=Math.floor(v/10), b=v%10; return [[block(x,0,1,a), cblock(x+3,b,1), block(x+6,0,1,a)], 7]; }
+    case 6: { const h1=Math.floor(v/10), h2=v%10; return [[block(x,0,3,h1), cblock(x,h2,3)], 3]; }
+    case 7: return [[spike(x), ispike(x+2), spike(x+4), ispike(x+6)], 7];
+  }
+  return [[], 0];
+}
+
+/* ---------- per-level parameters (deterministic) ---------- */
+function levelParams(mode, idx){
+  const ex = (mode === 'extreme'), d = idx/49;
+  const L = Math.round((ex ? 150 : 112) + idx*(ex ? 2.0 : 1.3));
+  const ceil = ex ? (d < 0.25 ? 7 : (d < 0.6 ? 6 : 5)) : 7;
+  const speed = ex ? 1.12 + 0.48*d : 0.9 + 0.3*d;
+  const cubeEnd = Math.round(L*0.55);
+  return {ex:ex, d:d, L:L, ceil:ceil, speed:speed, cubeEnd:cubeEnd, waveStart:cubeEnd, len:L+10,
+          hue: ex ? (330 + idx*7) % 360 : (185 + idx*6) % 360};
+}
+
+/* ---------- recipe encode/decode: each pattern = 4 chars ---------- */
+function encRec(a){ let s=''; for(let i=0;i<a.length;i+=3){ s += (a[i]+1).toString(36) + a[i+1].toString(36) + ('0'+a[i+2].toString(36)).slice(-2); } return s; }
+function decRec(s){ const a=[]; for(let i=0;i<s.length;i+=4){ a.push(parseInt(s.charAt(i),36)-1, parseInt(s.charAt(i+1),36), parseInt(s.substr(i+2,2),36)); } return a; }
+
+/* ---------- rebuild a level from its recipe ---------- */
+function buildLevel(mode, idx, rec){
+  const P = levelParams(mode, idx), data = [];
+  const c = decRec(rec.c), w = decRec(rec.w);
+  let x = 16;
+  for(let i=0;i<c.length;i+=3){ x += c[i+1]; if(c[i] >= 0){ const r = cubePat(c[i], x, c[i+2]); for(const o of r[0]) data.push(o); x += r[1]; } }
+  x = P.waveStart + 10;
+  for(let i=0;i<w.length;i+=3){ x += w[i+1]; if(w[i] >= 0){ const r = wavePat(w[i], x, w[i+2], P.ceil); for(const o of r[0]) data.push(o); x += r[1]; } }
+  return {mode:mode, idx:idx, name:(P.ex ? 'EXTREME ' : 'LITE ') + (idx+1), hue:P.hue, speed:P.speed,
+          ceil:P.ceil, waveStart:P.waveStart, len:P.len, data:data, isTutorial:false};
+}
+
+/* ---------- the hand-made tutorial level ---------- */
+function tutorialLevel(){
+  return {mode:'tutorial', idx:0, name:'TUTORIAL', hue:200, speed:0.85, ceil:7, waveStart:96, len:156, isTutorial:true,
+    data:[spike(22), block(34,0,3,1)].concat(spikes(52,5), [block(72,0,1,3), spike(114), ispike(126), spike(138)]),
+    msgs:[
+      {x0:-8,  x1:16,  k:'tut_welcome'}, {x0:16,  x1:30,  k:'tut_jump'},
+      {x0:30,  x1:46,  k:'tut_land'},    {x0:46,  x1:62,  k:'tut_double'},
+      {x0:62,  x1:80,  k:'tut_dot'},     {x0:80,  x1:96,  k:'tut_wavePortal'},
+      {x0:96,  x1:118, k:'tut_wave'},    {x0:118, x1:134, k:'tut_wave2'},
+      {x0:134, x1:156, k:'tut_yellow'}
+    ]};
+}
+
+/* ---------- player factory ---------- */
+function newPlayer(noDJ){
+  return {x:0, y:-PLAYER, vy:0, rot:0, onGround:true, airJumps:noDJ?0:1, form:'cube', grace:0, ph:false, dj:false, justWave:false};
+}
+
+/* ---------- ONE physics step (used by the game AND the solver) ----------
+   returns 0 = alive, 1 = dead, 2 = touched the yellow finish line.
+   hm = hitbox margin (solver uses it to demand slack). */
+function stepCore(p, lvl, data, held, queued, dt, hm){
+  const hs = BASE_SPEED*lvl.speed, ceilY = -lvl.ceil*U, AJ = lvl.noDJ ? 0 : 1;
+  p.x += hs*dt;
+  if(lvl.waveStart && p.form === 'cube' && p.x >= lvl.waveStart*U){
+    p.form = 'wave'; p.grace = 22; p.y = ceilY + (lvl.ceil*U - PLAYER)/2; p.vy = 0; p.justWave = true;
+  }
+  const prevBottom = p.y + PLAYER;
+  if(p.form === 'cube'){
+    p.vy += GRAVITY*dt;
+    if(p.onGround){ if(held){ p.vy = JUMP_V; p.onGround = false; } }
+    else if(queued && p.airJumps > 0){ p.vy = DJUMP_V; p.airJumps--; p.dj = true; }
+    p.y += p.vy*dt;
+    if(!p.onGround) p.rot += 0.11*dt; else p.rot = Math.round(p.rot/(Math.PI/2))*(Math.PI/2);
+    p.onGround = false;
+    if(p.y + PLAYER >= 0){ p.y = -PLAYER; p.vy = 0; p.onGround = true; p.airJumps = AJ; }
+  } else {
+    p.vy = held ? -hs : hs;
+    p.y += p.vy*dt;
+    p.rot = held ? -Math.PI/4 : Math.PI/4;
+    if(p.grace > 0){ p.grace -= dt; p.y = Math.max(ceilY+4, Math.min(-PLAYER-4, p.y)); }
+    else if(p.y + PLAYER + hm >= 0 || p.y - hm <= ceilY) return 1;
+  }
+  const ins = (p.form === 'wave' ? 12 : 5) - hm, ps = PLAYER - ins*2, pbx = p.x + ins, pby = p.y + ins;
+  const pr = p.x + PLAYER + hm + 2, pl = p.x - hm - 2;
+  for(let i=0;i<data.length;i++){
+    const o = data[i], ox = o.x*U, ow = o.w*U;
+    if(ox > pr || ox + ow < pl) continue;
+    const oh = o.h*U, anch = (o.t === 'cblock' || o.t === 'ispike');
+    const oy = anch ? ceilY : -(o.y||0)*U - oh;
+    if(o.t === 'spike' || o.t === 'ispike'){
+      const sx = ox + ow*0.3, sy = oy + (o.t === 'spike' ? oh*0.42 : 0), sw = ow*0.4, sh = oh*0.58;
+      if(pbx < sx+sw && pbx+ps > sx && pby < sy+sh && pby+ps > sy) return 1;
+    } else if(p.form === 'wave'){
+      if(pbx < ox+ow && pbx+ps > ox && pby < oy+oh && pby+ps > oy) return 1;
+    } else {
+      const fx = p.x - hm, fy = p.y - hm, fs = PLAYER + hm*2;
+      if(fx < ox+ow && fx+fs > ox && fy < oy+oh && fy+fs > oy){
+        if(p.vy >= 0 && prevBottom <= oy + 14 - hm){ p.y = oy - PLAYER; p.vy = 0; p.onGround = true; p.airJumps = AJ; }
+        else return 1;
+      }
+    }
+  }
+  if(p.x + PLAYER >= lvl.len*U) return 2;
+  return 0;
+}
+
+
+/* ==================================================================
+   SECTION 6 - THE 100 LEVELS
+   Each level is a compact "recipe" (a string of pattern ids, gaps and
+   sizes) found by a generate-and-verify search: a pattern was only kept
+   if a solver bot could survive it with a safety margin of a few pixels.
+   buildLevel() expands a recipe into obstacles. Same recipe = same level.
+   Every level: cube section -> blue wave portal -> wave corridor ->
+   YELLOW FINISH LINE.
+   ================================================================== */
+const RECIPES = {"lite":{"0":{"c":"1g0039021b00","w":"26011a0227021602"},"1":{"c":"3d021c001900","w":"260116011a0116021901"},"2":{"c":"1a001c001b000600","w":"1802160227011a02"},"3":{"c":"3f022e0206000600","w":"19012902160216012802"},"4":{"c":"1e002d021c00","w":"1a021a0217021901"},"5":{"c":"1g003a023c02","w":"1a021601190227021602"},"6":{"c":"2a022c024f02","w":"28021601280116022601"},"7":{"c":"3c034b023f03","w":"28011601190127022601"},"8":{"c":"49013b0249024901","w":"27024a034a0237022601"},"9":{"c":"3b0329024a011800","w":"2a021802260247023702"},"10":{"c":"39033a0328024b01","w":"46031902380346034703"},"11":{"c":"4b025b0m39023903","w":"360319011801470316021602"},"12":{"c":"1e001a001f000600","w":"19012602260129022a02"},"13":{"c":"2a023b021b002b03","w":"260249023503160246033502"},"14":{"c":"1d004b0239032802","w":"370347032901280116023603"},"15":{"c":"3e024e013e030600","w":"190225014702260138033502"},"16":{"c":"47012e0229035a0m0600","w":"450237034503190218012501"},"17":{"c":"580n29032a021e00","w":"47031902490328022701"},"18":{"c":"5e0m2e035c0n0600","w":"490328013503390248033803"},"19":{"c":"27031a002c034c020600","w":"350228022701270125023802"},"20":{"c":"2a0267027700170037020600","w":"180135031802360317011902"},"21":{"c":"7900580m7d0078000600","w":"180148031502490317011502"},"22":{"c":"2b03490238022a031800","w":"1801380347024803250135024902"},"23":{"c":"3c024701cc02590m0600","w":"3903150115022602490315014603"},"24":{"c":"490329033a023b026702","w":"370328012802480236031801"},"25":{"c":"1b0016003a02eb023703","w":"19013603560c560v15022702550v"},"26":{"c":"e603c902c80248031800","w":"3802290216011602560c2802"},"27":{"c":"b8038b059800c6020600","w":"290227023803560l1902550d"},"28":{"c":"77002b039600e7038705","w":"550m2902450338024902560c1802"},"29":{"c":"3c03180079005a0n7b00","w":"1801450227021801550v570c2902"},"30":{"c":"99002b049c0096000600","w":"350318022802550l260219022902"},"31":{"c":"280366024701c80247022a02","w":"180229014703560c460346033903"},"32":{"c":"77008b054a03b603570m0600","w":"1701580c49034702560l46023703"},"33":{"c":"2a036802e803360249030600","w":"4903450325011802570m350236031801"},"34":{"c":"98001a0069024b02c6020600","w":"1601260127013703270247021901"},"35":{"c":"e9023503b8036802550w1800","w":"560m15023803760c2902350235034803"},"36":{"c":"27022a0478002804450237024502","w":"45031801550c2902250239036916"},"37":{"c":"d70018004a028605450339030600","w":"150116021401170234033502680y560l"},"38":{"c":"680249032902560x2a032903","w":"3502770c670x660y16013803"},"39":{"c":"b9033a03570wb60326034601","w":"3802760c540d560d560v260225014602580c"},"40":{"c":"a702c802c602aa0285057800","w":"671637021702640x14024403580c"},"41":{"c":"66022504d5003503570x3a032503","w":"740m350238033603540m660y28011702"},"42":{"c":"c702560n8905680269021500","w":"3602240248024603550l640w14013603570m"},"43":{"c":"b603470147011700590x49017900","w":"4503760c570c67174603640x540c760v"},"44":{"c":"560ne802b6034801880518000600","w":"540c3603270236022501550l780v680x"},"45":{"c":"580x44011400e703280324021800c802","w":"540l2701540l250138031701640n760l740c"},"46":{"c":"2503b803e7027600550m1800e602","w":"1802640m160137033403740l4802760v"},"47":{"c":"280486057500c702350384056802","w":"3402240144026817570c4403160147031701"},"48":{"c":"95003403550n270428023703a702a602","w":"760l1602250218021802440214023402780v"},"49":{"c":"280384059800e7032703a6024702","w":"650o16012601740l4703370325026716"}},"extreme":{"0":{"c":"150035026303550n74007300750013001500","w":"550c3502230215021301330515012502730c3405"},"1":{"c":"2503540m43026503e302c502c3022303","w":"44022302530w4305230275157415530l740w550d"},"2":{"c":"540m7400b302b302b502540m4403b3034402","w":"2402250223014502730m540m4402740l540c4403"},"3":{"c":"43033403150064021400250324034501b403","w":"3403740c23021502750d750l350224023504"},"4":{"c":"1300b402550n740034027500530me302b303","w":"3402740w740w550l750c2501140173153303550w"},"5":{"c":"6502d500540m93002502c503e402","w":"4505440333024503740l641g3304530d35024504"},"6":{"c":"3502d500a303e3039500840743022402","w":"2501730d45051503750d330425014304750n530m"},"7":{"c":"7500e3036403240315002504740063021300","w":"23011301230268183505750l740e2501750m"},"8":{"c":"2503340225031300740093002503450185054401","w":"130323011303340223026417750n3304550n2502"},"9":{"c":"7500230463038307c503e302550w45031300","w":"2502750e4303741543046a0z150234044304"},"10":{"c":"6303d400b5028507a303550nb5024501","w":"8300550d650y630w35033404651g730d"},"11":{"c":"d300740025046403b4034502d30015004401","w":"1401840085002303250114014402650w1302"},"12":{"c":"150063038407b403b40364028405c402","w":"640y8500650p33042502640o15011303"},"13":{"c":"1400530m65037400a503b303a402650243041500","w":"3502640o85003304150334023504650m1301"},"14":{"c":"550m44042504430285076302c4029300550w7500","w":"1401530d43043402130244044503730c25012301230225022403"},"15":{"c":"e304a30244042305930063022504730035033502","w":"230144036516540c3403740b530v65171302530l630m"},"16":{"c":"43042304b5022303e3022405e50324032505a303","w":"240145033503530b8500140283008300540l8400"},"17":{"c":"6402540x530xd30014008305c302b202720092008207","w":"440433031302730b2301320433034302730b13012303140284002303"},"18":{"c":"5216b202a30223054204b4022304b403e204c403c202","w":"740l730d740d540d640x4403120344023402440212026216"},"19":{"c":"94006303530x43041400840524023302140084052305b202","w":"1203740b440322033304530v520c32038400720b1201430322038400"},"20":{"c":"e204e402e202730072001200d400e302830523056202","w":"1202730c3202660y320422038200540c22014402520b22018300"},"21":{"c":"3303440124027300e3025316b202a203520w220472006303b303","w":"2201140132034403230263162302430222018300620n22026717"},"22":{"c":"230344043203240384077200b302520n540w520wa30242044304520x520n","w":"8200740d4203520b84003304730c730v2303720b13022401530l"},"23":{"c":"33022305e402e304d2003303e203b402240434034403","w":"130333023302520d820023022403720b8300640n8300"},"24":{"c":"33027400620243042404e203e20223052202430482072204e303","w":"1202640n740b42028200720l1403740b3303240213014303630y"},"25":{"c":"e204620373002202d2005316b2022303a4024302d200720014004201","w":"53154404531512034303230182003404820012018400630x2403"},"26":{"c":"e202b2022202e302c20312003402640223057200840572002305","w":"720c520l22018300130214028300730d23034203420433043204420313034202"},"27":{"c":"530ne4042403d40083052205740023041400d20092004204","w":"1401660y8300730d4402340423032302240234028400530d"},"28":{"c":"e204e304720042032305b202440443042405320262024301720042041400","w":"640o1301440422023203240284002302640n4302720c640n"},"29":{"c":"e2042405520me202240584072404d400d200a203520x4304","w":"8200630w24024402630w33041303530l62164304330432048400"},"30":{"c":"12002304620222032202840722057300530wa302540m640372006403","w":"830042031402840023023302330323032201530b340282004202530l640n"},"31":{"c":"220534022202e303e2041400520x9400320343014404a30332038307a202","w":"640w22033203430214032302620w32033403840042032402540b3403"},"32":{"c":"7300e20224055216e304b2022404330333022404e202e3023403","w":"720c83002402620x43032202620n120332023202520c520l340234028300"},"33":{"c":"41032105510xb303710021056202a203b302511672004104210383074104730022056302","w":"81008200830043032303620x230281003203630n33031103720c"},"34":{"c":"e1032304b302e102c2036302710092006303d2004104b1024303b1034203","w":"4202510c33038100620m4302820021033303520b520b410212034203330343021303530b530l"},"35":{"c":"d3002304210592008307830792006302510m22058305a10213006202","w":"4102730l430342033302710c3102720l630w820012028200120131028300530c630x"},"36":{"c":"b3023102b2026303810721052105d20021059100510x8305d20023046102","w":"730b21033102820011014103630n620w630w510c660x730l630m4203"},"37":{"c":"5216a10223049300b302b202830713002303e2024201420413009300520we202a302","w":"8200120211022203730l8100720b620w12021302620x610n510l2202730b"},"38":{"c":"510xb1022302b30261026103230243044104a103b102b20361031100d30041028205b103","w":"220143033203530c630w730l42022102610m3202630m620n320321023302120312022203"},"39":{"c":"2102520x110042042304210472004201230521028205b102230342048207510m220342042104520w43047100","w":"43031202720c720c1302620w2203630x1102530b12014203530l13013102520b510c620n12011103"},"40":{"c":"3103d200110093007200d20012001200c10373002105e3032202a203c2022104531622022203","w":"31021202110311033203630m820012021203430231021202520b730b4303510l1303730c710l630w"},"41":{"c":"830781077200510x910021058305c3022305b1023303e20441015216d2002303","w":"520l12021103520b4103610n610x31034303410341033203810033022201330243031303510b120182003103"},"42":{"c":"a10261021300b2023103530w7300510xe304e304a1039200d2001200d30063027200","w":"520b310322028300510b33023302810031032203530b1101410242023103710l660x83004303630m"},"43":{"c":"6202830521043102a202e3034103510w320342043302720043047100e2041300b302220322051200","w":"610n610n12034203410213021202720b530b31022301630m650x610m3102720b33033202"},"44":{"c":"e204a103511623041300d2002203d300e3033302530w13002204a302b202e1032302","w":"4303620n83002201430313034203620x31031101520l3202710b720c8100730b210122018200"},"45":{"c":"d100510w2204b303e304b202a103c2039300c3035116220221056202c3032105","w":"22012201710c710b610m3102650x520c1103710b630n82003103520c110242022102630m3303"},"46":{"c":"2205430143047200d300a3036202b30283077100210483059200210312006102d1008105","w":"2202510l520c710b620x8300730c8100330383002303320311011102330213018200710c"},"47":{"c":"530m6303e102220271002102410192002103531661038205b102e20441042305d300a202c202","w":"1102510b82004202630w630n810033033103130282008200130382004102710c2301"},"48":{"c":"a10213009100420422036103e30441019200b203410443049100120041049300510we302e3039200","w":"2203530c3102510c620x430322014203530c1302720b4102410342033303630m510b43038200530b410232028200"},"49":{"c":"b1029100930081051300220223059200b303b2025316e2022205e3049100120013001100","w":"530b4102620m620w510b13024103610n8100230123038100810012033203630w31034303"}}};
+function genLevel(mode, idx){ return buildLevel(mode, idx, RECIPES[mode][idx]); }
+
+/* ==================================================================
+   SECTION 7 - GAME STATE
+   ================================================================== */
+let state = 'menu';            // menu | play | dead | levelcomplete
+let cur = null;                // current level object
+let attempts = 1;
+let camX = 0, player = null;
+let particles = [], rings = [], trail = [];
+let shake = 0, flash = 0;
+let bgHue = 200, bgHueTarget = 200;
+let portalSpin = 0, tick = 0, deadTimer = 0, warpTimer = 0, acc = 0;
+const stars = [];
+for(let i=0;i<120;i++) stars.push({x:Math.random(), y:Math.random()*0.8, s:Math.random()*2+0.5, p:Math.random()*Math.PI*2});
+
+function groundY(){ return H * GROUND_FRAC; }
+function levelScale(){ return (cur && cur.isTutorial) ? 1 : TIME_SCALE; }
+
+function updateFormTag(){
+  document.getElementById('formTag').textContent = (player && player.form === 'wave') ? t('formWave') : t('formCube');
+}
+function resetPlayer(){
+  player = newPlayer(false);
+  camX = -U*6; trail = []; acc = 0;
+  Music.play(cur, 1);                                  // (re)start this level's song from the top
+  updateFormTag();
+}
+function startLevel(levelObj){
+  cur = levelObj;
+  bgHueTarget = cur.hue;
+  attempts = 1;
+  document.getElementById('attempts').textContent = attempts;
+  document.getElementById('levelName').textContent = cur.isTutorial ? t('tutorial') : cur.name;
+  document.getElementById('levelSub').textContent =
+    cur.isTutorial ? '' : (cur.mode === 'extreme' ? '\uD83D\uDD25 DASH-EXTREME' : '\uD83C\uDF0A DASH-LITE');
+  document.body.classList.toggle('tutorial', !!cur.isTutorial);   // shows the SKIP button
+  resetPlayer();
+  state = 'play';
+  document.body.classList.add('playing');
+  showScreen(null);
+}
+
+/* ==================================================================
+   SECTION 8 - INPUT
+   jumpHeld   = button is down (cube auto-jumps, wave climbs).
+   jumpQueued = a FRESH press, consumed by the next physics tick
+                (this is what triggers the double jump).
+   ================================================================== */
+let jumpHeld = false, jumpQueued = false;
+function pressJump(){ if(!jumpHeld) jumpQueued = true; jumpHeld = true; }
+function releaseJump(){ jumpHeld = false; }
+addEventListener('keydown', e => {
+  Music.unlock();                                      // a key press counts as the gesture browsers require
+  if(e.code === 'KeyM'){ Music.toggle(); refreshMusicUI(); }   // M = mute / unmute
+  if(['Space','ArrowUp','KeyW'].includes(e.code)){
+    e.preventDefault();
+    if(!e.repeat) pressJump(); else jumpHeld = true;
+  }
+  if(e.code === 'Escape') exitToMenu();
+});
+addEventListener('keyup', e => { if(['Space','ArrowUp','KeyW'].includes(e.code)) releaseJump(); });
+canvas.addEventListener('mousedown', pressJump);
+canvas.addEventListener('mouseup', releaseJump);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); pressJump(); }, {passive:false});
+canvas.addEventListener('touchend', releaseJump);
+addEventListener('pointerdown', () => Music.unlock());   // any click/tap anywhere (menus too) unlocks audio
+
+/* ==================================================================
+   SECTION 9 - MENUS, TUTORIAL CHOICE & NAVIGATION
+   ================================================================== */
+const SCREENS = ['scr-title','scr-modes','scr-levels','scr-settings','scr-dialog'];
+function showScreen(id){
+  for(const s of SCREENS) document.getElementById(s).classList.toggle('off', s !== id);
+  if(id){ document.body.classList.remove('playing'); document.body.classList.remove('tutorial'); Music.menu(); }
+}
+let pendingMode = null;       // mode the player picked before the tutorial question
+
+function openLevels(mode){
+  const title = document.getElementById('gridTitle');
+  title.textContent = mode === 'extreme' ? 'DASH-EXTREME' : 'DASH-LITE';
+  title.className = 'gridTitle ' + mode;
+  const grid = document.getElementById('lvlGrid');
+  grid.innerHTML = '';
+  /* Every level is open from the start: all 50 buttons are clickable.
+     A level that you have beaten gets the green "done" style + checkmark. */
+  const cl = save.cleared[mode] || {};
+  for(let i=0;i<50;i++){
+    const b = document.createElement('div');
+    b.className = 'lvl ' + (cl[i] ? 'done' : 'open');
+    b.innerHTML = '<span>' + (i+1) + '</span>';
+    b.addEventListener('click', () => startLevel(genLevel(mode, i)));
+    grid.appendChild(b);
+  }
+  showScreen('scr-levels');
+}
+function refreshModeCards(){
+  document.getElementById('liteProg').textContent    = clearedCount('lite')    + ' / 50 ' + t('completedOf');
+  document.getElementById('extremeProg').textContent = clearedCount('extreme') + ' / 50 ' + t('completedOf');
+}
+
+/* First time in a mode: ASK whether to take the tutorial or skip it. */
+function chooseMode(mode){
+  if(save.tut){ openLevels(mode); return; }
+  pendingMode = mode;
+  showDialog('tutAskTitle', 'tutAskMsg', 'startTut', () => startLevel(tutorialLevel()),
+             'skipTut', () => { save.tut = true; persist(); pendingMode = null; openLevels(mode); });
+}
+/* Skip button shown during the tutorial run. */
+function skipTutorial(){
+  save.tut = true; persist();
+  state = 'menu'; cur = null;
+  const m = pendingMode; pendingMode = null;
+  if(m) openLevels(m); else { showScreen('scr-modes'); refreshModeCards(); }
+}
+function exitToMenu(){
+  if(state === 'menu') return;
+  state = 'menu'; cur = null;
+  showScreen('scr-modes'); refreshModeCards();
+}
+function showDialog(titleKey, msgKey, btnKey, onClick, btn2Key, onClick2){
+  document.getElementById('dlgTitle').textContent = t(titleKey);
+  document.getElementById('dlgMsg').textContent = t(msgKey);
+  const b = document.getElementById('dlgBtn');  b.textContent = t(btnKey);  b.onclick = onClick;
+  const b2 = document.getElementById('dlgBtn2');
+  if(btn2Key){ b2.textContent = t(btn2Key); b2.onclick = onClick2; b2.style.display = ''; }
+  else { b2.style.display = 'none'; }
+  state = 'menu'; cur = null;
+  showScreen('scr-dialog');
+}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('.langBtn').forEach(el => el.classList.toggle('sel', el.dataset.lang === save.lang));
+  refreshModeCards();
+  if(player) updateFormTag();
+  refreshMusicUI();
+}
+document.querySelectorAll('.langBtn').forEach(el =>
+  el.addEventListener('click', () => { save.lang = el.dataset.lang; persist(); applyLang(); }));
+
+document.getElementById('btnPlay').onclick         = () => { showScreen('scr-modes'); refreshModeCards(); };
+document.getElementById('btnSettings').onclick     = () => showScreen('scr-settings');
+document.getElementById('btnBackTitle').onclick    = () => showScreen('scr-title');
+document.getElementById('btnBackSettings').onclick = () => showScreen('scr-title');
+document.getElementById('btnBackModes').onclick    = () => showScreen('scr-modes');
+document.getElementById('cardLite').onclick        = () => chooseMode('lite');
+document.getElementById('cardExtreme').onclick     = () => chooseMode('extreme');
+document.getElementById('btnReplayTut').onclick    = () => { pendingMode = null; startLevel(tutorialLevel()); };
+document.getElementById('menuBtn').onclick         = exitToMenu;
+document.getElementById('skipBtn').onclick         = skipTutorial;
+
+/* Music controls: settings toggle + volume slider + HUD button all stay in sync. */
+function refreshMusicUI(){
+  const on = save.music !== false;
+  const tg = document.getElementById('musicToggle');
+  tg.textContent = '\u266A ' + t(on ? 'musicOn' : 'musicOff');
+  tg.classList.toggle('sel', on);
+  document.getElementById('musicVol').value = save.vol;
+  const mb = document.getElementById('musicBtn');
+  mb.textContent = on ? '\u266A' : '\u266A \u2715';
+  mb.style.opacity = on ? '1' : '0.55';
+}
+document.getElementById('musicToggle').onclick = () => { Music.toggle(); refreshMusicUI(); };
+document.getElementById('musicBtn').onclick    = () => { Music.toggle(); refreshMusicUI(); };
+document.getElementById('musicVol').oninput    = () => { Music.setVol(+document.getElementById('musicVol').value); };
+
+(function makeFloaters(){
+  for(const scr of ['scr-title','scr-modes']){
+    const el = document.getElementById(scr);
+    for(let i=0;i<10;i++){
+      const f = document.createElement('div');
+      f.className = 'floater';
+      const s = 10 + Math.random()*26;
+      f.style.cssText = 'width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100)+'%;' +
+        'animation-duration:'+(7+Math.random()*9)+'s;animation-delay:-'+(Math.random()*12)+'s;' +
+        'border-color:hsla('+(Math.random()*360)+',100%,70%,.3)';
+      el.appendChild(f);
+    }
+  }
+})();
+
+/* ==================================================================
+   SECTION 10 - EVENTS & EFFECTS (death, finish, double jump, wave)
+   ================================================================== */
+function die(){
+  state = 'dead'; deadTimer = 0; shake = 18; flash = 0.9;
+  Music.duck();                                        // music dips when you crash
+  attempts++; document.getElementById('attempts').textContent = attempts;
+  const cx = player.x + PLAYER/2, cy = groundY() + player.y + PLAYER/2;
+  for(let i=0;i<70;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*9+2;
+    particles.push({x:cx, y:cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-2, life:1,
+      hue:bgHue + Math.random()*80, size:Math.random()*7+3});
+  }
+}
+function completeLevel(){                          // player touched the yellow finish line
+  state = 'levelcomplete'; warpTimer = 0; flash = 0.8;
+  const cx = player.x + PLAYER/2, cy = groundY() + player.y + PLAYER/2;
+  for(let i=0;i<110;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*11+3;
+    particles.push({x:cx, y:cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1.4,
+      hue:45 + Math.random()*20, size:Math.random()*8+3});
+  }
+}
+function doubleJumpFX(){
+  const cx = player.x + PLAYER/2, cy = groundY() + player.y + PLAYER;
+  rings.push({x:cx, y:cy, r:6, life:1});
+  for(let i=0;i<16;i++){
+    const a = Math.PI*(0.1 + 0.8*Math.random()), sp = Math.random()*5+2;
+    particles.push({x:cx, y:cy, vx:Math.cos(a)*sp*(Math.random()<.5?-1:1), vy:Math.sin(a)*sp,
+      life:0.7, hue:(bgHue+160)%360, size:Math.random()*5+2});
+  }
+}
+function waveFX(){                                  // cube -> wave transformation burst
+  flash = 0.55; shake = 8; updateFormTag();
+  Music.setIntensity(2);                               // wave section = heavier, driving beat
+  const cx = player.x + PLAYER/2, cy = groundY() + player.y + PLAYER/2;
+  for(let i=0;i<50;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*8+2;
+    particles.push({x:cx, y:cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1,
+      hue:195 + Math.random()*30, size:Math.random()*6+2});
+  }
+}
+/* After the finish: tutorial -> graduation dialog, level 50 -> victory,
+   otherwise mark the level cleared and roll into the next one. */
+function afterFinish(){
+  if(cur.isTutorial){
+    save.tut = true; persist();
+    const target = pendingMode; pendingMode = null;
+    showDialog('tutDone','tutDoneMsg','cont', () => {
+      if(target) openLevels(target); else { showScreen('scr-modes'); refreshModeCards(); }
+    });
+    return;
+  }
+  const mode = cur.mode, idx = cur.idx;
+  save.cleared[mode][idx] = 1; persist();            // remember this level as beaten
+  if(idx + 1 < 50){ startLevel(genLevel(mode, idx+1)); }
+  else showDialog('youWin', mode==='extreme' ? 'winExtreme' : 'winLite', 'cont',
+                  () => { showScreen('scr-modes'); refreshModeCards(); });
+}
+
+/* ==================================================================
+   SECTION 11 - UPDATE
+   Physics uses a FIXED TIMESTEP: each real frame we owe (dt * TIME_SCALE) ticks
+   and run stepCore once per tick. That keeps the game deterministic
+   (same as the solver) and identical on 60Hz and 144Hz screens.
+   ================================================================== */
+function gameTick(){
+  const q = jumpQueued; jumpQueued = false;
+  const r = stepCore(player, cur, cur.data, jumpHeld, q, 1, 0);
+  if(player.justWave){ player.justWave = false; waveFX(); }
+  if(player.dj){ player.dj = false; doubleJumpFX(); }
+  const fast = levelScale() > 1;
+  trail.push({x:player.x+PLAYER/2, y:groundY()+player.y+PLAYER/2, life:1});
+  const dec = player.form === 'wave' ? (fast ? 0.05 : 0.025) : (fast ? 0.1 : 0.045);
+  for(const tr of trail) tr.life -= dec;
+  while(trail.length && trail[0].life <= 0) trail.shift();
+  if(r === 1){ die(); return false; }
+  if(r === 2){ completeLevel(); return false; }
+  return true;
+}
+
+function update(dt){
+  tick += dt; portalSpin += 0.06*dt;
+  bgHue += (bgHueTarget - bgHue) * 0.03 * dt;
+  if(shake>0) shake = Math.max(0, shake - 1.1*dt);
+  if(flash>0) flash = Math.max(0, flash - 0.03*dt);
+  for(const p of particles){ p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 0.25*dt; p.life -= 0.02*dt; }
+  particles = particles.filter(p=>p.life>0);
+  for(const r of rings){ r.r += 3.2*dt; r.life -= 0.05*dt; }
+  rings = rings.filter(r=>r.life>0);
+
+  if(state === 'dead'){
+    deadTimer += dt;
+    if(deadTimer > DEATH_PAUSE){ resetPlayer(); state = 'play'; }
+    return;
+  }
+  if(state === 'levelcomplete'){
+    warpTimer += dt;
+    if(warpTimer > 70) afterFinish();
+    return;
+  }
+  if(state !== 'play' || !cur){ jumpQueued = false; return; }
+
+  acc += dt * levelScale();                          // ticks owed this frame
+  let n = 0;
+  while(acc >= 1 && n < 14){ acc -= 1; n++; if(!gameTick()) break; }
+  camX = player.x - W*0.3;
+
+  if(state === 'play'){
+    document.getElementById('progressBar').style.width = (Math.min(1, player.x/(cur.len*U))*100).toFixed(1) + '%';
+    if(player.form === 'cube' && player.onGround && Math.random() < 0.6){
+      particles.push({x:player.x, y:groundY(), vx:-Math.random()*3-1, vy:-Math.random()*2,
+        life:0.5, hue:bgHue+40, size:Math.random()*4+1});
+    }
+  }
+}
+
+/* ==================================================================
+   SECTION 12 - RENDERING (painter's algorithm, back to front)
+   sky -> stars -> mountains -> grid floor -> wave corridor -> obstacles
+   -> wave portal -> YELLOW FINISH LINE -> trail -> player -> particles.
+   ================================================================== */
+function drawPortal(gridX, hue){                    // blue wave-transform portal
+  const g = groundY(), px = gridX*U - camX;
+  if(px > W + 220 || px < -220) return;
+  const pcx = px + U*0.75, pcy = g - U*2.2;
+  for(let r=0;r<3;r++){
+    ctx.save(); ctx.translate(pcx,pcy); ctx.rotate(portalSpin*(r%2?1:-1)+r);
+    ctx.strokeStyle = 'hsla('+hue+',100%,'+(65+r*8)+'%,'+(0.9-r*0.22)+')';
+    ctx.lineWidth = 5-r; ctx.shadowColor = 'hsl('+hue+',100%,60%)'; ctx.shadowBlur = 25;
+    ctx.beginPath(); ctx.ellipse(0,0,U*(0.7+r*0.25),U*(2.0+r*0.3),0,0.3,Math.PI*2-0.1); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.shadowBlur = 0;
+  const pg = ctx.createRadialGradient(pcx,pcy,2,pcx,pcy,U*1.4);
+  pg.addColorStop(0,'hsla('+hue+',100%,85%,.9)'); pg.addColorStop(1,'hsla('+hue+',100%,50%,0)');
+  ctx.fillStyle = pg;
+  ctx.beginPath(); ctx.ellipse(pcx,pcy,U*0.9,U*2.1,0,0,Math.PI*2); ctx.fill();
+}
+
+function drawFinishLine(){                          // the vertical yellow finish line
+  const fx = cur.len*U - camX;
+  if(fx < -80 || fx > W + 80) return;
+  const pulse = 0.6 + 0.4*Math.sin(tick*0.15);
+  const gl = ctx.createLinearGradient(fx-46,0,fx+46,0);
+  gl.addColorStop(0,'rgba(255,230,0,0)');
+  gl.addColorStop(0.5,'rgba(255,230,0,'+(0.38*pulse)+')');
+  gl.addColorStop(1,'rgba(255,230,0,0)');
+  ctx.fillStyle = gl; ctx.fillRect(fx-46,-20,92,H+40);
+  ctx.lineCap = 'butt';
+  ctx.strokeStyle = '#ffe600'; ctx.lineWidth = 7;
+  ctx.shadowColor = '#ffd400'; ctx.shadowBlur = 32;
+  ctx.beginPath(); ctx.moveTo(fx,-20); ctx.lineTo(fx,H+20); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#fffbd0'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(fx,-20); ctx.lineTo(fx,H+20); ctx.stroke();
+  ctx.fillStyle = '#ffe600'; ctx.textAlign = 'center'; ctx.font = 'bold 15px sans-serif';
+  ctx.shadowColor = '#fc0'; ctx.shadowBlur = 12;
+  ctx.fillText(t('finish'), fx, H*0.3);
+  ctx.shadowBlur = 0;
+}
+
+function draw(){
+  const g = groundY();
+  ctx.save();
+  ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+
+  const h1 = bgHue, h2 = (bgHue+60)%360;
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'hsl('+h1+',65%,10%)');
+  grad.addColorStop(0.6,'hsl('+h1+',70%,18%)');
+  grad.addColorStop(1,'hsl('+h2+',80%,26%)');
+  ctx.fillStyle = grad; ctx.fillRect(-20,-20,W+40,H+40);
+
+  for(const s of stars){
+    ctx.globalAlpha = (0.5 + 0.5*Math.sin(tick*0.05 + s.p))*0.8;
+    ctx.fillStyle = 'hsl('+h2+',100%,85%)';
+    ctx.fillRect(((s.x*W - camX*0.08) % W + W) % W, s.y*H, s.s, s.s);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = 'hsla('+h1+',60%,24%,.5)';
+  ctx.beginPath(); ctx.moveTo(0,g);
+  for(let x=0; x<=W; x+=40){
+    const wx = x + camX*0.25;
+    ctx.lineTo(x, g - 60 - 90*Math.abs(Math.sin(wx*0.004)) - 40*Math.sin(wx*0.011));
+  }
+  ctx.lineTo(W,g); ctx.closePath(); ctx.fill();
+
+  ctx.strokeStyle = 'hsla('+h2+',90%,65%,.25)'; ctx.lineWidth = 1;
+  const off = (-camX) % U;
+  for(let x=off; x<W; x+=U){ ctx.beginPath(); ctx.moveTo(x,g); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=g; y<H; y+=U){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle = 'hsl('+h2+',100%,70%)'; ctx.lineWidth = 3;
+  ctx.shadowColor = 'hsl('+h2+',100%,60%)'; ctx.shadowBlur = 18;
+  ctx.beginPath(); ctx.moveTo(0,g); ctx.lineTo(W,g); ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  if(cur){
+    const toScreen = x => x - camX;
+    const cy = g - cur.ceil*U;                       // wave-corridor ceiling (screen y)
+
+    /* Wave corridor: dark mass + glowing ceiling line from the wave portal onward. */
+    if(cur.waveStart){
+      const wsx = Math.max(0, toScreen(cur.waveStart*U));
+      if(wsx < W){
+        ctx.fillStyle = 'rgba(0,0,12,.55)';
+        ctx.fillRect(wsx, -20, W-wsx+20, cy+20);
+        ctx.strokeStyle = 'hsl('+h2+',100%,70%)'; ctx.lineWidth = 3;
+        ctx.shadowColor = 'hsl('+h2+',100%,60%)'; ctx.shadowBlur = 18;
+        ctx.beginPath(); ctx.moveTo(wsx, cy); ctx.lineTo(W, cy); ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    /* Obstacles: floor spikes, ceiling spikes, floor/ceiling blocks. */
+    for(const o of cur.data){
+      const ox = toScreen(o.x*U), ow = o.w*U, oh = o.h*U;
+      if(ox > W + U*2 || ox + ow < -U*2) continue;
+      if(o.t === 'spike'){
+        const oy = g - (o.y||0)*U - oh;
+        ctx.fillStyle = 'hsl(0,90%,55%)';
+        ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.moveTo(ox+ow*0.08, oy+oh); ctx.lineTo(ox+ow/2, oy+oh*0.05); ctx.lineTo(ox+ow*0.92, oy+oh);
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.5; ctx.stroke();
+      } else if(o.t === 'ispike'){
+        ctx.fillStyle = 'hsl(0,90%,55%)';
+        ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.moveTo(ox+ow*0.08, cy); ctx.lineTo(ox+ow/2, cy+oh*0.95); ctx.lineTo(ox+ow*0.92, cy);
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.5; ctx.stroke();
+      } else {
+        const oy = (o.t === 'cblock') ? cy : g - (o.y||0)*U - oh;
+        ctx.fillStyle = 'hsla('+h2+',55%,22%,.95)';
+        ctx.shadowColor = 'hsl('+h2+',100%,60%)'; ctx.shadowBlur = 12;
+        ctx.fillRect(ox,oy,ow,oh);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'hsl('+h2+',100%,70%)'; ctx.lineWidth = 2;
+        ctx.strokeRect(ox+1,oy+1,ow-2,oh-2);
+        ctx.strokeStyle = 'hsla('+h2+',100%,80%,.35)';
+        for(let bx=0;bx<o.w;bx++) for(let by=0;by<o.h;by++)
+          ctx.strokeRect(ox+bx*U+8, oy+by*U+8, U-16, U-16);
+      }
+    }
+
+    if(cur.waveStart) drawPortal(cur.waveStart, 205);   // blue portal = become a wave
+    drawFinishLine();                                   // yellow vertical line = finish
+
+    for(const r of rings){
+      ctx.globalAlpha = Math.max(0,r.life)*0.8;
+      ctx.strokeStyle = 'hsl('+((bgHue+160)%360)+',100%,70%)';
+      ctx.lineWidth = 3*r.life; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.ellipse(toScreen(r.x), r.y, r.r*1.6, r.r*0.6, 0, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+
+    /* Trail: squares for the cube, a connected ribbon for the wave. */
+    if(player && player.form === 'wave' && trail.length > 1){
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for(let i=1;i<trail.length;i++){
+        const a = trail[i].life;
+        ctx.globalAlpha = Math.max(0,a)*0.85;
+        ctx.strokeStyle = 'hsl('+((bgHue+120)%360)+',100%,65%)';
+        ctx.lineWidth = 2 + 8*Math.max(0,a);
+        ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.moveTo(toScreen(trail[i-1].x), trail[i-1].y);
+        ctx.lineTo(toScreen(trail[i].x), trail[i].y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    } else {
+      for(const tr of trail){
+        ctx.globalAlpha = Math.max(0,tr.life)*0.5;
+        ctx.fillStyle = 'hsl('+((bgHue+120)%360)+',100%,65%)';
+        const s = PLAYER*0.55*Math.max(0,tr.life);
+        ctx.fillRect(toScreen(tr.x)-s/2, tr.y-s/2, s, s);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* Player: cube square or wave arrow. */
+    if(player && (state === 'play' || state === 'levelcomplete')){
+      ctx.save();
+      ctx.translate(toScreen(player.x)+PLAYER/2, g + player.y + PLAYER/2);
+      ctx.rotate(player.rot);
+      const c1 = 'hsl('+((bgHue+120)%360)+',100%,60%)';
+      const c2 = 'hsl('+((bgHue+180)%360)+',100%,55%)';
+      if(player.form === 'wave'){
+        ctx.shadowColor = c1; ctx.shadowBlur = 22;
+        const pgr = ctx.createLinearGradient(-PLAYER/2,0,PLAYER/2,0);
+        pgr.addColorStop(0,c2); pgr.addColorStop(1,c1);
+        ctx.fillStyle = pgr;
+        ctx.beginPath();
+        ctx.moveTo(PLAYER*0.62, 0);
+        ctx.lineTo(-PLAYER*0.42, -PLAYER*0.34);
+        ctx.lineTo(-PLAYER*0.18, 0);
+        ctx.lineTo(-PLAYER*0.42, PLAYER*0.34);
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      } else {
+        ctx.shadowColor = c1; ctx.shadowBlur = 20;
+        const pgr = ctx.createLinearGradient(-PLAYER/2,-PLAYER/2,PLAYER/2,PLAYER/2);
+        pgr.addColorStop(0,c1); pgr.addColorStop(1,c2);
+        ctx.fillStyle = pgr;
+        ctx.fillRect(-PLAYER/2,-PLAYER/2,PLAYER,PLAYER);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(-PLAYER/2,-PLAYER/2,PLAYER,PLAYER);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-PLAYER*0.22,-PLAYER*0.2,PLAYER*0.14,PLAYER*0.14);
+        ctx.fillRect(PLAYER*0.08,-PLAYER*0.2,PLAYER*0.14,PLAYER*0.14);
+        ctx.fillRect(-PLAYER*0.18,PLAYER*0.1,PLAYER*0.36,PLAYER*0.08);
+        if(!player.onGround && player.airJumps > 0 && state === 'play'){
+          ctx.shadowColor = '#fff'; ctx.shadowBlur = 10;       // double-jump-ready dot
+          ctx.beginPath(); ctx.arc(0,0,PLAYER*0.07,0,Math.PI*2); ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      ctx.restore();
+    }
+
+    /* Tutorial banner, localized live. */
+    if(cur.isTutorial && cur.msgs && player && state === 'play'){
+      const gx = player.x / U;
+      const m = cur.msgs.find(mm => gx >= mm.x0 && gx < mm.x1);
+      if(m){
+        const text = t(m.k);
+        ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
+        const tw = ctx.measureText(text).width;
+        const bx = W/2, by = H*0.13;
+        ctx.fillStyle = 'rgba(0,0,20,.72)';
+        ctx.strokeStyle = 'rgba(0,255,255,.6)'; ctx.lineWidth = 1.5;
+        if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(bx-tw/2-24, by-30, tw+48, 48, 12); ctx.fill(); ctx.stroke(); }
+        else { ctx.fillRect(bx-tw/2-24, by-30, tw+48, 48); ctx.strokeRect(bx-tw/2-24, by-30, tw+48, 48); }
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = '#0ff'; ctx.shadowBlur = 10;
+        ctx.fillText(text, bx, by+2);
+        ctx.shadowBlur = 0;
+      }
+    }
+  }
+
+  for(const p of particles){
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+    ctx.fillStyle = 'hsl('+p.hue+',100%,65%)';
+    ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
+    ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+  }
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+
+  if(flash > 0){ ctx.fillStyle = 'rgba(255,255,255,'+flash+')'; ctx.fillRect(-20,-20,W+40,H+40); }
+
+  if(state === 'levelcomplete' && warpTimer > 10){
+    ctx.fillStyle = '#ffe34d'; ctx.textAlign = 'center';
+    ctx.font = 'bold 50px sans-serif';
+    ctx.shadowColor = '#fc0'; ctx.shadowBlur = 25;
+    ctx.fillText(t('cleared'), W/2, H/2);
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+}
+
+/* ==================================================================
+   SECTION 13 - MAIN LOOP
+   requestAnimationFrame drives everything; dt is clamped so a hidden
+   tab cannot cause a giant physics jump; the canvas size is re-checked
+   every frame; menus keep animating the backdrop.
+   ================================================================== */
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(2.5, (now - last) / 16.67);
+  last = now;
+  syncSize();
+  if(sized()){
+    if(player && !isFinite(player.y)) resetPlayer();
+    if(state !== 'menu') update(dt);
+    else { tick += dt; portalSpin += 0.06*dt; bgHue += (bgHueTarget-bgHue)*0.03*dt; }
+    try { draw(); } catch(e) {}
+  }
+  requestAnimationFrame(loop);
+}
+
+applyLang();
+showScreen('scr-title');
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
