@@ -10,23 +10,23 @@ permalink: /geometry-dash-game/
 
 **Innovators Journal · October 13, 2026**
 
-[Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html)
+[Play the latest game with music](/assets/neon-dash/neon-dash-v8-music.html)
 
 In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I gave the ideas, tried the results, and asked for fixes.
 
 ## Play my game
 
-Click inside the game, then press **Start**. Use **Space**, **↑**, **W**, or click to jump. Release and press again in the air to double jump.
+Click inside the game and choose **Play**. Use **Space**, **↑**, **W**, or click to jump. Release and press again in the air to double jump. In wave mode, hold to rise and release to fall. You can turn music on or off in Settings.
 
-<p><a href="/assets/neon-dash/neon-dash-v4-doublejump.html" target="_blank" rel="noopener">Open the game in a full window ↗</a></p>
+<p><a href="/assets/neon-dash/neon-dash-v8-music.html" target="_blank" rel="noopener">Open the game in a full window ↗</a></p>
 
 <iframe
-  src="/assets/neon-dash/neon-dash-v4-doublejump.html"
+  src="/assets/neon-dash/neon-dash-v8-music.html"
   title="Play Geometry Dash My Version"
   width="100%"
   height="600"
   style="display:block; width:100%; height:600px; border:0; border-radius:12px; background:#000;"
-  allow="fullscreen"
+  allow="autoplay; fullscreen"
   allowfullscreen>
 </iframe>
 
@@ -50,7 +50,7 @@ After working on jumping, I asked for more ways to play. WebGPT returned a versi
 
 WebGPT added wave movement: a blue portal changes the player into an arrow, holding makes it rise, and releasing makes it fall. A yellow finish portal ends the level. My last request was to make Extreme ten times harder, but the chat ends before a reply.
 
-The game and screenshots linked here show the five-level version. The later versions still need testing.
+The playable game above is now the v8 music version. The screenshots below show the earlier five-level version.
 
 ## What I learned
 
