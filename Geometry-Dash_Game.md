@@ -14,6 +14,22 @@ permalink: /geometry-dash-game/
 
 In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I gave the ideas, tried the results, and asked for fixes.
 
+## Play my game
+
+Click inside the game, then press **Start**. Use **Space**, **↑**, **W**, or click to jump. Release and press again in the air to double jump.
+
+<p><a href="/assets/neon-dash/neon-dash-v4-doublejump.html" target="_blank" rel="noopener">Open the game in a full window ↗</a></p>
+
+<iframe
+  src="/assets/neon-dash/neon-dash-v4-doublejump.html"
+  title="Play Geometry Dash My Version"
+  width="100%"
+  height="600"
+  style="display:block; width:100%; height:600px; border:0; border-radius:12px; background:#000;"
+  allow="fullscreen"
+  allowfullscreen>
+</iframe>
+
 ## My development process
 
 ### October 12: Starting and fixing the game
