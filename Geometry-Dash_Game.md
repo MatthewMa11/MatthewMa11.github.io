@@ -10,7 +10,7 @@ permalink: /geometry-dash-game/
 
 **Innovators Journal · October 13, 2026**
 
-[Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html) · [Download the Word journal](/assets/neon-dash/neon-dash-development-journal.docx) · [View the source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/neon-dash/neon-dash-v4-doublejump.html)
+[Play the five-level game](/assets/neon-dash/neon-dash-v4-doublejump.html)
 
 In class, I used WebGPT to make a game like Geometry Dash. WebGPT wrote the HTML, CSS, and JavaScript. I gave the ideas, tried the results, and asked for fixes.
 
@@ -103,6 +103,8 @@ The canvas is where the game is drawn. The game loop keeps moving the player, ch
 
 The game checks invisible hitboxes to decide when the player hits a spike or block. Landing on top of a block is safe, but hitting its side causes a crash. The attempt counter tracks crashes, and the progress bar shows how close the player is to the portal.
 
+The game features a Geometry Dash-style game, though it has its own differences. My version of Geometry Dash have double 
+
 ## Screenshots and goals
 
 ![Game start screen with jump controls](/assets/neon-dash/menu.png)
@@ -119,9 +121,9 @@ The game checks invisible hitboxes to decide when the player hits a spike or blo
 
 ### Goals for October 15 to October 18
 
-- **By October 16:** Test that a third jump fails, and landing restores the extra jump.
-- **By October 18:** Try each published level five times and sample both expanded modes. Record unfair obstacles and check both portal types.
-- **By October 18:** Refine the tutorials that I already have and improve upon them further. 
-- **By October 18:** Compare 800 × 600 and 1280 × 720 screenshots. Check the ground and controls, and fix the strange menu symbols.
+- **By October 16:** Fix double jump gravity issue, and create a tutorial page for new players.
+- **By October 18:** Try each published level five times and sample both expanded modes. Record unfair obstacles and check both portal types. Adjust the speed so it is neither too fast nor too slow. 
+- **By October 18:** Refine the tutorials that I already have and improve upon them further. It forces you to play the tutorial every time you start a game, which is inconvenient for those who already know how to play.
+- **By October 18:** Compare 800 × 600 and 1280 × 720 screenshots. Check the ground and controls, and fix the strange menu symbols. Add music to the game, and also add a setting to turn the music on or off.
 
 ChatGPT helped me with the format and theme of this journal.
