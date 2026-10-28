@@ -12,9 +12,74 @@ Innovators Journal · October 27, 2026
 
 [Open the game](/assets/fight-the-landlord/game.html) · [Download the project ZIP](/assets/fight-the-landlord/landlord-controller-project.zip) · [Download the Word journal](/assets/fight-the-landlord/fight-the-landlord-controller-journal.docx) · [View the Arduino code](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/fight-the-landlord/LandlordController/LandlordController.ino)
 
-I used ChatGPT to write the code for a Fight the Landlord card game and its Arduino controller. I also used ChatGPT to help me understand the code. The physical controller worked, and I think the results are quite good.
+I turned the idea of a physical game controller into a working Arduino prototype for Fight the Landlord. I used a joystick, a separate push button, and three LEDs to connect physical actions to the browser game. The controller worked, and I think the results are quite good.
 
-## Play my game
+## Skill focus: turning ideas into reality
+
+I can transform ideas into reality by managing my time effectively, following through on commitments, and maintaining momentum from concept to completed prototype or product.
+
+### Managing my time
+
+I set deadlines for myself, with the goal of completing the controller and getting it running before Monday’s class ended. This gave me a clear target for the project: a physical controller that could communicate with the game and respond to input.
+
+I used ChatGPT to write the code and help me understand it. That support helped me move the project forward while learning how the Arduino and the browser worked together.
+
+### Following through
+
+I followed through on the goal of making a working physical controller. The project reached the point where the hardware worked with the game. I also provided photos, a demonstration video, and the project files, then documented the result in this GitHub journal.
+
+I confirmed that my separate button uses Arduino pin 9. The shared sketch and documentation now match that connection. Checking this detail was part of making the finished project clear enough for someone else to understand and use.
+
+### Maintaining momentum from idea to prototype
+
+The project connects several pieces of work: the controller idea, the code, the physical hardware, and the demonstration. ChatGPT helped with the code and explanations, and I tried the physical controller and reported that it worked. The photos and video make the final prototype visible alongside the source files.
+
+For me, the strongest evidence of this skill is the completed working prototype and its documentation. I brought the idea to a result that I could show, explain, and continue improving.
+
+## How I used AI
+
+I used ChatGPT to write the project code and help me understand what it does. ChatGPT/Codex also helped organize and edit this journal using my files, photos, demonstration, and descriptions of my experience. I supplied the deadline and my report that the physical controller worked.
+
+## How the prototype works
+
+- Joystick left and right: moves the card highlight. Return it to center before moving again.
+- Joystick click on D2: selects or deselects the highlighted card.
+- Separate button on D9: plays selected cards or passes when allowed. During bidding, it chooses the next higher legal bid.
+- LEDs on D4, D5, and D6: show my turn, Bot 1’s turn, and Bot 2’s turn.
+- Screen buttons: connect the Arduino, choose bids, play or pass, request a hint, clear selections, restart, open the rules, and toggle sound.
+
+The Arduino and computer communicate through a USB serial connection at 9600 baud. The Arduino sends short messages when I move or press a control. The browser checks the game rules and updates the cards. It sends turn messages back to the Arduino to choose which LED lights up. Connect Arduino lets me choose the board’s port.
+
+## Execution and troubleshooting
+
+One concrete correction was matching the shared files to my hardware: the earlier sketch listed pin 3 for the separate button, and I confirmed that my button is on pin 9. The shared files now use D9. A physical retest of that updated sketch is a next check to record.
+
+If an input stopped working, I would check the wiring and pin first, then the Arduino message, the USB connection, and the game response. This would help locate the problem before changing unrelated code. A new test log would record the expected result, what happened, the change made, and the result after trying again.
+
+## My reflection
+
+I think the results are quite good because the physical controller worked. Having a working prototype gives me something concrete to show for the project. Next time, I would record a few checkpoints alongside my deadline so I could show more clearly how I used my class time and what I completed at each stage.
+
+## Photos and demonstration
+
+
+![Arduino Uno, breadboard, joystick, separate push button, and turn LEDs](/assets/fight-the-landlord/controller-wiring.jpg)
+
+*My controller hardware. The separate play button uses digital pin 9; the joystick click uses pin 2.*
+
+![Controller connected beside a laptop displaying Fight the Landlord](/assets/fight-the-landlord/controller-setup.jpg)
+
+*The controller connected beside the laptop with Fight the Landlord on screen.*
+
+<video controls playsinline preload="metadata" poster="/assets/fight-the-landlord/controller-setup.jpg" style="display:block; width:100%; height:auto; border-radius:12px;">
+  <source src="/assets/fight-the-landlord/controller-demo.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="/assets/fight-the-landlord/controller-demo.mp4">Open the project demonstration</a>.
+</video>
+
+*[Watch the project demonstration](/assets/fight-the-landlord/controller-demo.mp4) · About 74 seconds.*
+
+## Try the prototype
+
 
 The game lets me play against two programmed opponents. I can use the mouse, or connect the Arduino controller to move between cards, select cards, and play them. Three LEDs show whose turn it is.
 
@@ -33,74 +98,13 @@ For the physical controller, [open the game in a full window](/assets/fight-the-
 
 *The embedded game can be played with the mouse. Use the full-window link above when connecting the Arduino.*
 
-## My development process and AI use
+## Detailed code walkthrough
 
-This project connects a physical controller to a browser game. The browser handles the cards, rules, and turns. The Arduino reads the joystick and buttons, then sends short commands to the browser through USB.
+The main journal above focuses on the skill. The original code and section-by-section explanations are kept below as an optional reference.
 
-ChatGPT wrote the code and helped explain it to me. I used AI for both making the project and understanding what the different parts do. The explanations in this journal focus on how an input becomes a game action, how the program remembers a button press, and how information travels back to the LEDs.
+<details markdown="1">
+<summary>Open the code and explanations</summary>
 
-My physical controller worked when I tried it. That is the result I can report from using the project. The original AI conversation is not included here, so the descriptions of my AI use are summaries rather than exact prompt quotations.
-
-## Photos and demonstration
-
-![Arduino Uno, breadboard, joystick, separate push button, and turn LEDs](/assets/fight-the-landlord/controller-wiring.jpg)
-
-*My controller hardware. The separate play button uses digital pin 9; the joystick click uses pin 2.*
-
-![Controller connected beside a laptop displaying Fight the Landlord](/assets/fight-the-landlord/controller-setup.jpg)
-
-*The controller connected beside the laptop with Fight the Landlord on screen.*
-
-<video controls playsinline preload="metadata" poster="/assets/fight-the-landlord/controller-setup.jpg" style="display:block; width:100%; height:auto; border-radius:12px;">
-  <source src="/assets/fight-the-landlord/controller-demo.mp4" type="video/mp4">
-  Your browser does not support embedded video. <a href="/assets/fight-the-landlord/controller-demo.mp4">Open the project demonstration</a>.
-</video>
-
-*[Watch the project demonstration](/assets/fight-the-landlord/controller-demo.mp4) · About 74 seconds.*
-
-## How the controls work
-
-| Physical control | Connection | What it does |
-| --- | --- | --- |
-| Joystick left and right | VRx → A4 | Moves the blue focus outline to the previous or next card. Return to center before moving again. Tilting does not select a card. |
-| Joystick click | SW → D2, pressed to GND | Selects or deselects the focused card during my playing turn. Selected cards rise and have a gold border. |
-| Separate mini button | D9 → GND | During play, submits the selected cards. With no cards selected, passes if passing is allowed. During bidding, chooses the next higher legal bid. |
-| My turn LED | D4 | Lights for player 0, the human player. |
-| Bot 1 turn LED | D5 | Lights for player 1, the left bot. |
-| Bot 2 turn LED | D6 | Lights for player 2, the right bot. |
-
-The joystick connects to 5 V and GND. Its up/down axis is unused. The joystick’s built-in click switch and the separate mini button are two different digital inputs. Both use INPUT_PULLUP, so a press connects the input to ground. Each LED uses a 220–330 ohm series resistor, as specified in the sketch. All grounds connect to the Arduino GND.
-
-The blue outline means “this is the card I am browsing.” A raised card with a gold border means “this card is selected to play.” I can select several cards before pressing the mini button. A leading player cannot pass, and controller gameplay actions are ignored during the bots’ turns or while the rules window is open.
-
-| Screen button | What it does |
-| --- | --- |
-| Connect Arduino / Disconnect Arduino | Opens the port chooser and connects the controller, or closes an existing connection. |
-| Hint | Selects a suggested legal play. I still press Play to submit it. |
-| Play | Validates and submits selected cards. With no selection, passes only when passing is legal. |
-| Pass during play | Passes when responding to another player’s trick. It cannot pass while leading. |
-| Deselect All | Clears the selected cards. |
-| Bid 1, Bid 2, Bid 3 | Chooses an available bid higher than the current highest bid. |
-| Pass during bidding | Declines to bid. The physical mini button raises the bid; it does not choose this option. |
-| New Game | Starts a fresh round. |
-| Rules and its close buttons | Opens or closes the rules window. |
-| Speaker button | Turns game audio on or off. |
-
-## How the Arduino and computer connect
-
-There are two programs. The Arduino sketch runs on the board and reads electrical inputs. The HTML file runs in the computer’s browser and handles cards, rules, turns, and the screen. A USB data cable provides a serial connection between them. In this project, that connection carries short text commands rather than keyboard key presses.
-
-1. I upload the sketch to the Arduino and connect the board to the computer by USB.
-2. I open the game in a browser that supports Web Serial, click Connect Arduino, and choose the board’s port. The browser asks for permission to access that port.
-3. The browser opens the port at 9600 baud, matching the sketch. Baud rate is the configured serial communication speed; both ends must agree.
-4. The Arduino sends input messages such as NAV_LEFT, NAV_RIGHT, TOGGLE_SELECT, and BTN_PLAY. Each message ends with a newline so the receiver knows where it finishes.
-5. The browser interprets the message using the current game state. It also sends TURN:0, TURN:1, TURN:2, or TURN:OFF back to the board to control the LEDs.
-
-For example, clicking the joystick connects D2 to ground. After the press is stable for 50 milliseconds, the Arduino sends TOGGLE_SELECT. The browser collects the complete line, checks that it is my playing turn, changes the focused card’s selection, and redraws my hand. Pressing the D9 mini button then sends BTN_PLAY. If the selected cards are legal and the round continues, the browser plays them and advances to Bot 2, the next player in this game’s turn order. The reply TURN:2 makes the Arduino light Bot 2’s LED on D6.
-
-The port chooser, permission step, byte streams, and matching baud rate follow the browser’s [Web Serial API](https://developer.chrome.com/docs/capabilities/serial). The actual messages and button behavior described here come from this project’s source code. The board does not send commands to ChatGPT; ChatGPT helped write and explain the code before it runs.
-
-## Understanding my code, section by section
 
 Each section below puts the original code excerpt first, followed by its explanation. The excerpts come directly from the shared project files. The Arduino file includes the confirmed pin 9 correction. The full files remain available through the source links; long functions are identified as excerpts when only part is shown.
 
@@ -766,57 +770,7 @@ disconnectSerial first marks the connection as closing and attempts to send TURN
 
 The finally block clears the saved connection and partial-message state, re-enables the button, and changes the display to Disconnected. If communication stops while the Arduino remains powered, its own timeout is the backup for clearing the LEDs. Disconnecting its only power source turns the LEDs off immediately. Reconnecting starts with a fresh message buffer.
 
-## Execution and troubleshooting
 
-The physical controller worked. The checks below explain the safeguards in the final code and how to narrow down a problem if one occurs. They are not a claim that I personally encountered every failure listed.
-
-### Matching the button pin to my hardware
-
-My separate play button is wired to digital pin 9. The earlier project package listed pin 3. The sketch, wiring description, and downloads now use pin 9 to match my hardware. The joystick's click switch stays on pin 2.
-
-const byte PIN_JOY_SW = 2;
-
-const byte PIN_PLAY_BTN = 9;
-
-This is a concrete example of checking the wiring against the code: if the program reads a different pin from the one the button uses, it will not receive the expected press. This update corrects that mismatch in the shared files; it does not claim a new physical retest.
-
-### If the highlight moves too many times
-
-I would first hold the joystick in one direction, then return it to center and tilt again. The expected result is one step for each tilt. The movedX flag handles this in the code. If it does not reset on the actual controller, checking the joystick’s center reading would help determine whether the center range needs adjustment.
-
-### If one press causes several actions
-
-A mechanical button can briefly switch between HIGH and LOW when pressed. The code waits 50 milliseconds for a stable change. Each button keeps its own timing and state, so selecting and playing remain separate.
-
-To check this, I would hold each button, release it, and press again. One stable press should produce one action. If a button does nothing, I would check its pin and ground connection, including whether the correct legs of the tactile switch were used.
-
-### If the game receives no commands
-
-I would check the connection before changing the game rules: the correct USB port, matching baud rates, and whether Serial Monitor is still using the port. The browser waits for a newline before processing a command, so text arriving in separate USB reads is assembled into one message.
-
-This gives me a useful troubleshooting order: physical input, Arduino message, browser connection, then game response. Checking one stage at a time helps identify where the signal stops.
-
-### If the play button seems to do nothing
-
-The game may be rejecting an illegal move. It must be my turn, the selected cards must form a legal combination, and a leading player cannot pass. Invalid or weaker combinations stay selected so they can be adjusted. Checking the game’s notice and current turn helps distinguish a controller problem from a rule being enforced correctly.
-
-The supplied README also reports software simulations for game rules, controller commands, and serial communication. Those are separate from my report that the physical controller worked; they do not establish that every possible hardware situation has been tested.
-
-## My thinking and feelings
-
-I think the results are quite good because the physical controller worked with the game. Having a working controller gives me a concrete result to show alongside the code.
-
-I also wanted help understanding the code, which is why I used ChatGPT for explanations as well as code writing. For this project, the connection between a physical action and a message like TOGGLE_SELECT is a useful way to explain what the program does. The same idea applies to the LEDs: a change in the game becomes a message that changes an output on the Arduino.
-
-## What I would improve next
-
-A useful next step is to record specific tests instead of only saying that the controller works. I could check holding the joystick, repeated button presses, invalid card combinations, and unplugging and reconnecting the board. For each test, I would record what I expected, what happened, what I changed, and the result after trying again.
-
-The photos and video above now document the physical setup. I would next record the result of each specific control test, including whether the correct LED follows each turn.
-
----
-
-ChatGPT wrote the project code and helped me understand it. ChatGPT/Codex also helped organize and format this journal from my files and my description of the result.
+</details>
 
 [View the browser game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/fight-the-landlord/game.html) · [View the Arduino sketch](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/fight-the-landlord/LandlordController/LandlordController.ino)
-
