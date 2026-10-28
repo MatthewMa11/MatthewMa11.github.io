@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>斗地主 - Fight the Landlord (Dòu Dìzhǔ) Hardware Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #0d2818;
+            background-image: radial-gradient(circle at center, #184126 0%, #08170e 100%);
+            user-select: none;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .card-item {
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform-origin: bottom center;
+            cursor: pointer;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            user-select: none;
+        }
+
+        .card-item:hover {
+            transform: translateY(-18px);
+            z-index: 60 !important;
+            border-color: #f59e0b;
+        }
+
+        .card-item.selected {
+            transform: translateY(-30px) !important;
+            box-shadow: 0 14px 24px -4px rgba(245, 158, 11, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4);
+            border-color: #f59e0b !important;
+        }
+
+        /* Joystick Cursor Focus Ring */
+        .card-item.focused {
+            outline: 3px solid #38bdf8;
+            outline-offset: 3px;
+        }
+
+        /* Separate hand cards so every rank and suit stays visible. */
+        #human-hand-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 26px 12px;
+            padding: 24px 12px 14px;
+            overflow: visible;
+        }
+        #human-hand-container > .card-item {
+            flex: 0 0 auto;
+            width: clamp(54px, 5.5vw, 80px);
+            height: clamp(88px, 8vw, 112px);
+            margin: 0 !important;
+        }
+        #human-hand-container > .card-item:hover {
+            transform: translateY(-4px);
+        }
+        #human-hand-container > .card-item.selected {
+            transform: translateY(-10px) !important;
+        }
+
+        .suit-red { color: #dc2626; }
+        .suit-black { color: #0f172a; }
+        .joker-red-color { color: #e11d48; }
+        .joker-black-color { color: #334155; }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+        }
+
+        @keyframes activePulse {
+            0%, 100% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(245, 158, 11, 0.85); }
+        }
+        .turn-active {
+            animation: activePulse 1.8s infinite;
+            border-color: #f59e0b !important;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-950/80 backdrop-blur border-b border-emerald-800/40 px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between z-30 shadow-xl gap-2">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-br from-amber-400 to-amber-600 p-2 rounded-xl text-slate-950 font-black shadow-lg">
+                <i class="fa-solid fa-crown text-lg sm:text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-base sm:text-xl tracking-wide flex items-center gap-2 text-amber-400">
+                    斗地主 <span class="text-xs font-semibold text-slate-300">Dòu Dìzhǔ</span>
+                </h1>
+                <p class="text-[11px] text-emerald-400/90 font-medium hidden sm:block">Hardware Joystick Edition</p>
+            </div>
+        </div>
+
+        <!-- Hole Cards Display Center -->
+        <div class="flex flex-col items-center">
+            <span class="text-[10px] font-bold tracking-wider text-amber-300 uppercase mb-0.5">
+                底牌 Dǐpái <span class="text-slate-400 font-normal hidden sm:inline">(Hole Cards)</span>
+            </span>
+            <div id="hole-cards-container" class="flex gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700/60 shadow-inner">
+                <div class="w-8 h-12 sm:w-10 sm:h-14 bg-emerald-900/80 border border-emerald-600/50 rounded-lg flex items-center justify-center text-emerald-400/50 text-xs"><i class="fa-solid fa-cards"></i></div>
+                <div class="w-8 h-12 sm:w-10 sm:h-14 bg-emerald-900/80 border border-emerald-600/50 rounded-lg flex items-center justify-center text-emerald-400/50 text-xs"><i class="fa-solid fa-cards"></i></div>
+                <div class="w-8 h-12 sm:w-10 sm:h-14 bg-emerald-900/80 border border-emerald-600/50 rounded-lg flex items-center justify-center text-emerald-400/50 text-xs"><i class="fa-solid fa-cards"></i></div>
+            </div>
+        </div>
+
+        <!-- Right Side Utility Control Buttons & Arduino Serial Connect -->
+        <div class="flex items-center gap-2">
+            <button id="connect-btn" onclick="connectSerial()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg">
+                <i class="fa-solid fa-plug"></i>
+                <span>Connect Arduino</span>
+            </button>
+            <button id="btn-audio-toggle" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs transition">
+                <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+            </button>
+            <button id="btn-rules" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-book-open"></i>
+                <span class="hidden sm:inline">规则 Rules</span>
+            </button>
+            <button id="btn-restart" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span class="hidden sm:inline">新游戏 New Game</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Table Field -->
+    <main class="relative flex-1 flex flex-col justify-between p-2 sm:p-4 max-w-7xl mx-auto w-full">
+
+        <!-- Card Memory Assistant Bar (记牌器 Card Tracker) -->
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl px-3 py-1.5 mb-2 flex flex-wrap items-center justify-between text-xs gap-2 shadow-lg">
+            <div class="flex items-center gap-1 text-slate-400 font-bold">
+                <i class="fa-solid fa-eye text-amber-400"></i>
+                <span title="Cards remaining in all hands, including yours">未出牌 Unplayed:</span>
+            </div>
+            <div class="flex items-center gap-3 font-mono font-bold text-slate-200">
+                <span title="Big Joker Red (大王)">👑 大王: <span id="tracker-big-joker" class="text-rose-400">1</span></span>
+                <span title="Small Joker Black (小王)">🃏 小王: <span id="tracker-small-joker" class="text-slate-300">1</span></span>
+                <span title="Number 2 Cards (2s)">2s: <span id="tracker-2s" class="text-amber-400">4</span></span>
+                <span title="Ace Cards (As)">As: <span id="tracker-as" class="text-amber-300">4</span></span>
+            </div>
+            <div id="serial-status-text" class="text-[11px] text-emerald-400 font-mono font-medium">
+                Serial: Disconnected ❌
+            </div>
+        </div>
+
+        <!-- Status & Multipliers Header Bar -->
+        <div class="flex justify-between items-center bg-slate-950/60 backdrop-blur rounded-2xl px-4 py-2 border border-slate-800/80 mb-2 shadow-lg">
+            <div class="flex items-center gap-4 text-xs sm:text-sm">
+                <div>
+                    <span class="text-slate-400">底分 Base: <b id="base-score">—</b> · 倍数 Multiplier:</span>
+                    <span id="game-multiplier" class="font-black text-amber-400 ml-1 text-sm sm:text-base">x1</span>
+                </div>
+                <div>
+                    <span class="text-slate-400">地主 Landlord:</span>
+                    <span id="landlord-identity" class="font-bold text-slate-200 ml-1">竞牌中 Bidding...</span>
+                </div>
+            </div>
+            <div id="game-phase-badge" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-full font-bold">
+                叫牌阶段 Bidding Phase (Jiào dìzhǔ)
+            </div>
+        </div>
+
+        <div id="round-result" class="hidden rounded-xl bg-amber-500/20 border border-amber-500 p-3 mb-3 text-sm font-bold" role="status"></div>
+
+        <!-- Central Play Field -->
+        <div class="grid grid-cols-12 gap-2 my-auto items-center min-h-[260px] sm:min-h-[290px]">
+            
+            <!-- Left Bot Player 1 (Upstream 上家) -->
+            <div id="bot-left-container" class="col-span-3 sm:col-span-2 flex flex-col items-center bg-slate-950/40 p-2 sm:p-3 rounded-2xl border border-slate-800/80 relative backdrop-blur transition-all">
+                <div class="relative mb-1 sm:mb-2">
+                    <div id="avatar-bot-left" class="w-11 h-11 sm:w-16 sm:h-16 bg-slate-800 rounded-2xl flex items-center justify-center border-2 border-slate-700 text-slate-300 text-xl sm:text-2xl shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span id="badge-bot-left" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-slate-950 shadow">
+                        地主
+                    </span>
+                </div>
+                <span class="font-bold text-xs sm:text-sm text-slate-200">Bot 1</span>
+                <span class="text-[10px] text-slate-400 font-medium">上家 Shàngjiā</span>
+                
+                <div class="mt-2 bg-slate-900/90 px-2.5 py-1 rounded-full text-xs font-black text-amber-400 border border-slate-700 flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span id="card-count-left">17</span>
+                </div>
+
+                <div id="action-bot-left" class="mt-2 min-h-[22px] text-[11px] sm:text-xs font-bold text-amber-300 text-center"></div>
+            </div>
+
+            <!-- Table Cards Arena -->
+            <div class="col-span-6 sm:col-span-8 flex flex-col items-center justify-center min-h-[220px] bg-emerald-950/25 rounded-3xl border border-emerald-800/30 p-3 relative shadow-inner">
+                
+                <!-- Bidding Panel Overlay -->
+                <div id="bidding-overlay" class="hidden flex-col items-center text-center z-20 bg-slate-950/90 p-4 sm:p-6 rounded-2xl border border-amber-500/40 max-w-md w-full shadow-2xl backdrop-blur">
+                    <h3 class="text-amber-400 font-black text-base sm:text-lg mb-1">叫地主阶段 Bidding Phase</h3>
+                    <p class="text-xs text-slate-300 mb-4">Press button or click to Bid 1-3 points or Pass ("不叫").</p>
+                    <div id="bidding-buttons" class="flex flex-wrap gap-2 justify-center"></div>
+                </div>
+
+                <!-- Table Played Cards Display -->
+                <div id="table-played-cards" class="flex flex-col items-center w-full my-auto">
+                    <div id="ai-reason-tag" class="hidden text-[11px] sm:text-xs bg-slate-900/90 border border-amber-500/50 text-amber-300 px-3.5 py-1.5 rounded-full font-semibold mb-3 shadow-lg text-center max-w-xl"></div>
+                    <div id="played-cards-header" class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-gamepad text-amber-400"></i>
+                        <span id="played-cards-title">Game Started! Bidding in progress...</span>
+                    </div>
+
+                    <div id="lead-control-badge" class="hidden my-2 bg-gradient-to-r from-amber-500/30 to-amber-600/30 border border-amber-400 text-amber-300 px-4 py-1.5 rounded-full font-black text-xs sm:text-sm animate-pulse shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-amber-400"></i>
+                        <span>自由出牌 Lead Control (Zìyóu Chū Pái)</span>
+                    </div>
+
+                    <div id="played-cards-list" class="flex justify-center flex-wrap -space-x-5 sm:-space-x-7 min-h-[110px] items-center p-2"></div>
+                </div>
+
+                <div id="game-notice-toast" class="absolute bottom-2 text-xs font-bold bg-slate-950/90 border border-amber-500/50 text-amber-300 px-4 py-1.5 rounded-full shadow-2xl transition-all opacity-0 pointer-events-none"></div>
+            </div>
+
+            <!-- Right Bot Player 2 (Downstream 下家) -->
+            <div id="bot-right-container" class="col-span-3 sm:col-span-2 flex flex-col items-center bg-slate-950/40 p-2 sm:p-3 rounded-2xl border border-slate-800/80 relative backdrop-blur transition-all">
+                <div class="relative mb-1 sm:mb-2">
+                    <div id="avatar-bot-right" class="w-11 h-11 sm:w-16 sm:h-16 bg-slate-800 rounded-2xl flex items-center justify-center border-2 border-slate-700 text-slate-300 text-xl sm:text-2xl shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span id="badge-bot-right" class="hidden absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-slate-950 shadow">
+                        地主
+                    </span>
+                </div>
+                <span class="font-bold text-xs sm:text-sm text-slate-200">Bot 2</span>
+                <span class="text-[10px] text-slate-400 font-medium">下家 Xiàjiā</span>
+                
+                <div class="mt-2 bg-slate-900/90 px-2.5 py-1 rounded-full text-xs font-black text-amber-400 border border-slate-700 flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span id="card-count-right">17</span>
+                </div>
+
+                <div id="action-bot-right" class="mt-2 min-h-[22px] text-[11px] sm:text-xs font-bold text-amber-300 text-center"></div>
+            </div>
+
+        </div>
+
+        <!-- Hint Box -->
+        <div id="hint-box" class="bg-slate-950/90 border border-amber-500/50 rounded-2xl p-3 mb-2 flex items-start gap-3 shadow-2xl relative hidden">
+            <div class="bg-amber-500/20 p-2 rounded-xl text-amber-400 mt-0.5">
+                <i class="fa-solid fa-lightbulb text-xl"></i>
+            </div>
+            <div class="flex-1 text-xs">
+                <div class="flex justify-between items-center mb-0.5">
+                    <span class="font-black text-amber-300 flex items-center gap-1">
+                        智能提示 AI Hint & Tactical Reasoning <span class="text-[10px] font-normal text-slate-400">(Zhìnéng Tíshì)</span>
+                    </span>
+                    <button id="btn-close-hint" class="text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <p id="hint-content-pinyin" class="text-amber-200 font-bold italic"></p>
+                <p id="hint-content-cn" class="text-slate-100 font-semibold my-0.5"></p>
+                <p id="hint-content-en" class="text-slate-300"></p>
+            </div>
+        </div>
+
+        <!-- Human Player Hand Area -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-3xl p-3 sm:p-4 backdrop-blur shadow-2xl relative">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black flex items-center justify-center text-xs shadow">
+                        你
+                    </div>
+                    <div>
+                        <span class="font-black text-sm text-slate-100">You (Human Player)</span>
+                        <span id="human-role-badge" class="ml-2 text-[10px] bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-bold">
+                            农民 Peasant (Nóngmín)
+                        </span>
+                    </div>
+                </div>
+
+                <div id="human-action-buttons" class="flex flex-wrap items-center gap-2">
+                    <button id="btn-hint" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-600 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>提示 Hint (Tíshì)</span>
+                    </button>
+                    <button id="btn-pass" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow">
+                        不要 Pass (Guò)
+                    </button>
+                    <button id="btn-play" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 px-5 py-1.5 rounded-xl text-xs font-extrabold shadow-lg transition transform active:scale-95">
+                        出牌 Play (Chū Pái)
+                    </button>
+                    <button id="btn-deselect" class="bg-slate-800 hover:bg-slate-700 text-slate-400 p-2 rounded-xl text-xs transition" title="Deselect All">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Human Hand Container -->
+            <p class="text-xs text-sky-300 mb-2">Joystick ←/→: highlight · Click joystick: select/deselect · Mini button: play / pass</p>
+            <div id="human-hand-container" class="min-h-[150px]"></div>
+        </div>
+
+    </main>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-black text-base sm:text-lg text-amber-400">斗地主教学与规则 Rules & Educational Guide</h2>
+                        <p class="text-xs text-slate-400">Joystick Hardware Control Edition</p>
+                    </div>
+                </div>
+                <button id="btn-close-rules" class="text-slate-400 hover:text-white p-2 rounded-xl">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-5 text-xs sm:text-sm text-slate-300">
+                <section>
+                    <h3 class="font-bold text-amber-300 text-base mb-2">三人斗地主 · Classic scored rules</h3>
+                    <p class="mb-2">54 cards: 17 each, plus 3 face-up bottom cards for the landlord. Bid once: Pass, 1, 2, or 3; a bid must exceed the previous bid. Three ends bidding immediately. If all pass, redeal.</p>
+                    <p class="mb-2">地主 leads. Turns go You → Bot 2 (right) → Bot 1 (left). Follow with a higher play of the same type, length, and attachments—or pass. Two consecutive passes give the last player a new lead. A pass does not stop you playing on a later turn.</p>
+                    <p class="mb-3 text-amber-200">Ranks: 大王 &gt; 小王 &gt; 2 &gt; A &gt; K &gt; Q &gt; J &gt; 10 … 3. Suits have equal strength.</p>
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead><tr class="border-b border-slate-600"><th class="p-2">牌型 Pattern</th><th class="p-2">Example / requirement</th></tr></thead>
+                        <tbody>
+                            <tr><td class="p-2">单张 / 对子 / 三张</td><td class="p-2">7 / 77 / 777</td></tr>
+                            <tr><td class="p-2">三带一 / 三带二</td><td class="p-2">777 + 4 / 777 + 44</td></tr>
+                            <tr><td class="p-2">顺子 Straight</td><td class="p-2">34567 · at least 5 ranks</td></tr>
+                            <tr><td class="p-2">连对 Pair sequence</td><td class="p-2">334455 · at least 3 consecutive pairs</td></tr>
+                            <tr><td class="p-2">飞机 Airplane</td><td class="p-2">333444 · at least 2 consecutive triples</td></tr>
+                            <tr><td class="p-2">飞机带单 / 带对</td><td class="p-2">333444 + 78 / 333444 + 7788 · one single or pair per triple</td></tr>
+                            <tr><td class="p-2">四带二 Four + two</td><td class="p-2">5555 + 78 / 5555 + 7788 · ordinary plays, not bombs</td></tr>
+                            <tr><td class="p-2">炸弹 Bomb</td><td class="p-2">7777 · beats ordinary plays and lower bombs</td></tr>
+                            <tr><td class="p-2">王炸 Rocket</td><td class="p-2">Both jokers together · beats everything else</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="mt-3">Sequences stop at A: never 2 or jokers. Wings do not change strength; compare the triple sequence or four-of-a-kind. Bare airplanes, single wings, and pair wings are different patterns.</p>
+                    <p class="mt-2 text-slate-400">Wing rules for this version: single wings may form a pair (333444 + 77 and 5555 + 77 are legal). Wing ranks must differ from the core; pair wings must be distinct pairs. Both jokers, an entire bomb, or an adjacent extra triple cannot be airplane wings. Both jokers cannot accompany four-of-a-kind.</p>
+                    <p class="mt-3">Either farmer finishing wins for both farmers. Round stake = winning bid × 2 for each bomb/rocket × 2 for spring, if any. Landlord wins/loses twice the stake; each farmer loses/wins one stake.</p>
+                    <p class="mt-2">春天: landlord wins before either farmer plays. 反春天: farmers win after the landlord played exactly once. This classic version goes directly from bidding to playing.</p>
+                    <p class="mt-3 text-slate-400">Rules references: <a class="underline" href="https://www.ourgame.com/game/lord.html" target="_blank" rel="noopener noreferrer">联众</a> · <a class="underline" href="https://www.jj.cn/news/320/20110920103700018196.shtml" target="_blank" rel="noopener noreferrer">JJ card patterns</a>. Bidding, scoring, and wing details vary by platform; this game's choices are stated above.</p>
+                </section>
+                <section>
+                    <h3 class="font-bold text-amber-300 text-sm sm:text-base border-b border-slate-800 pb-1 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad text-amber-400"></i> Hardware Controls (手柄控制)
+                    </h3>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-300">
+                        <li><b>Joystick Left / Right:</b> Move cursor focus across your hand cards.</li>
+                        <li><b>Click Joystick (SW / Pin 2):</b> Press straight down to select / deselect the highlighted card. Tilting up or down does nothing.</li>
+                        <li><b>Separate Mini Button (Pin 3):</b> Play selected cards. If none are selected, pass your turn (unless you are leading). During bidding, bid the next available value. Use the on-screen buttons for other choices.</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="px-5 py-3 border-t border-slate-800 bg-slate-950/80 flex justify-end">
+                <button id="btn-close-rules-bottom" class="bg-amber-400 hover:bg-amber-300 text-slate-950 px-5 py-1.5 rounded-xl text-xs font-bold transition">
+                    Got It! (知道了)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Game Logic & Web Serial -->
+    <script>
+        const PATTERNS = {
+            INVALID: -1, SINGLE: 1, PAIR: 2, TRIO: 3, TRIO_SOLO: 4,
+            TRIO_PAIR: 5, STRAIGHT: 6, CHAIN_PAIRS: 7, AIRPLANE: 8,
+            FOUR_TWO: 9, BOMB: 10, ROCKET: 11
+        };
+
+        const PATTERN_NAMES = {
+            [PATTERNS.SINGLE]: { en: 'Single', cn: '单张', pinyin: 'Dān zhāng' },
+            [PATTERNS.PAIR]: { en: 'Pair', cn: '对子', pinyin: 'Duìzi' },
+            [PATTERNS.TRIO]: { en: 'Trio', cn: '三张', pinyin: 'Sān zhāng' },
+            [PATTERNS.TRIO_SOLO]: { en: 'Trio + Solo', cn: '三带一', pinyin: 'Sān dài yī' },
+            [PATTERNS.TRIO_PAIR]: { en: 'Trio + Pair', cn: '三带二', pinyin: 'Sān dài èr' },
+            [PATTERNS.STRAIGHT]: { en: 'Straight', cn: '顺子', pinyin: 'Shùnzi' },
+            [PATTERNS.CHAIN_PAIRS]: { en: 'Chain Pairs', cn: '连对', pinyin: 'Liánduì' },
+            [PATTERNS.AIRPLANE]: { en: 'Airplane', cn: '飞机', pinyin: 'Fēijī' },
+            [PATTERNS.FOUR_TWO]: { en: 'Four with Two', cn: '四带二', pinyin: 'Sì dài èr' },
+            [PATTERNS.BOMB]: { en: 'Bomb', cn: '炸弹', pinyin: 'Zhàdàn' },
+            [PATTERNS.ROCKET]: { en: 'Rocket / Nuke', cn: '火箭/王炸', pinyin: 'Huǒjiàn' }
+        };
+
+        const CARD_SUITS = [
+            { symbol: '♠', color: 'suit-black' }, { symbol: '♥', color: 'suit-red' },
+            { symbol: '♣', color: 'suit-black' }, { symbol: '♦', color: 'suit-red' }
+        ];
+
+        const RANK_DETAILS = {
+            3: { label: '3', pinyin: 'Sān' }, 4: { label: '4', pinyin: 'Sì' }, 5: { label: '5', pinyin: 'Wǔ' },
+            6: { label: '6', pinyin: 'Liù' }, 7: { label: '7', pinyin: 'Qī' }, 8: { label: '8', pinyin: 'Bā' },
+            9: { label: '9', pinyin: 'Jiǔ' }, 10: { label: '10', pinyin: 'Shí' }, 11: { label: 'J', pinyin: 'Jiā-kè' },
+            12: { label: 'Q', pinyin: 'Kūn' }, 13: { label: 'K', pinyin: 'Kāng' }, 14: { label: 'A', pinyin: 'Jiān' },
+            15: { label: '2', pinyin: 'Èr' }, 16: { label: '小王', pinyin: 'Xiǎo Wáng' }, 17: { label: '大王', pinyin: 'Dà Wáng' }
+        };
+
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (type === 'card') {
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else if (type === 'play') {
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now); osc.stop(now + 0.12);
+                } else if (type === 'bomb') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now); osc.stop(now + 0.35);
+                } else if (type === 'pass') {
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.linearRampToValueAtTime(180, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                }
+            } catch (e) {}
+        }
+
+        class DouDiZhuGame {
+            constructor() {
+                this.players=[
+                    {id:0,name:'You',isAI:false,hand:[],role:'PEASANT',bids:-1,playsCount:0},
+                    {id:1,name:'Bot 1',isAI:true,hand:[],role:'PEASANT',bids:-1,playsCount:0},
+                    {id:2,name:'Bot 2',isAI:true,hand:[],role:'PEASANT',bids:-1,playsCount:0}
+                ];
+                this.holeCards=[];this.selectedCardIds=new Set();this.aiTimer=null;
+                this.focusedCardIndex=0;this.gamePhase='BIDDING';this.currentTurn=0;
+                this.landlordId=-1;this.highestBid=0;this.highestBidder=-1;
+                this.baseScore=1;this.multiplier=1;this.bombCount=0;
+                this.lastTrick=null;this.passCount=0;this.playedCards=[];
+                this.springType=null;this.roundScores=null;
+            }
+            nextPlayer(id) { return (id+2)%3; } // You -> right bot -> left bot.
+            init() {
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                this.landlordId=-1;this.highestBid=0;this.highestBidder=-1;
+                this.baseScore=1;this.multiplier=1;this.bombCount=0;
+                this.lastTrick=null;this.passCount=0;this.playedCards=[];
+                this.springType=null;this.roundScores=null;
+                this.selectedCardIds.clear();this.focusedCardIndex=0;this.gamePhase='BIDDING';
+                this.players.forEach(p=>{p.hand=[];p.role='PEASANT';p.bids=-1;p.playsCount=0;updatePlayerActionText(p.id,'');});
+                const deck=[];let id=0;
+                for(let rank=3;rank<=15;rank++)for(const suit of CARD_SUITS)
+                    deck.push({id:id++,rank,suit:suit.symbol,suitColor:suit.color,isJoker:false});
+                deck.push({id:id++,rank:16,suit:'🃏',suitColor:'joker-black-color',isJoker:true});
+                deck.push({id:id++,rank:17,suit:'🃏',suitColor:'joker-red-color',isJoker:true});
+                for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+                this.players.forEach((p,i)=>p.hand=deck.slice(i*17,i*17+17));
+                this.holeCards=deck.slice(51);this.sortHands();
+                this.currentTurn=Math.floor(Math.random()*3);
+                updatePhaseBadge('叫分 Bidding · Classic rules');
+                updatePlayedCardsTitle('Bid 1, 2, 3, or Pass');
+                showAIReasonTag('三人叫分制 · Classic scored game',true);
+                this.nextBiddingTurn();
+            }
+            sortHands() { this.players.forEach(p=>p.hand.sort((a,b)=>b.rank-a.rank||a.id-b.id)); }
+            nextBiddingTurn() {
+                if(this.gamePhase!=='BIDDING')return;
+                if(this.highestBid===3 || this.players.every(p=>p.bids!==-1)) {
+                    showBiddingOverlay(false);
+                    if(this.highestBidder!==-1)this.finalizeLandlord(this.highestBidder);
+                    else {
+                        this.gamePhase='REDEAL';sendLedCommandToArduino('OFF');renderAllUI();
+                        showToastNotice('All three passed. Redealing…');
+                        this.aiTimer=setTimeout(()=>this.init(),1500);
+                    }
+                    return;
+                }
+                sendLedCommandToArduino(this.currentTurn);renderAllUI();
+                const player=this.players[this.currentTurn];
+                showBiddingOverlay(!player.isAI);
+                if(player.isAI)this.aiTimer=setTimeout(()=>{
+                    const desired=this.evaluateAIBid(player);
+                    this.handleBid(player.id,desired>this.highestBid?desired:0);
+                },1400);
+            }
+            evaluateAIBid(player) {
+                const score=player.hand.reduce((total,c)=>total+(c.rank===17?4:c.rank===16?3:c.rank===15?2:c.rank===14?1:0),0);
+                return score>=7?3:score>=5?2:score>=3?1:0;
+            }
+            handleBid(playerId,bidPoints) {
+                if(this.gamePhase!=='BIDDING'||this.currentTurn!==playerId||!this.players[playerId]||
+                   this.players[playerId].bids!==-1||!Number.isInteger(bidPoints)||bidPoints<0||bidPoints>3||
+                   (bidPoints>0&&bidPoints<=this.highestBid))return false;
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                this.players[playerId].bids=bidPoints;
+                updatePlayerActionText(playerId,bidPoints?`叫 ${bidPoints} 分 · Bid ${bidPoints}`:'不叫 · Pass');
+                if(bidPoints>this.highestBid){this.highestBid=bidPoints;this.highestBidder=playerId;}
+                this.currentTurn=this.nextPlayer(playerId);this.nextBiddingTurn();return true;
+            }
+            finalizeLandlord(landlordId) {
+                if(this.gamePhase!=='BIDDING'||!this.players[landlordId])return false;
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                this.landlordId=landlordId;this.baseScore=Math.max(1,this.highestBid);this.multiplier=1;
+                this.players[landlordId].role='LANDLORD';this.players[landlordId].hand.push(...this.holeCards);
+                this.sortHands();this.currentTurn=landlordId;
+                this.players.forEach(p=>updatePlayerActionText(p.id,''));
+                showToastNotice(`${this.players[landlordId].name} is Landlord · 底分 ${this.baseScore}`);
+                this.startPlayingPhase();return true;
+            }
+            startPlayingPhase() {
+                this.gamePhase='PLAYING';showBiddingOverlay(false);
+                updatePhaseBadge('出牌 Playing · Classic rules');this.nextPlayTurn();
+            }
+            nextPlayTurn() {
+                if(this.gamePhase!=='PLAYING')return;
+                if(this.passCount>=2){this.currentTurn=this.lastTrick.playerId;this.lastTrick=null;this.passCount=0;}
+                sendLedCommandToArduino(this.currentTurn);renderAllUI();
+                const player=this.players[this.currentTurn],lead=!this.lastTrick;
+                updatePlayedCardsTitle(lead?`👑 ${player.name} · 自由出牌 Lead`:`${player.name} · 跟牌 Follow`);
+                if(!player.isAI) {
+                    showAIReasonTag(lead?'Select any legal combination to lead.':'Beat the same pattern and card count, play a bomb/rocket, or pass.',true);
+                } else {
+                    showAIReasonTag(`🤖 ${player.name} is thinking…`,true);
+                    this.aiTimer=setTimeout(()=>this.executeAIPlay(player,lead),1400);
+                }
+            }
+            executeAIPlay(player,lead) {
+                if(this.gamePhase!=='PLAYING'||this.currentTurn!==player.id)return;
+                const cards=lead?this.findAILeadPlay(player.hand):this.findAIFollowPlay(player.hand,this.lastTrick);
+                if(cards&&cards.length)this.playCardsAction(player.id,cards);
+                else if(!lead)this.passTurnAction(player.id);
+            }
+            findAILeadPlay(hand) { return chooseLeadPlay(hand); }
+            findAIFollowPlay(hand,targetTrick) {
+                const legal=generateLegalPlays(hand,targetTrick),winning=legal.find(cards=>cards.length===hand.length);
+                if(winning)return winning;
+                if(this.currentTurn!==this.landlordId && targetTrick.playerId!==this.landlordId)return null;
+                return chooseFollowPlay(hand,targetTrick);
+            }
+            searchCandidatePlay(hand,targetTrick) { return chooseFollowPlay(hand,targetTrick); }
+            playCardsAction(playerId,requestedCards) {
+                if(this.gamePhase!=='PLAYING'||this.currentTurn!==playerId||!this.players[playerId]||
+                   !Array.isArray(requestedCards)||requestedCards.length===0)return false;
+                const player=this.players[playerId],ids=new Set(requestedCards.map(c=>c&&c.id));
+                if(ids.size!==requestedCards.length)return false;
+                const cards=player.hand.filter(c=>ids.has(c.id));
+                if(cards.length!==requestedCards.length)return false;
+                const pattern=evaluatePattern(cards);
+                if(pattern.type===PATTERNS.INVALID || (this.lastTrick&&!canBeat(cards,this.lastTrick)))return false;
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                player.hand=player.hand.filter(c=>!ids.has(c.id));player.playsCount++;
+                this.playedCards.push(...cards);this.lastTrick={playerId,cards,pattern};this.passCount=0;
+                if(playerId===0)this.selectedCardIds.clear();
+                if(pattern.type===PATTERNS.BOMB||pattern.type===PATTERNS.ROCKET){
+                    this.multiplier*=2;this.bombCount++;playSound('bomb');
+                } else playSound('play');
+                updatePlayerActionText(playerId,patternDescription(pattern));
+                if(player.hand.length===0){this.handleGameOver(playerId);return true;}
+                this.currentTurn=this.nextPlayer(playerId);this.nextPlayTurn();return true;
+            }
+            passTurnAction(playerId) {
+                if(this.gamePhase!=='PLAYING'||this.currentTurn!==playerId||!this.lastTrick||this.lastTrick.playerId===playerId)return false;
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                if(playerId===0)this.selectedCardIds.clear();
+                this.passCount++;playSound('pass');updatePlayerActionText(playerId,'不要 · Pass');
+                this.currentTurn=this.nextPlayer(playerId);this.nextPlayTurn();return true;
+            }
+            handleGameOver(winnerId) {
+                if(this.gamePhase!=='PLAYING'||!this.players[winnerId]||this.players[winnerId].hand.length!==0)return;
+                clearTimeout(this.aiTimer);this.aiTimer=null;
+                const landlordWon=winnerId===this.landlordId;
+                this.springType=null;
+                if(landlordWon&&this.players.filter(p=>p.id!==this.landlordId).every(p=>p.playsCount===0))this.springType='SPRING';
+                else if(!landlordWon&&this.players[this.landlordId].playsCount===1)this.springType='ANTI_SPRING';
+                if(this.springType)this.multiplier*=2;
+                const stake=this.baseScore*this.multiplier,sign=landlordWon?1:-1;
+                this.roundScores=this.players.map(p=>p.id===this.landlordId?2*stake*sign:-stake*sign);
+                this.gamePhase='OVER';sendLedCommandToArduino('OFF');
+                const title=landlordWon?'地主获胜 · Landlord wins':'农民获胜 · Both farmers win';
+                updatePhaseBadge('游戏结束 Game Over');updatePlayedCardsTitle(title);
+                showAIReasonTag(`🏆 ${title}${this.springType?' · '+(this.springType==='SPRING'?'春天 Spring':'反春天 Anti-spring'):''}`,true);
+                showToastNotice(title);renderAllUI();
+            }
+        }
+
+        function patternDescription(p) {
+            let label=PATTERN_NAMES[p.type].cn+' · '+PATTERN_NAMES[p.type].en;
+            if(p.type===PATTERNS.AIRPLANE||p.type===PATTERNS.FOUR_TWO)
+                label+=p.wing==='single'?' + singles':p.wing==='pair'?' + pairs':'';
+            return label;
+        }
+
+        // Classic scored three-player rules. Published variants differ on wings:
+        // here single wings may repeat ranks; both jokers and whole bombs cannot be wings.
+        function evaluatePattern(cards) {
+            const invalid = {type:PATTERNS.INVALID};
+            if (!Array.isArray(cards) || cards.length === 0 || cards.length > 20) return invalid;
+            if (cards.some(c => !c || !Number.isInteger(c.rank) || c.rank < 3 || c.rank > 17)) return invalid;
+            if (cards.every(c => c.id !== undefined) && new Set(cards.map(c => c.id)).size !== cards.length) return invalid;
+            const counts = new Map();
+            cards.forEach(c => counts.set(c.rank, (counts.get(c.rank) || 0) + 1));
+            if ([...counts].some(([r,n]) => n > (r >= 16 ? 1 : 4))) return invalid;
+            const ranks = [...counts.keys()].sort((a,b) => a-b), n = cards.length;
+            const pattern = (type, primaryRank, wing='none', chainLength=1) => ({type,primaryRank,length:n,wing,chainLength});
+            const run = ranks.every((r,i) => i===0 || r===ranks[i-1]+1) && ranks.at(-1)<=14;
+            if (n===2 && counts.has(16) && counts.has(17)) return pattern(PATTERNS.ROCKET,17);
+            if (ranks.length===1) {
+                const types={1:PATTERNS.SINGLE,2:PATTERNS.PAIR,3:PATTERNS.TRIO,4:PATTERNS.BOMB};
+                return pattern(types[n],ranks[0]);
+            }
+            const trio = ranks.find(r => counts.get(r)===3);
+            if (n===4 && trio) return pattern(PATTERNS.TRIO_SOLO,trio,'single');
+            if (n===5 && trio && ranks.length===2) return pattern(PATTERNS.TRIO_PAIR,trio,'pair');
+            if (n>=5 && ranks.length===n && run) return pattern(PATTERNS.STRAIGHT,ranks.at(-1),'none',ranks.length);
+            if (n>=6 && ranks.every(r=>counts.get(r)===2) && run) return pattern(PATTERNS.CHAIN_PAIRS,ranks.at(-1),'none',ranks.length);
+            // Test no wings before wings so four consecutive triples stay a bare airplane.
+            for (const [unit,wing] of [[3,'none'],[4,'single'],[5,'pair']]) {
+                const length=n/unit;
+                if (!Number.isInteger(length) || length<2) continue;
+                for (let start=3;start+length-1<=14;start++) {
+                    const core=Array.from({length},(_,i)=>start+i);
+                    if (!core.every(r=>counts.get(r)===3)) continue;
+                    const rest=ranks.filter(r=>!core.includes(r));
+                    if (rest.includes(16) && rest.includes(17)) continue;
+                    if (rest.some(r=>counts.get(r)===4)) continue;
+                    // A neighboring triple belongs to the sequence, not to its wings.
+                    if (rest.some(r=>counts.get(r)===3 && r<=14 && (r===start-1 || r===start+length))) continue;
+                    const total=rest.reduce((sum,r)=>sum+counts.get(r),0);
+                    if ((wing==='none' && total===0) ||
+                        (wing==='single' && total===length) ||
+                        (wing==='pair' && rest.length===length && rest.every(r=>counts.get(r)===2))) {
+                        return pattern(PATTERNS.AIRPLANE,start+length-1,wing,length);
+                    }
+                }
+            }
+            const four=ranks.find(r=>counts.get(r)===4);
+            if (four) {
+                const rest=ranks.filter(r=>r!==four);
+                if (rest.includes(16) && rest.includes(17)) return invalid;
+                if (n===6) return pattern(PATTERNS.FOUR_TWO,four,'single');
+                if (n===8 && rest.length===2 && rest.every(r=>counts.get(r)===2)) return pattern(PATTERNS.FOUR_TWO,four,'pair');
+            }
+            return invalid;
+        }
+
+        function canBeat(candidateCards, targetTrick) {
+            const candidate=evaluatePattern(candidateCards);
+            if (candidate.type===PATTERNS.INVALID) return false;
+            if (!targetTrick) return true;
+            const target=targetTrick.pattern || evaluatePattern(targetTrick.cards);
+            if (target.type===PATTERNS.INVALID || target.type===PATTERNS.ROCKET) return false;
+            if (candidate.type===PATTERNS.ROCKET) return true;
+            if (candidate.type===PATTERNS.BOMB && target.type!==PATTERNS.BOMB) return true;
+            return candidate.type===target.type && candidate.length===target.length &&
+                candidate.wing===target.wing && candidate.chainLength===target.chainLength &&
+                candidate.primaryRank>target.primaryRank;
+        }
+
+        // Generate by rank, not by every suit permutation. Every result is validated.
+        function generateLegalPlays(hand, targetTrick=null) {
+            const groups=new Map();
+            [...hand].sort((a,b)=>a.rank-b.rank || a.id-b.id).forEach(c=>{
+                if (!groups.has(c.rank)) groups.set(c.rank,[]);
+                groups.get(c.rank).push(c);
+            });
+            const ranks=[...groups.keys()], plays=[], seen=new Set();
+            const add=cards=>{
+                const p=evaluatePattern(cards);
+                if (p.type===PATTERNS.INVALID || (targetTrick && !canBeat(cards,targetTrick))) return;
+                const key=cards.map(c=>c.rank).sort((a,b)=>a-b).join(',');
+                if (!seen.has(key)) {seen.add(key);plays.push(cards);}
+            };
+            // Callback over rank-count combinations, bounded by the tiny hand size.
+            const attachments=(outside, need, pairs, callback)=>{
+                function visit(index,remaining,picked) {
+                    if (remaining===0) {callback(picked);return;}
+                    if (index===outside.length) return;
+                    const group=groups.get(outside[index]);
+                    const max=pairs ? Math.min(1,Math.floor(group.length/2),remaining) : Math.min(group.length,remaining);
+                    for (let take=0;take<=max;take++) visit(index+1,remaining-take,picked.concat(group.slice(0,take*(pairs?2:1))));
+                }
+                visit(0,need,[]);
+            };
+            for (const rank of ranks) {
+                const group=groups.get(rank), outside=ranks.filter(r=>r!==rank);
+                for (let count=1;count<=Math.min(group.length,4);count++) add(group.slice(0,count));
+                if (group.length>=3) for (const r of outside) {
+                    add(group.slice(0,3).concat(groups.get(r).slice(0,1)));
+                    if (groups.get(r).length>=2) add(group.slice(0,3).concat(groups.get(r).slice(0,2)));
+                }
+                if (group.length===4) {
+                    attachments(outside,2,false,w=>add(group.concat(w)));
+                    attachments(outside,2,true,w=>add(group.concat(w)));
+                }
+            }
+            if (groups.has(16) && groups.has(17)) add([groups.get(16)[0],groups.get(17)[0]]);
+            for (const [copies,minLength] of [[1,5],[2,3],[3,2]]) {
+                for (let start=3;start<=14;start++) {
+                    let core=[];
+                    for (let end=start;end<=14;end++) {
+                        if (!groups.has(end) || groups.get(end).length<copies) break;
+                        core=core.concat(groups.get(end).slice(0,copies));
+                        const length=end-start+1;
+                        if (length<minLength) continue;
+                        add(core);
+                        if (copies===3) {
+                            const outside=ranks.filter(r=>r<start || r>end);
+                            if (length*4<=hand.length) attachments(outside,length,false,w=>add(core.concat(w)));
+                            if (length*5<=hand.length) attachments(outside,length,true,w=>add(core.concat(w)));
+                        }
+                    }
+                }
+            }
+            return plays;
+        }
+
+        function chooseLeadPlay(hand) {
+            const plays=generateLegalPlays(hand);
+            const whole=plays.find(p=>p.length===hand.length);
+            if (whole) return whole;
+            const ordinary=plays.filter(p=>![PATTERNS.BOMB,PATTERNS.ROCKET].includes(evaluatePattern(p).type));
+            return (ordinary.length?ordinary:plays).sort((a,b)=>b.length-a.length || evaluatePattern(a).primaryRank-evaluatePattern(b).primaryRank)[0] || [];
+        }
+
+        function chooseFollowPlay(hand,targetTrick) {
+            const plays=generateLegalPlays(hand,targetTrick);
+            const weight=p=>p.type===PATTERNS.ROCKET?2:p.type===PATTERNS.BOMB?1:0;
+            return plays.sort((a,b)=>{
+                const pa=evaluatePattern(a),pb=evaluatePattern(b);
+                return weight(pa)-weight(pb) || pa.primaryRank-pb.primaryRank;
+            })[0] || null;
+        }
+
+        const game = new DouDiZhuGame();
+
+        /* ======================================================================
+           HARDWARE JOYSTICK & BUTTON HANDLER (Web Serial)
+           ====================================================================== */
+        function playSelectedOrPass() {
+            if (game.gamePhase !== 'PLAYING' || game.currentTurn !== 0) return;
+            const cards = game.players[0].hand.filter(c => game.selectedCardIds.has(c.id));
+            if (cards.length === 0) {
+                if (!game.lastTrick || game.lastTrick.playerId === 0) {
+                    showToastNotice('You are leading: select cards to play. You cannot pass.');
+                } else {
+                    game.passTurnAction(0);
+                }
+                return;
+            }
+            if (evaluatePattern(cards).type === PATTERNS.INVALID) {
+                showToastNotice('These cards are not a valid combination.');
+                return;
+            }
+            if (game.lastTrick && game.lastTrick.playerId !== 0 && !canBeat(cards, game.lastTrick)) {
+                showToastNotice('Select a stronger combination, or deselect all cards to pass.');
+                return;
+            }
+            game.playCardsAction(0, cards);
+        }
+
+        function handleHardwareInput(command) {
+            if (command === 'READY') { syncTurnLED(); return; }
+            if (!document.getElementById('rules-modal').classList.contains('hidden')) return;
+            if (game.gamePhase === 'OVER') return;
+            if (game.currentTurn !== 0) return;
+            const humanCards = game.players[0].hand;
+            game.focusedCardIndex = Math.max(0, Math.min(game.focusedCardIndex, humanCards.length - 1));
+            if (command === 'NAV_LEFT' || command === 'NAV_RIGHT') {
+                const delta = command === 'NAV_LEFT' ? -1 : 1;
+                game.focusedCardIndex = Math.max(0, Math.min(game.focusedCardIndex + delta, humanCards.length - 1));
+                renderHumanHand();
+                const focused = document.querySelector('#human-hand-container .focused');
+                if (focused && focused.scrollIntoView) focused.scrollIntoView({block:'nearest', inline:'nearest'});
+            } else if (command === 'TOGGLE_SELECT' && game.gamePhase === 'PLAYING') {
+                const card = humanCards[game.focusedCardIndex];
+                if (!card) return;
+                if (game.selectedCardIds.has(card.id)) game.selectedCardIds.delete(card.id);
+                else game.selectedCardIds.add(card.id);
+                playSound('card');
+                renderHumanHand();
+            } else if (command === 'BTN_PLAY') {
+                if (game.gamePhase === 'BIDDING') {
+                    // Preserve button bidding, always using the lowest legal higher bid.
+                    if (game.players[0].bids === -1 && game.highestBid < 3)
+                        game.handleBid(0, game.highestBid + 1);
+                } else playSelectedOrPass();
+            }
+        }
+
+        /* ======================================================================
+           WEB SERIAL API
+           ====================================================================== */
+        const $ = id => document.getElementById(id);
+        // Web Serial: commands are newline-delimited and can span USB packets.
+        let serialPort=null, serialReader=null, serialWriter=null, serialReadTask=null;
+        let serialBusy=false, serialClosing=false, serialBuffer='', serialDropping=false;
+        let writeQueue=Promise.resolve();
+        function feedSerialText(text) {
+            for(const ch of text) {
+                if(ch==='\r')continue;
+                if(ch==='\n') {
+                    if(!serialDropping)handleHardwareInput(serialBuffer.trim());
+                    serialBuffer='';serialDropping=false;
+                } else if(!serialDropping) {
+                    if(serialBuffer.length<100)serialBuffer+=ch;
+                    else {serialBuffer='';serialDropping=true;}
+                }
+            }
+        }
+        function setSerialStatus(text){$('serial-status-text').textContent=text;}
+        function sendSerialLine(line) {
+            const writer=serialWriter;
+            if(!writer)return Promise.resolve();
+            writeQueue=writeQueue.then(()=>writer.write(new TextEncoder().encode(line+'\n')))
+                .catch(()=>{if(!serialClosing)setSerialStatus('Connection lost. Disconnect and reconnect Arduino.');});
+            return writeQueue;
+        }
+        function syncTurnLED() {
+            const turn=['OVER','REDEAL'].includes(game.gamePhase)?'OFF':game.currentTurn;
+            return sendSerialLine('TURN:'+turn);
+        }
+        async function readSerialLoop(port) {
+            const decoder=new TextDecoder();
+            try {
+                serialReader=port.readable.getReader();
+                while(!serialClosing) {
+                    const {value,done}=await serialReader.read();
+                    if(done)break;
+                    feedSerialText(decoder.decode(value,{stream:true}));
+                }
+            } catch(error) {
+                if(!serialClosing)setSerialStatus('Arduino disconnected: '+error.message);
+            } finally {
+                if(serialReader){serialReader.releaseLock();serialReader=null;}
+                // Let this read task finish before disconnect waits for it.
+                if(!serialClosing)Promise.resolve().then(()=>disconnectSerial());
+            }
+        }
+        async function disconnectSerial() {
+            if(serialClosing)return;
+            serialClosing=true;
+            try {
+                await sendSerialLine('TURN:OFF');
+                if(serialReader)await serialReader.cancel().catch(()=>{});
+                if(serialReadTask)await serialReadTask;
+                await writeQueue;
+                if(serialWriter){serialWriter.releaseLock();serialWriter=null;}
+                if(serialPort)await serialPort.close().catch(()=>{});
+            } finally {
+                serialPort=null;serialReadTask=null;serialBuffer='';serialDropping=false;
+                serialClosing=false;serialBusy=false;
+                $('connect-btn').textContent='Connect Arduino';
+                $('connect-btn').disabled=false;
+                setSerialStatus('Disconnected');
+            }
+        }
+        async function connectSerial() {
+            if(serialBusy||serialClosing)return;
+            if(serialPort){await disconnectSerial();return;}
+            if(!('serial' in navigator)){setSerialStatus('Open this downloaded HTML in desktop Chrome or Edge to connect Arduino.');return;}
+            serialBusy=true;$('connect-btn').disabled=true;
+            try {
+                const port=await navigator.serial.requestPort();
+                await port.open({baudRate:9600});
+                serialPort=port;serialWriter=port.writable.getWriter();
+                serialBuffer='';serialDropping=false;
+                serialReadTask=readSerialLoop(port);
+                $('connect-btn').textContent='Disconnect Arduino';
+                setSerialStatus('Connected · 9600 baud');
+                await syncTurnLED();
+            } catch(error) {
+                if(serialPort)await disconnectSerial();
+                setSerialStatus(error.name==='NotFoundError'?'No port selected.':'Connection failed: '+error.message+' Close Arduino Serial Monitor and try again.');
+            } finally {serialBusy=false;$('connect-btn').disabled=false;}
+        }
+        function sendLedCommandToArduino(turnVal) {
+            return sendSerialLine('TURN:' + turnVal);
+        }
+        setInterval(() => { if (!serialClosing) syncTurnLED(); }, 1000);
+
+        /* ======================================================================
+           UI RENDERERS
+           ====================================================================== */
+        function renderAllUI() {
+            const holeContainer = document.getElementById('hole-cards-container');
+            holeContainer.innerHTML = '';
+            game.holeCards.forEach(c => {
+                const show = game.landlordId !== -1;
+                const cardEl = document.createElement('div');
+                cardEl.className = `w-8 h-12 sm:w-10 sm:h-14 rounded-lg flex flex-col items-center justify-center font-extrabold text-xs shadow ${show ? 'bg-white text-slate-900 border border-slate-300' : 'bg-emerald-900/80 border border-emerald-600/50 text-emerald-400/50'}`;
+                cardEl.innerHTML = show ? `<span>${RANK_DETAILS[c.rank].label}</span><span class="${c.suitColor} text-[10px]">${c.suit}</span>` : '<i class="fa-solid fa-cards"></i>';
+                holeContainer.appendChild(cardEl);
+            });
+
+            document.getElementById('game-multiplier').innerText = `x${game.multiplier}`;
+            document.getElementById('landlord-identity').innerText = game.landlordId === -1 ? '竞牌中' : (game.landlordId === 0 ? '你' : game.players[game.landlordId].name);
+
+            [1, 2].forEach(pId => {
+                const isTurn = game.currentTurn === pId && ['PLAYING','BIDDING'].includes(game.gamePhase);
+                const container = document.getElementById(`bot-${pId === 1 ? 'left' : 'right'}-container`);
+                const badge = document.getElementById(`badge-bot-${pId === 1 ? 'left' : 'right'}`);
+                document.getElementById(`card-count-${pId === 1 ? 'left' : 'right'}`).innerText = game.players[pId].hand.length;
+                if (isTurn) container.classList.add('turn-active'); else container.classList.remove('turn-active');
+                if (game.landlordId === pId) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+            });
+
+            const humanRoleBadge = document.getElementById('human-role-badge');
+            if (game.landlordId === 0) {
+                humanRoleBadge.innerText = '👑 地主 Landlord';
+                humanRoleBadge.className = 'ml-2 text-[10px] bg-amber-500 text-slate-950 border border-amber-400 px-2 py-0.5 rounded-full font-bold';
+            } else {
+                humanRoleBadge.innerText = '🌾 农民 Peasant';
+                humanRoleBadge.className = 'ml-2 text-[10px] bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-bold';
+            }
+
+            const leadBadge = document.getElementById('lead-control-badge');
+            if (game.gamePhase === 'PLAYING' && game.currentTurn === 0 && (!game.lastTrick || game.lastTrick.playerId === 0)) leadBadge.classList.remove('hidden');
+            else leadBadge.classList.add('hidden');
+
+            const playedList = document.getElementById('played-cards-list');
+            playedList.innerHTML = '';
+            if (game.lastTrick && game.lastTrick.cards.length > 0) {
+                game.lastTrick.cards.forEach((c, idx) => playedList.appendChild(createCardElement(c, idx)));
+            } else {
+                playedList.innerHTML = '<span class="text-xs text-slate-500 italic">等待出牌...</span>';
+            }
+
+            renderHumanHand();
+            updateHumanActionButtons(!game.lastTrick);
+            document.getElementById('base-score').textContent=game.landlordId<0?'—':game.baseScore;
+            for(const [rank,suffix,total] of [[17,'big-joker',1],[16,'small-joker',1],[15,'2s',4],[14,'as',4]])
+                document.getElementById('tracker-'+suffix).textContent=total-game.playedCards.filter(c=>c.rank===rank).length;
+            const result=document.getElementById('round-result');
+            result.classList.toggle('hidden',!game.roundScores);
+            if(game.roundScores) {
+                result.textContent=`Round points · Base ${game.baseScore} × ${game.multiplier}: `+
+                    game.players.map(p=>`${p.name} ${game.roundScores[p.id]>0?'+':''}${game.roundScores[p.id]}`).join(' | ');
+            }
+        }
+
+        function createCardElement(card, zIndex = 0) {
+            const el = document.createElement('div');
+            const details = RANK_DETAILS[card.rank];
+            el.className = `card-item w-12 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28 rounded-xl flex flex-col justify-between p-1.5 sm:p-2 relative`;
+            el.style.zIndex = zIndex;
+            el.innerHTML = `
+                <div class="flex justify-between items-start leading-none font-black text-xs sm:text-sm text-slate-900">
+                    <span>${details.label}</span>
+                    <span class="${card.suitColor}">${card.suit}</span>
+                </div>
+                <div class="text-center font-extrabold text-base sm:text-xl md:text-2xl ${card.suitColor} my-auto">
+                    ${card.suit}
+                </div>
+                <div class="flex justify-between items-end leading-none text-[9px] sm:text-[10px] font-bold text-slate-400">
+                    <span>${details.pinyin}</span>
+                    <span class="font-black text-xs sm:text-sm text-slate-900">${details.label}</span>
+                </div>
+            `;
+            return el;
+        }
+
+        function renderHumanHand() {
+            const container = document.getElementById('human-hand-container');
+            container.innerHTML = '';
+            const hand = game.players[0].hand;
+
+            if (game.focusedCardIndex >= hand.length) game.focusedCardIndex = Math.max(0, hand.length - 1);
+
+            hand.forEach((card, idx) => {
+                const isSelected = game.selectedCardIds.has(card.id);
+                const isFocused = (idx === game.focusedCardIndex && game.currentTurn === 0 && game.gamePhase === 'PLAYING');
+                const cardEl = createCardElement(card, idx + 1);
+
+                if (isSelected) cardEl.classList.add('selected');
+                if (isFocused) cardEl.classList.add('focused');
+
+                cardEl.onclick = () => {
+                    if (game.gamePhase !== 'PLAYING' || game.currentTurn !== 0) return;
+                    game.focusedCardIndex = idx;
+                    playSound('card');
+                    if (game.selectedCardIds.has(card.id)) game.selectedCardIds.delete(card.id);
+                    else game.selectedCardIds.add(card.id);
+                    renderHumanHand();
+                };
+                container.appendChild(cardEl);
+            });
+        }
+
+        function showBiddingOverlay(show) {
+            const overlay = document.getElementById('bidding-overlay');
+            const btns = document.getElementById('bidding-buttons');
+            if (show) {
+                btns.innerHTML = '';
+                [0, 1, 2, 3].forEach(pts => {
+                    if (pts > 0 && pts <= game.highestBid) return;
+                    const btn = document.createElement('button');
+                    btn.className = pts === 0 ? 'bg-slate-800 text-slate-300 font-bold px-3.5 py-1.5 rounded-xl text-xs' : 'bg-amber-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs shadow';
+                    btn.innerText = pts === 0 ? 'Pass' : `Bid ${pts}`;
+                    btn.onclick = () => game.handleBid(0, pts);
+                    btns.appendChild(btn);
+                });
+                overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            } else {
+                overlay.classList.add('hidden'); overlay.classList.remove('flex');
+            }
+        }
+
+        function updateHumanActionButtons(isLead) {
+            const active=game.gamePhase==='PLAYING'&&game.currentTurn===0;
+            for(const id of ['btn-play','btn-pass','btn-hint']) {
+                const btn=document.getElementById(id);
+                btn.disabled=!active||(id==='btn-pass'&&isLead);
+                btn.classList.toggle('opacity-50',btn.disabled);
+            }
+        }
+
+        function showAIReasonTag(text, show) {
+            const tag = document.getElementById('ai-reason-tag');
+            if (show) { tag.innerHTML = text; tag.classList.remove('hidden'); }
+            else { tag.classList.add('hidden'); }
+        }
+
+        function updatePlayerActionText(playerId, text) {
+            if (playerId === 1) document.getElementById('action-bot-left').innerText = text;
+            else if (playerId === 2) document.getElementById('action-bot-right').innerText = text;
+        }
+
+        function updatePhaseBadge(text) { document.getElementById('game-phase-badge').innerText = text; }
+        function updatePlayedCardsTitle(text) { document.getElementById('played-cards-title').innerText = text; }
+
+        function showToastNotice(text) {
+            const toast = document.getElementById('game-notice-toast');
+            toast.innerText = text; toast.classList.remove('opacity-0'); toast.classList.add('opacity-100');
+            setTimeout(() => { toast.classList.remove('opacity-100'); toast.classList.add('opacity-0'); }, 2500);
+        }
+
+        // Button handlers
+        document.getElementById('btn-hint').onclick = () => {
+            if(game.gamePhase!=='PLAYING'||game.currentTurn!==0)return;
+            const hand=game.players[0].hand;
+            const cards=game.lastTrick?chooseFollowPlay(hand,game.lastTrick):chooseLeadPlay(hand);
+            game.selectedCardIds=new Set((cards||[]).map(c=>c.id));
+            renderHumanHand();
+            showToastNotice(cards&&cards.length?'Legal suggestion selected. Press Play to use it.':'No legal response. Press the mini button to pass.');
+        };
+        document.getElementById('btn-play').onclick = playSelectedOrPass;
+        document.getElementById('btn-pass').onclick = () => {
+            if (game.gamePhase !== 'PLAYING' || game.currentTurn !== 0 ||
+                !game.lastTrick || game.lastTrick.playerId === 0) return;
+            game.passTurnAction(0);
+        };
+        document.getElementById('btn-deselect').onclick = () => { game.selectedCardIds.clear(); renderHumanHand(); };
+        document.getElementById('btn-restart').onclick = () => { game.init(); };
+        document.getElementById('btn-rules').onclick = () => { document.getElementById('rules-modal').classList.remove('hidden'); };
+        document.getElementById('btn-close-rules').onclick = () => { document.getElementById('rules-modal').classList.add('hidden'); };
+        document.getElementById('btn-close-rules-bottom').onclick = () => { document.getElementById('rules-modal').classList.add('hidden'); };
+        document.getElementById('btn-audio-toggle').onclick = () => {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-icon').className = audioEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+        };
+
+        window.onload = () => { game.init(); };
+    </script>
+</body>
+</html>
