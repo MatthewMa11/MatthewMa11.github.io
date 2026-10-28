@@ -40,14 +40,58 @@ For me, the strongest evidence of this skill is the completed working prototype 
 
 ### Using AI to write the code
 
-I used ChatGPT to write the code for the browser game and its Arduino controller. The project needed two programs that could work together: one to read the physical controls and one to manage the cards, rules, and turns. AI helped produce the code that connects those parts. 
+I used ChatGPT to write the code for the browser game and its Arduino controller. The project needed two programs that could work together: one to read the physical controls and one to manage the cards, rules, and turns. AI helped produce the code that connects those parts.
+
 ### Using AI to understand the code
 
 I also used ChatGPT to help me understand the code. I asked for explanations by section, with the actual code shown together with each explanation. This makes it easier to follow what happens when I tilt the joystick, click it, or press the separate button. For example, readButton checks for a stable press, while handleHardwareInput turns its message into a game action. Looking at these sections together connects the physical controller to what happens on the screen.
 
+When I did not know how to connect the Arduino to the computer, I searched for documentation and used AI assistance. This gave me a way to work through a part of the project I found frustrating. The code explanations below show the USB serial path between the board and the game.
+
 ### Using AI while keeping responsibility for the result
 
 My target was to get the controller running before Monday’s class ended. ChatGPT gave me support with coding and explanations as I worked toward that target. I still needed a physical result to demonstrate, and I think the results are quite good because the controller worked. ChatGPT/Codex also helped organize this journal from my files and descriptions. I supplied the deadline, hardware information, photos, video, and my account of the result. The game itself runs the code in the browser and on the Arduino; it does not consult ChatGPT during play.
+
+## Execution and troubleshooting
+
+### Working through the Arduino connection
+
+Problem and how I felt: I did not know how to connect the Arduino to the computer. This was a great pain for me because the physical controls needed to communicate with the browser game. I found this part frustrating.
+
+What I did: I searched for documentation and used AI assistance to work through the connection problem. I also used ChatGPT to help me understand the code.
+
+The connection I needed to understand: The finished project uses USB serial communication. The sketch starts Serial at 9600 baud, and the browser opens the selected port at the same speed. The browser’s Connect Arduino button lets the user choose the board. Input messages travel to the game, and turn messages return to the LEDs. These are the connection steps explained by the project code below.
+
+Result: The physical controller worked with the game, and I think the results are quite good. My photos and demonstration show the assembled controller and the game together.
+
+What this shows about execution: When I reached a part I did not understand, I looked for documentation and used AI support to keep working toward the prototype. The project reached a working physical result that I could demonstrate and explain.
+
+### Checking the button connection against the code
+
+I confirmed that my separate button is wired to D9, while the earlier shared sketch expected D3. Comparing the hardware connection with PIN_PLAY_BTN identified a mismatch in the shared project information. The sketch and wiring instructions were updated to D9; the joystick click remains on D2. The updated source now matches my confirmed pin connection. A physical retest of that revision is a next check to record.
+
+For a future problem, I would trace the signal in order: the physical input, the Arduino message, the USB connection, and the browser action. I would record what I expected, what happened, what I changed, and the result after testing again.
+
+## My reflection
+
+The most frustrating part was not knowing how to connect the Arduino to the computer. This was a great pain for me because I needed the physical controller and the browser game to communicate. I think the results are quite good because the physical controller worked. Having a working prototype gives me something concrete to show for the project. Next time, I would record checkpoints alongside my deadline, including time to check the connection, so I could show what I completed at each stage.
+
+## Photos and demonstration
+
+![Arduino Uno, breadboard, joystick, separate push button, and turn LEDs](/assets/fight-the-landlord/controller-wiring.jpg)
+
+*My controller hardware. The separate play button uses digital pin 9; the joystick click uses pin 2.*
+
+![Controller connected beside a laptop displaying Fight the Landlord](/assets/fight-the-landlord/controller-setup.jpg)
+
+*The controller connected beside the laptop with Fight the Landlord on screen.*
+
+<video controls playsinline preload="metadata" poster="/assets/fight-the-landlord/controller-setup.jpg" style="display:block; width:100%; height:auto; border-radius:12px;">
+  <source src="/assets/fight-the-landlord/controller-demo.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="/assets/fight-the-landlord/controller-demo.mp4">Open the project demonstration</a>.
+</video>
+
+*[Watch the project demonstration](/assets/fight-the-landlord/controller-demo.mp4) · About 74 seconds.*
 
 ## How the prototype works
 
@@ -728,36 +772,7 @@ disconnectSerial first marks the connection as closing and attempts to send TURN
 
 The finally block clears the saved connection and partial-message state, re-enables the button, and changes the display to Disconnected. If communication stops while the Arduino remains powered, its own timeout is the backup for clearing the LEDs. Disconnecting its only power source turns the LEDs off immediately. Reconnecting starts with a fresh message buffer.
 
-## Execution and troubleshooting
-
-One concrete correction was matching the shared files to my hardware: the earlier sketch listed pin 3 for the separate button, and I confirmed that my button is on pin 9. The shared files now use D9. A physical retest of that updated sketch is a next check to record.
-
-If an input stopped working, I would check the wiring and pin first, then the Arduino message, the USB connection, and the game response. This would help locate the problem before changing unrelated code. A new test log would record the expected result, what happened, the change made, and the result after trying again.
-
-## My reflection
-
-I think the results are quite good because the physical controller worked. Having a working prototype gives me something concrete to show for the project. Next time, I would record a few checkpoints alongside my deadline so I could show more clearly how I used my class time and what I completed at each stage.
-
-## Photos and demonstration
-
-
-![Arduino Uno, breadboard, joystick, separate push button, and turn LEDs](/assets/fight-the-landlord/controller-wiring.jpg)
-
-*My controller hardware. The separate play button uses digital pin 9; the joystick click uses pin 2.*
-
-![Controller connected beside a laptop displaying Fight the Landlord](/assets/fight-the-landlord/controller-setup.jpg)
-
-*The controller connected beside the laptop with Fight the Landlord on screen.*
-
-<video controls playsinline preload="metadata" poster="/assets/fight-the-landlord/controller-setup.jpg" style="display:block; width:100%; height:auto; border-radius:12px;">
-  <source src="/assets/fight-the-landlord/controller-demo.mp4" type="video/mp4">
-  Your browser does not support embedded video. <a href="/assets/fight-the-landlord/controller-demo.mp4">Open the project demonstration</a>.
-</video>
-
-*[Watch the project demonstration](/assets/fight-the-landlord/controller-demo.mp4) · About 74 seconds.*
-
 ## Try the prototype
-
 
 The game lets me play against two programmed opponents. I can use the mouse, or connect the Arduino controller to move between cards, select cards, and play them. Three LEDs show whose turn it is.
 
@@ -777,3 +792,4 @@ For the physical controller, [open the game in a full window](/assets/fight-the-
 *The embedded game can be played with the mouse. Use the full-window link above when connecting the Arduino.*
 
 [View the browser game source](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/fight-the-landlord/game.html) · [View the Arduino sketch](https://github.com/MatthewMa11/MatthewMa11.github.io/blob/main/assets/fight-the-landlord/LandlordController/LandlordController.ino)
+
