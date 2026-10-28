@@ -1,7 +1,7 @@
 /*
   Fight the Landlord controller (Arduino Uno)
   VRx -> A4; VRy -> A5 (unused); joystick SW -> D2
-  Separate mini button -> D3 and GND
+  Separate mini button -> D9 and GND
   LEDs: You D4, Bot 1 D5, Bot 2 D6 (each through a 220-330 ohm resistor)
   Joystick VCC -> 5V; all GND connections -> Arduino GND.
 
@@ -16,7 +16,7 @@
 
 const byte PIN_JOY_X = A4;
 const byte PIN_JOY_SW = 2;
-const byte PIN_PLAY_BTN = 3;
+const byte PIN_PLAY_BTN = 9;
 const byte LED_P0 = 4;
 const byte LED_P1 = 5;
 const byte LED_P2 = 6;

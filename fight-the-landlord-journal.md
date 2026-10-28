@@ -41,13 +41,30 @@ ChatGPT wrote the code and helped explain it to me. I used AI for both making th
 
 My physical controller worked when I tried it. That is the result I can report from using the project. The original AI conversation is not included here, so the descriptions of my AI use are summaries rather than exact prompt quotations.
 
+## Photos and demonstration
+
+![Arduino Uno, breadboard, joystick, separate push button, and turn LEDs](/assets/fight-the-landlord/controller-wiring.jpg)
+
+*My controller hardware. The separate play button uses digital pin 9; the joystick click uses pin 2.*
+
+![Controller connected beside a laptop displaying Fight the Landlord](/assets/fight-the-landlord/controller-setup.jpg)
+
+*The controller connected beside the laptop with Fight the Landlord on screen.*
+
+<video controls playsinline preload="metadata" poster="/assets/fight-the-landlord/controller-setup.jpg" style="display:block; width:100%; height:auto; border-radius:12px;">
+  <source src="/assets/fight-the-landlord/controller-demo.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="/assets/fight-the-landlord/controller-demo.mp4">Open the project demonstration</a>.
+</video>
+
+*[Watch the project demonstration](/assets/fight-the-landlord/controller-demo.mp4) · About 74 seconds.*
+
 ## How the controls work
 
 | Control | Connection | What it does |
 | --- | --- | --- |
 | Joystick left and right | VRx → A4 | Moves the blue highlight to another card. Return to center before moving again. |
 | Joystick click | SW → D2 | Selects or deselects the highlighted card. Selected cards rise and have a gold border. |
-| Separate mini button | D3 → GND | Plays the selected cards. If no cards are selected, it passes when passing is allowed. |
+| Separate mini button | D9 → GND | Plays the selected cards. If no cards are selected, it passes when passing is allowed. |
 | Three turn LEDs | D4, D5, D6 | Show the turns for me, Bot 1, and Bot 2. Each LED uses a 220–330 ohm series resistor. |
 
 The joystick connects to 5 V and GND. Its up/down axis is unused; selecting a card means physically clicking the joystick down. The click switch and the separate play button have different digital inputs.
@@ -91,6 +108,17 @@ The browser repeats the current turn every second. If the Arduino stops receivin
 
 The physical controller worked. The checks below explain the safeguards in the final code and how to narrow down a problem if one occurs. They are not a claim that I personally encountered every failure listed.
 
+### Matching the button pin to my hardware
+
+My separate play button is wired to **digital pin 9**. The earlier project package listed pin 3. The sketch, wiring description, and downloads now use pin 9 to match my hardware. The joystick's click switch stays on pin 2.
+
+```cpp
+const byte PIN_JOY_SW = 2;
+const byte PIN_PLAY_BTN = 9;
+```
+
+This is a concrete example of checking the wiring against the code: if the program reads a different pin from the one the button uses, it will not receive the expected press. This update corrects that mismatch in the shared files; it does not claim a new physical retest.
+
 ### If the highlight moves too many times
 
 I would first hold the joystick in one direction, then return it to center and tilt again. The expected result is one step for each tilt. The `movedX` flag handles this in the code. If it does not reset on the actual controller, checking the joystick’s center reading would help determine whether the center range needs adjustment.
@@ -123,7 +151,7 @@ I also wanted help understanding the code, which is why I used ChatGPT for expla
 
 A useful next step is to record specific tests instead of only saying that the controller works. I could check holding the joystick, repeated button presses, invalid card combinations, and unplugging and reconnecting the board. For each test, I would record what I expected, what happened, what I changed, and the result after trying again.
 
-I would also add a photo of the physical controller and a short demonstration. These would make it easier to show the wiring, the controls in use, and how the LEDs follow the turns.
+The photos and video above now document the physical setup. I would next record the result of each specific control test, including whether the correct LED follows each turn.
 
 ---
 
