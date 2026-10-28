@@ -46,10 +46,6 @@ I used ChatGPT to write the code for the browser game and its Arduino controller
 
 I also used ChatGPT to help me understand the code. I asked for explanations by section, with the actual code shown together with each explanation. This makes it easier to follow what happens when I tilt the joystick, click it, or press the separate button. For example, readButton checks for a stable press, while handleHardwareInput turns its message into a game action. Looking at these sections together connects the physical controller to what happens on the screen.
 
-### Checking AI output against the physical project
-
-The code still had to match my hardware. I confirmed that the separate button is connected to pin 9, while the earlier supplied sketch listed pin 3. The shared files were updated to use D9. I also provided the photos and demonstration and reported that the physical controller worked. These are concrete checks on the project beyond having code written for it. The code walkthrough explains how I can trace an input through the Arduino, the USB connection, and the browser when checking a problem.
-
 ### Using AI while keeping responsibility for the result
 
 My target was to get the controller running before Monday’s class ended. ChatGPT gave me support with coding and explanations as I worked toward that target. I still needed a physical result to demonstrate, and I think the results are quite good because the controller worked. ChatGPT/Codex also helped organize this journal from my files and descriptions. I supplied the deadline, hardware information, photos, video, and my account of the result. The game itself runs the code in the browser and on the Arduino; it does not consult ChatGPT during play.
