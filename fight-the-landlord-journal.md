@@ -40,8 +40,7 @@ For me, the strongest evidence of this skill is the completed working prototype 
 
 ### Using AI to write the code
 
-I used ChatGPT to write the code for the browser game and its Arduino controller. The project needed two programs that could work together: one to read the physical controls and one to manage the cards, rules, and turns. AI helped produce the code that connects those parts. I am describing this openly because the code was AI-assisted, and that assistance was part of how I developed the prototype.
-
+I used ChatGPT to write the code for the browser game and its Arduino controller. The project needed two programs that could work together: one to read the physical controls and one to manage the cards, rules, and turns. AI helped produce the code that connects those parts. 
 ### Using AI to understand the code
 
 I also used ChatGPT to help me understand the code. I asked for explanations by section, with the actual code shown together with each explanation. This makes it easier to follow what happens when I tilt the joystick, click it, or press the separate button. For example, readButton checks for a stable press, while handleHardwareInput turns its message into a game action. Looking at these sections together connects the physical controller to what happens on the screen.
