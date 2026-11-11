@@ -136,6 +136,14 @@ We used two separate power rails on the breadboard. One rail received **12 V fro
 
 The **12 V and 5 V positive rails stay separate**. Sharing ground does not mean joining the two positive supplies. The 12 V motor supply must not be connected to the Arduino's 5 V pin or the driver's logic inputs.
 
+#### Wiring diagram we followed
+
+![Wiring reference showing an Arduino Mega connected to an A4988 stepper driver, external motor supply, capacitor, and stepper motor](/assets/arduino-3d-scanner/motor-driver-wiring-reference.png)
+
+*The wiring diagram we used as a connection reference, credited in the image to How To Mechatronics. The drawing shows an Arduino Mega; our build photos show an Arduino Uno.*
+
+This diagram shows the overall layout we followed: the motor's two coil pairs connect to the driver, the external supply powers the motor side, and the Arduino provides logic power and STEP and DIR control signals. It also shows the shared ground and a capacitor across the motor supply. On our Uno, the control connections need to match the Arduino pins used in our test code.
+
 ### Why we connected SLEEP and RESET
 
 ![Close-up of the breadboard-mounted stepper driver showing the wiring around its SLEEP and RESET pins](/assets/arduino-3d-scanner/driver-sleep-reset-connection.jpg)
@@ -159,6 +167,8 @@ For our motor and driver setup, we adjusted the reference voltage to approximate
 ![Adjusting the stepper motor driver's potentiometer with a screwdriver while the multimeter displays 1.206 V](/assets/arduino-3d-scanner/driver-vref-adjustment.jpg)
 
 *Our driver adjustment setup, with the multimeter showing approximately 1.2 V.*
+
+Our adjustment reference is the YouTube guide [Control a NEMA 17 Stepper Motor with A4988 Driver and Arduino — Full Guide](https://www.youtube.com/watch?v=wcLeXXATCR4), which demonstrates how to adjust the driver's current limit. It provides a video reference alongside our multimeter photo and the approximately 1.2 V reference-voltage setting recorded above.
 
 The voltage used for this adjustment is called the reference voltage, or VREF. It is used to set the current limit; the meter is not directly measuring the motor current in this setup. The correct VREF depends on the particular driver board and the motor's rated current. For example, [Pololu's A4988 documentation](https://www.pololu.com/product/1182#current-limiting) explains how its reference voltage relates to the limit. We need to use the instructions for our actual driver rather than copy a voltage from a different board.
 
@@ -191,6 +201,8 @@ We also worked on a Sharp infrared distance sensor marked **2Y0A21 F 62 A**. We 
 The ends of the sensor wires were still covered by insulation. We used scissors to carefully strip off enough insulation to expose the metal conductors. Then we inserted each exposed wire into the female end of a male-to-female jumper wire and secured the joint with electrical tape. We plugged the male ends into the Arduino connections listed above.
 
 This let us connect the sensor for our prototype. It also showed us why the physical connections matter: tape holds the joint in place, but the metal conductors still need firm contact. For a more permanent version, we should use proper connectors or soldered, insulated joints so movement does not loosen the wires. Wire strippers would also give us more control than scissors.
+
+For background on using and calibrating the distance sensor, we referred to [Colin's Sensor Prototype and Calibration journal](https://github.com/itsamecolin/itsamecolin.github.io/tree/main#sensor-prototype-and-calibration). It documents the same GP2Y0A21YK0F sensor, fitting a power regression to the data-sheet graph, and checking the resulting distance readings with a ruler. This gives us an approach to follow when we calibrate our own sensor after wiring it.
 
 ### How the infrared sensor measures distance
 
