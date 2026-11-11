@@ -105,3 +105,74 @@ This prototype measures one scanning plane. My next step is to test that plane r
 
 
 
+
+## Entry 2: Stepper motor troubleshooting and infrared sensor wiring
+
+In this stage of our 3D scanner project, we worked on a stepper motor circuit and a Sharp infrared distance sensor separately. Our main progress was getting one stepper motor running after about two classes of troubleshooting. We also prepared the sensor wiring and learned how its output relates to distance.
+
+### Our first motor attempt and the damaged driver
+
+First, we connected the entire stepper motor circuit without setting the driver's current limit. When we powered it, the driver burned out and produced smoke. Some wires became hot enough for their insulation to melt, and several stuck together. We quickly unplugged the circuit.
+
+We suspected that leaving the current limit unset allowed too much current and contributed to the failure. This was our working explanation, rather than a confirmed diagnosis. The smoke and melted insulation showed that something was seriously wrong, but those observations alone could not tell us whether the cause was the current setting, a wiring fault, or another electrical problem.
+
+This experience taught us that checking whether the wires are connected is only part of preparing a circuit. We also need to check the driver's settings before running the motor. Any damaged wires need replacing before another test, and wiring changes should be made with power disconnected.
+
+### Setting the driver with a multimeter
+
+We switched to another driver and used a multimeter while adjusting the small screw on the driver's potentiometer. We set the meter to measure DC voltage, connected the black probe to GND, and connected the red probe to the metal part of a screwdriver touching the adjustment screw. That let us observe the reading while turning the adjustment.
+
+The voltage used for this adjustment is called the reference voltage, or VREF. It is used to set the current limit; the meter is not directly measuring the motor current in this setup. The correct VREF depends on the particular driver board and the motor's rated current. For example, [Pololu's A4988 documentation](https://www.pololu.com/product/1182#current-limiting) explains how its reference voltage relates to the limit. We need to use the instructions for our actual driver rather than copy a voltage from a different board.
+
+Because our red probe was connected through a metal screwdriver, careful contact mattered. Touching a nearby pin with the screwdriver could create a short circuit. This made the adjustment more delicate than simply turning a screw.
+
+### Why the reading kept showing zero
+
+One of the most frustrating parts was repeatedly getting a reading of zero. We kept trying to understand why the value would not change, and eventually found that one of the drivers we were using was broken. Changing to a working driver allowed us to continue. After about two classes of attempts, we finally got the motor running.
+
+For us, the faulty driver was an important part of the problem. A zero reading by itself is not enough to identify a broken driver, though. Next time, we should check the meter's DC voltage setting, the power supply, the ground connection, and whether the probes are actually touching the correct points before deciding to replace a component.
+
+The lesson was to test our assumptions one at a time. We had spent a long time expecting an adjustment to work on hardware that could not give us the reading we needed.
+
+### Our first successful motor test
+
+We ran one test program generated with ChatGPT and successfully operated one stepper motor. The program gave us a way to test movement before combining it with distance sensing. ChatGPT supplied the test code, while our work involved connecting the hardware, adjusting the driver, troubleshooting the zero reading, and testing the motor in class.
+
+This is our current motor milestone: one motor has run with a test program. We still need to test repeatable movement and connect that movement to the sensor measurements before we have a working scanner.
+
+### Connecting the Sharp sensor separately
+
+We also worked on a Sharp infrared distance sensor marked **2Y0A21 F 62 A**. We connected its three wires to the Arduino as follows:
+
+| Sensor wire | Arduino connection | Purpose |
+| --- | --- | --- |
+| Red | 5V | Sensor power |
+| Black | GND | Ground reference |
+| White | An analog input pin | Sensor output signal |
+
+The ends of the sensor wires were still covered by insulation. We used scissors to carefully strip off enough insulation to expose the metal conductors. Then we inserted each exposed wire into the female end of a male-to-female jumper wire and secured the joint with electrical tape. We plugged the male ends into the Arduino connections listed above.
+
+This let us connect the sensor for our prototype. It also showed us why the physical connections matter: tape holds the joint in place, but the metal conductors still need firm contact. For a more permanent version, we should use proper connectors or soldered, insulated joints so movement does not loosen the wires. Wire strippers would also give us more control than scissors.
+
+### How the infrared sensor measures distance
+
+The sensor sends out infrared light, which reflects from an object and enters a receiver. It uses **triangulation**: as the object's distance changes, the reflected light reaches a different position on a position-sensitive detector inside the sensor. Internal electronics turn that information into an analog output voltage. It does not use the ultrasonic echo timing from our first prototype. The [Sharp GP2Y0A21YK0F data sheet](https://global.sharp/products/device/lineup/data/pdf/datasheet/gp2y0a21yk_e.pdf) describes this sensor family and specifies a measuring range of **10 to 80 cm**.
+
+The Arduino's analog input reads the output signal. To use that signal for scanning, we will need to convert it into a distance and check the result against known measurements.
+
+### What the distance graph tells us
+
+![Sharp infrared sensor graphs showing output voltage against distance and inverse distance for white and gray paper](/assets/arduino-3d-scanner/sharp-distance-response.png)
+
+*Sharp sensor response curves for white and gray paper. These are reference curves, not measurements collected by our group.*
+
+In the upper graph, the output voltage generally decreases as distance increases through the 10–80 cm measuring range. The curve is not straight, so the same voltage change does not represent the same distance change everywhere. Below about 10 cm, the curve turns around, meaning a very close object can produce a voltage similar to a farther object. We should therefore keep objects within the specified measuring range.
+
+The lower graph plots voltage against inverse distance, or 1/distance. This makes much of the useful range look closer to a straight line and helps explain why a simple linear voltage-to-distance conversion would not fit the upper graph well. The white-paper and gray-paper curves also remind us to check readings on different surfaces when we calibrate our own setup.
+
+### Reflection and next steps
+
+Our biggest achievement so far is getting one stepper motor running after a failed driver and several frustrating attempts. We learned that a working program cannot compensate for damaged hardware or an incorrect driver setup. We also learned to separate the motor and sensor work so that we can understand each part before combining them.
+
+Next, we plan to secure the sensor connections, record its readings at known distances between 10 and 80 cm, and compare repeated measurements. Then we can combine controlled motor movement with sensor readings and record each distance alongside its position. That will move the project from separate component tests toward an actual scanning system.
+
