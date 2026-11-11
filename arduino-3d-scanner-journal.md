@@ -208,6 +208,26 @@ In the upper graph, the output voltage generally decreases as distance increases
 
 The lower graph plots voltage against inverse distance, or 1/distance. This makes much of the useful range look closer to a straight line and helps explain why a simple linear voltage-to-distance conversion would not fit the upper graph well. The white-paper and gray-paper curves also remind us to check readings on different surfaces when we calibrate our own setup.
 
+### Sensor orientation and surface boundaries
+
+![Incorrect and correct Sharp sensor orientation relative to a boundary between different surface colors or materials](/assets/arduino-3d-scanner/sensor-surface-boundary-orientation.png)
+
+*The first diagram shows how to orient the sensor when the target has a clear boundary between different colors or materials.*
+
+The line across the target represents a boundary between surfaces that reflect light differently, such as a dark section beside a light section. Sharp recommends keeping this boundary **parallel to the line joining the centers of the infrared emitter and receiver**. This imaginary line between the sensor's two optical parts is the reference for the diagram. The correct arrangement reduces distance errors near the boundary. See [Sharp's application note, section 3-1](https://jp.sharp/products/device/doc/opto/gp2y0a_gp2y0d_series_appl_e.pdf).
+
+This matters because triangulation depends on the position of the reflected light. Uneven reflection across a surface boundary can disturb the reading, even when both surface sections are at the same distance.
+
+### Sensor orientation and object movement
+
+![Incorrect and correct directions of target movement relative to the Sharp sensor's emitter-to-receiver line](/assets/arduino-3d-scanner/sensor-target-movement-direction.png)
+
+*The second diagram shows the preferred direction for an object moving across the sensor's view.*
+
+For a moving target, Sharp recommends that its movement be **perpendicular, or at 90 degrees, to the emitter-to-receiver line** to reduce measurement errors caused by movement. The arrows show direction relative to the sensor's orientation; they do not mean that every setup must move horizontally across a table. See [Sharp's application note, section 3-2](https://jp.sharp/products/device/doc/opto/gp2y0a_gp2y0d_series_appl_e.pdf).
+
+For our scanner, these diagrams give us two things to check when designing the sensor mount: the orientation of surface boundaries and the direction the target moves through the sensing area. We plan to compare readings from a stationary target and a moving target at known distances before relying on the measurements for scanning.
+
 ### Reflection and next steps
 
 Our biggest achievement so far is getting one stepper motor running after a failed driver and several frustrating attempts. We learned that a working program cannot compensate for damaged hardware or an incorrect driver setup. We also learned to separate the motor and sensor work so that we can understand each part before combining them.
