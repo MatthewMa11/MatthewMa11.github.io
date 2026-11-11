@@ -120,7 +120,13 @@ This experience taught us that checking whether the wires are connected is only 
 
 ### Setting the driver with a multimeter
 
-We switched to another driver and used a multimeter while adjusting the small screw on the driver's potentiometer. We set the meter to measure DC voltage, connected the black probe to GND, and connected the red probe to the metal part of a screwdriver touching the adjustment screw. That let us observe the reading while turning the adjustment.
+We switched to another driver and used a multimeter while adjusting the small screw on the driver's potentiometer. We set the meter to measure DC voltage, connected the black probe to GND, and connected the red probe to the metal part of a screwdriver touching the adjustment screw. To adjust the current limit, we rotated the screwdriver to turn the potentiometer screw while watching the voltage reading.
+
+For our motor and driver setup, we adjusted the reference voltage to approximately **1.2 V**. The multimeter in the photo reads **1.206 V**, which is close to our 1.2 V target.
+
+![Adjusting the stepper motor driver's potentiometer with a screwdriver while the multimeter displays 1.206 V](/assets/arduino-3d-scanner/driver-vref-adjustment.jpg)
+
+*Our driver adjustment setup, with the multimeter showing approximately 1.2 V.*
 
 The voltage used for this adjustment is called the reference voltage, or VREF. It is used to set the current limit; the meter is not directly measuring the motor current in this setup. The correct VREF depends on the particular driver board and the motor's rated current. For example, [Pololu's A4988 documentation](https://www.pololu.com/product/1182#current-limiting) explains how its reference voltage relates to the limit. We need to use the instructions for our actual driver rather than copy a voltage from a different board.
 
