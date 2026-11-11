@@ -118,6 +118,38 @@ We suspected that leaving the current limit unset allowed too much current and c
 
 This experience taught us that checking whether the wires are connected is only part of preparing a circuit. We also need to check the driver's settings before running the motor. Any damaged wires need replacing before another test, and wiring changes should be made with power disconnected.
 
+### Overall motor, driver, and Arduino connections
+
+![Our overall stepper motor circuit, with the Arduino at the lower left, the driver on the breadboard, and the motor on the right](/assets/arduino-3d-scanner/motor-driver-arduino-connections.jpg)
+
+*Our motor test setup, showing the Arduino, breadboard-mounted driver, and stepper motor.*
+
+We used two separate power rails on the breadboard. One rail received **12 V from an external power supply** for the motor side of the driver. The other received **5 V from the Arduino** for the driver's logic side. The Arduino sends the control signals, while the driver switches current through the motor's coils using the external supply. This separates the motor's power needs from the Arduino's control role, as shown in [Pololu's A4988 wiring guide](https://www.pololu.com/product/1182#power-connections).
+
+| Connection | Role in our setup |
+| --- | --- |
+| External 12 V rail | Supplies the driver's motor-power input, VMOT |
+| Arduino 5 V rail | Supplies the driver's logic-power input, VDD |
+| Common ground | Joins the external supply negative, driver GND, and Arduino GND so the control signals have the same reference |
+| Arduino control wires | Carry STEP and DIR signals to control movement |
+| Motor wires | Connect the motor's two coils to the driver's outputs |
+
+The **12 V and 5 V positive rails stay separate**. Sharing ground does not mean joining the two positive supplies. The 12 V motor supply must not be connected to the Arduino's 5 V pin or the driver's logic inputs.
+
+### Why we connected SLEEP and RESET
+
+![Close-up of the breadboard-mounted stepper driver showing the wiring around its SLEEP and RESET pins](/assets/arduino-3d-scanner/driver-sleep-reset-connection.jpg)
+
+*Close-up of the driver wiring. We linked SLEEP and RESET with a jumper as part of getting the motor working.*
+
+We found that the motor would not run in our setup until we connected the driver's **SLEEP and RESET pins to each other**. These pins control whether the driver is ready to operate, so supplying power and sending movement commands is not enough by itself.
+
+On an A4988-type driver, both inputs are **active LOW**. A LOW on SLEEP puts the chip into a low-power state and turns off the motor outputs. A LOW on RESET resets the internal step sequence, turns off the outputs, and causes STEP commands to be ignored. Both pins must therefore be HIGH for normal stepping. These functions are described in the [Allegro A4988 data sheet](https://www.allegromicro.com/-/media/files/datasheets/a4988-datasheet.pdf).
+
+On an A4988 carrier with a pull-up on SLEEP, linking RESET to SLEEP also brings RESET HIGH instead of leaving it floating at an undefined voltage. [Pololu describes this connection](https://www.pololu.com/product/1182#control-inputs) for its carrier. An undefined or LOW RESET signal is a likely explanation for why our motor did not respond before we added the jumper.
+
+The important condition is that **both pins are held HIGH at the correct logic voltage**. Joining two pins that are both LOW would still leave the driver unable to run; holding them HIGH separately is another valid arrangement. In our 5 V logic setup, these control pins belong to the logic side, not the 12 V motor rail. This helped us understand why one small control connection could stop the whole motor circuit from working.
+
 ### Setting the driver with a multimeter
 
 We switched to another driver and used a multimeter while adjusting the small screw on the driver's potentiometer. We set the meter to measure DC voltage, connected the black probe to GND, and connected the red probe to the metal part of a screwdriver touching the adjustment screw. To adjust the current limit, we rotated the screwdriver to turn the potentiometer screw while watching the voltage reading.
