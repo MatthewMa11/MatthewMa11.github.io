@@ -184,7 +184,7 @@ The lesson was to test our assumptions one at a time. We had spent a long time e
 
 ### Our first successful motor test
 
-We ran one test program generated with ChatGPT and successfully operated one stepper motor. The program gave us a way to test movement before combining it with distance sensing. ChatGPT supplied the test code, while our work involved connecting the hardware, adjusting the driver, troubleshooting the zero reading, and testing the motor in class.
+We ran one test program and successfully operated one stepper motor. The program gave us a way to test movement before combining it with distance sensing. Our hands-on work involved connecting the hardware, adjusting the driver, troubleshooting the zero reading, and testing the motor in class.
 
 This is our current motor milestone: one motor has run with a test program. We still need to test repeatable movement and connect that movement to the sensor measurements before we have a working scanner.
 
@@ -245,3 +245,7 @@ For our scanner, these diagrams give us two things to check when designing the s
 Our biggest achievement so far is getting one stepper motor running after a failed driver and several frustrating attempts. We learned to check what voltage a driver is currently accepting and how to adjust its voltage limit. We also learned to separate the motor and sensor work so that we can understand each part before combining them.
 
 Next, we plan to secure the sensor connections, record its readings at known distances between 10 and 80 cm, and compare repeated measurements. Then, assemble a connection of multiple stepper motors working simultaneously, and laser-cut or 3D-print mounts for the sensor and the motors.
+
+### AI use
+
+I used ChatGPT to generate the stepper motor test code. ChatGPT/Codex also helped turn my rough notes into journal paragraphs, improve the wording and organization, explain the circuit and sensor concepts using the linked references, and format and publish Entry 2 on GitHub. AI wrote the captions and explanations beneath every graph and image in Entry 2, including the distance-response graph, wiring diagrams, photos, and sensor-orientation diagrams. Our group supplied the project experiences, photos, diagrams, and reference links and carried out the wiring, current-limit adjustment, troubleshooting, and motor test.
