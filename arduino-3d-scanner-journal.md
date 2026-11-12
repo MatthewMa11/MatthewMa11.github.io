@@ -110,13 +110,13 @@ This prototype measures one scanning plane. My next step is to test that plane r
 
 In this stage of our 3D scanner project, we worked on a stepper motor circuit and a Sharp infrared distance sensor separately. Our main progress was getting one stepper motor running after about two classes of troubleshooting. We also prepared the sensor wiring and learned how its output relates to distance.
 
-### Our first motor attempt and the damaged driver
+### First motor attempt made it smoke
 
 First, we connected the entire stepper motor circuit without setting the driver's current limit. When we powered it, the driver burned out and produced smoke. Some wires became hot enough for their insulation to melt, and several stuck together. We quickly unplugged the circuit.
 
-We suspected that leaving the current limit unset allowed too much current and contributed to the failure. This was our working explanation, rather than a confirmed diagnosis. The smoke and melted insulation showed that something was seriously wrong, but those observations alone could not tell us whether the cause was the current setting, a wiring fault, or another electrical problem.
+We suspected that leaving the current limit unset allowed too much current and cause to the failure. The smoke and melted insulation showed that something was seriously hot, but those observations alone could not tell us whether the cause was the current setting, a wiring fault, or another electrical problem. We suspect that too much electricity was passing through and the driver was not able to take it; therefore, the electricity was trapped inside the wire and caused it to melt. The heat sink of the Driver was also extremely hot, as when I touched the heat sink, it almost burned my skin.
 
-This experience taught us that checking whether the wires are connected is only part of preparing a circuit. We also need to check the driver's settings before running the motor. Any damaged wires need replacing before another test, and wiring changes should be made with power disconnected.
+This experience taught us that we need to check the driver's settings before running the motor. Any damaged wires need replacing before another test, and wiring changes should be made with power disconnected, and watch carefully where the 12V and the 5V power go.
 
 ### Overall motor, driver, and Arduino connections
 
@@ -136,7 +136,7 @@ We used two separate power rails on the breadboard. One rail received **12 V fro
 
 The **12 V and 5 V positive rails stay separate**. Sharing ground does not mean joining the two positive supplies. The 12 V motor supply must not be connected to the Arduino's 5 V pin or the driver's logic inputs.
 
-#### Wiring diagram we followed
+#### Wiring diagram we followed  
 
 ![Wiring reference showing an Arduino Mega connected to an A4988 stepper driver, external motor supply, capacitor, and stepper motor](/assets/arduino-3d-scanner/motor-driver-wiring-reference.png)
 
@@ -242,7 +242,6 @@ For our scanner, these diagrams give us two things to check when designing the s
 
 ### Reflection and next steps
 
-Our biggest achievement so far is getting one stepper motor running after a failed driver and several frustrating attempts. We learned that a working program cannot compensate for damaged hardware or an incorrect driver setup. We also learned to separate the motor and sensor work so that we can understand each part before combining them.
+Our biggest achievement so far is getting one stepper motor running after a failed driver and several frustrating attempts. We learned to check what voltage a driver is currently accepting and how to adjust its voltage limit. We also learned to separate the motor and sensor work so that we can understand each part before combining them.
 
-Next, we plan to secure the sensor connections, record its readings at known distances between 10 and 80 cm, and compare repeated measurements. Then we can combine controlled motor movement with sensor readings and record each distance alongside its position. That will move the project from separate component tests toward an actual scanning system.
-
+Next, we plan to secure the sensor connections, record its readings at known distances between 10 and 80 cm, and compare repeated measurements. Then, assemble a connection of multiple stepper motors working simultaneously, and laser-cut or 3D-print mounts for the sensor and the motors.
